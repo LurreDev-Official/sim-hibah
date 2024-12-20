@@ -1,88 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <!-- Required meta tags -->
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-   <title>Login Page</title>
-   <!-- plugins:css -->
-   <link rel="stylesheet" href="{{ asset('assets/vendors/feather/feather.css')}}">
-   <link rel="stylesheet" href="{{ asset('assets/vendors/ti-icons/css/themify-icons.css')}}">
-   <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css')}}">
-   <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css')}}">
-   <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css')}}">
-   <!-- endinject -->
-   <!-- Plugin css for this page -->
-   <link rel="stylesheet" href="{{ asset('assets/vendors/datatables.net-bs5/dataTables.bootstrap5.css')}}">
-   <link rel="stylesheet" href="{{ asset('assets/vendors/ti-icons/css/themify-icons.css')}}">
-   <link rel="stylesheet" type="text/css" href="{{ asset('assets/js/select.dataTables.min.css')}}">
-   <!-- End plugin css for this page -->
-   <!-- inject:css -->
-   <link rel="stylesheet" href="{{ asset('assets/css/style.css')}}">
-   <!-- endinject -->
-   <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png')}}" />
-</head>
-<body>
-    <div class="container-scroller">
-      <div class="container-fluid page-body-wrapper full-page-wrapper">
-        <div class="content-wrapper d-flex align-items-center auth px-0">
-          <div class="row w-100 mx-0">
-            <div class="col-lg-4 mx-auto">
-              <div class="auth-form-light text-left py-5 px-4 px-sm-5">
-                <div class="brand-logo d-flex align-items-center justify-content-center">
-                  <img src="{{ asset('image/Logo-unhasy.webp') }}" alt="logo" style="width: 50px; height: auto; margin-right: 10px;">
-                  <h1 style="font-size: 1.5rem;">SISTEM HIBAH UNHASY</h1>
-                </div>
-                <h4>Hello! Let's get started</h4>
-                <h6 class="font-weight-light">Isi Form Login</h6>
-                <form class="pt-3">
-                  <div class="form-group">
-                    <input type="email" class="form-control form-control-lg" id="exampleInputEmail1" placeholder="Gmail" required>
-                  </div>
-                  <div class="form-group">
-                    <input type="password" class="form-control form-control-lg" id="exampleInputPassword1" placeholder="Password" required>
-                  </div>
-                  <div class="mt-3 d-grid gap-2">
-                    <button class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" type="submit">MASUK</button>
-                  </div>
-                  <div class="my-2 d-flex justify-content-between align-items-center">
-                    <div class="form-check">
-                      <label class="form-check-label text-muted">
-                        <input type="checkbox" class="form-check-input"> Simpan Login saya </label>
-                    </div>
-                    <a href="wa.me/6281234443565" class="auth-link text-black">Lupa Password??</a>
-                  </div>
-                  <div class="text-center mt-4 font-weight-light"> belum punya akun? <a href="{{ url('register')}}" class="text-primary">Create</a>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- content-wrapper ends -->
-      </div>
-      <!-- page-body-wrapper ends -->
-    </div>
-    <!-- container-scroller -->
-    <!-- plugins:js -->
-    <script src="{{asset('assets/vendors/js/vendor.bundle.base.js')}}"></script>
-    <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <script src="{{asset('assets/vendors/chart.js/chart.umd.js')}}"></script>
-    <script src="{{asset('assets/vendors/datatables.net/jquery.dataTables.js')}}"></script>
-    <script src="{{asset('assets/vendors/datatables.net-bs5/dataTables.bootstrap5.js')}}"></script>
-    <script src="{{asset('assets/js/dataTables.select.min.js')}}"></script>
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
-    <script src="{{asset('assets/js/off-canvas.js')}}"></script>
-    <script src="{{asset('assets/js/template.js')}}"></script>
-    <script src="{{asset('assets/js/settings.js')}}"></script>
-    <script src="{{asset('assets/js/todolist.js')}}"></script>
-    <!-- endinject -->
-    <!-- Custom js for this page-->
-    <script src="{{asset('assets/js/jquery.cookie.js')}}" type="text/javascript"></script>
-    <script src="{{asset('assets/js/dashboard.js')}}"></script>
-    <!-- End custom js for this page-->
-    <!-- endinject -->
-</body>
+	<!--begin::Head-->
+	<head>
+		<title>SIM HIBAH UNHASY</title>
+		<meta charset="utf-8" />
+	 
+		<link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.ico')}}" />
+		<!--begin::Fonts-->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+		<!--end::Fonts-->
+		<!--begin::Global Stylesheets Bundle(used by all pages)-->
+		<link href="{{ asset('assets/plugins/global/plugins.bundle.css')}}" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('assets/css/style.bundle.css')}}" rel="stylesheet" type="text/css" />
+		<!--end::Global Stylesheets Bundle-->
+	</head>
+	<!--end::Head-->
+	<!--begin::Body-->
+	<body id="kt_body" class="bg-body">
+		<!--begin::Main-->
+		<div class="d-flex flex-column flex-root">
+			<!--begin::Authentication - Sign-in -->
+			<div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed" style="background-image: url(assets/media/illustrations/sketchy-1/14.png)">
+				<!--begin::Content-->
+				<div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
+					<!--begin::Logo-->
+					<a href="#" class="mb-12">
+						<img alt="Logo" src="{{ asset('image/logo.png')}}" class="h-100px rounded" />
+					</a>
+					<!--end::Logo-->
+					<!--begin::Wrapper-->
+					<div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
+						<!--begin::Form-->
+						<form class="form w-100" novalidate="novalidate" id="kt_sign_in_form" method="POST" action="{{ route('login') }}">
+                            @csrf
+                            <!--begin::Heading-->
+							<div class="text-center mb-10">
+								<!--begin::Title-->
+								<h1 class="text-dark mb-3">Silahkan Login</h1>
+								<!--end::Title-->
+								<!--begin::Link-->
+								<!--end::Link-->
+							</div>
+							<!--begin::Heading-->
+							<!--begin::Input group-->
+							<div class="fv-row mb-10">
+								<!--begin::Label-->
+								<label class="form-label fs-6 fw-bolder text-dark">Email</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input class="form-control form-control-lg form-control-solid @error('email') is-invalid @enderror" type="text" name="email" autocomplete="off" />
+								<!--end::Input-->
+								@error('email')
+								<span class="invalid-feedback" role="alert">
+									<strong>{{ $message }}</strong>
+								</span>
+								@enderror
+							</div>
+							<!--end::Input group-->
+							<!--begin::Input group-->
+							<div class="fv-row mb-10">
+								<!--begin::Wrapper-->
+								<div class="d-flex flex-stack mb-2">
+									<!--begin::Label-->
+									<label class="form-label fw-bolder text-dark fs-6 mb-0">Password</label>
+									<!--end::Label-->
+								</div>
+								<!--end::Wrapper-->
+								<!--begin::Input-->
+								<input class="form-control form-control-lg form-control-solid @error('password') is-invalid @enderror" type="password" name="password" autocomplete="off" />
+								@error('password')
+								<span class="invalid-feedback" role="alert">
+									<strong>{{ $message }}</strong>
+								</span>
+								@enderror
+							</div>
+							<!--end::Input group-->
+							
+							<!-- Error untuk login gagal -->
+							@if($errors->has('email'))
+							<div class="alert alert-danger">
+								<strong>{{ $errors->first('email') }}</strong>
+							</div>
+							@endif
+
+							<!--begin::Actions-->
+							<div class="text-center">
+								<!--begin::Submit button-->
+								<button type="submit" class="btn btn-lg btn-primary w-100 mb-5">
+									<span class="indicator-label">Login</span>
+									<span class="indicator-progress">Please wait...
+									<span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+								</button>
+								OR
+								<a href="{{ route('google.redirect') }}" class="btn btn-danger w-100 mb-5">
+									<i class="fab fa-google"></i> Login with Google
+								</a>
+								
+
+							</div>
+								<!--begin::Register Link-->
+								<p class="text-center">
+									Belum punya akun? <a href="{{ route('register') }}" class="link-primary fw-bolder">Daftar Sekarang</a>
+								</p>
+							<!--end::Actions-->
+						</form>
+						<!--end::Form-->
+					</div>
+					<!--end::Wrapper-->
+				</div>
+				<!--end::Content-->
+			</div>
+			<!--end::Authentication - Sign-in-->
+		</div>
+		<!--end::Main-->
+		<!--begin::Javascript-->
+		<!--begin::Global Javascript Bundle(used by all pages)-->
+		<script src="{{ asset('assets/plugins/global/plugins.bundle.js')}}"></script>
+		<script src="{{ asset('assets/js/scripts.bundle.js')}}"></script>
+		<!--end::Global Javascript Bundle-->
+		<!--end::Javascript-->
+	</body>
+	<!--end::Body-->
 </html>

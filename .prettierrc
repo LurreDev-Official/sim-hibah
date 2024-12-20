@@ -1,0 +1,7 @@
+{
+  "tabSize": 4,
+  "useTabs": false,
+  "endWithNewline": true,
+  "wrapAttributes": "auto",
+  "wrapLineLength": 120
+}
