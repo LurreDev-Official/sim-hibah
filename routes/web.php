@@ -11,6 +11,8 @@ use App\Http\Controllers\KriteriaPenilaianController;
 use App\Http\Controllers\IndikatorPenilaianController;
 use App\Http\Controllers\FormPenilaianController;
 use App\Http\Controllers\UsulanPerbaikanController;
+use App\Http\Controllers\LaporanKemajuanController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -47,10 +49,18 @@ Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])-
     Route::get('usulan/{jenis}', [UsulanController::class, 'show'])->name('usulan.show');
     Route::delete('usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
     Route::resource('perbaikan-usulan', UsulanPerbaikanController::class);
+    Route::get('perbaikan-usulan/{jenis}', [UsulanPerbaikanController::class, 'show'])->name('perbaikan-usulan.show');
+
     Route::get('/perbaikan-usulan/{usulan}/detail-revisi', [UsulanPerbaikanController::class, 'detailRevisi'])->name('perbaikan-usulan.detail_revisi');
 // Route untuk upload PDF perbaikan revisi
 Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanController::class, 'uploadRevisi'])
     ->name('perbaikan-usulan.upload_revisi');
+    Route::resource('laporan-kemajuan', LaporanKemajuanController::class);
+    Route::get('laporan-kemajuan/{jenis}', [LaporanKemajuanController::class, 'show'])->name('laporan-kemajuan.show');
+
+    Route::resource('laporan-akhir', LaporanAkhirController::class);
+    Route::get('laporan-akhir/{jenis}', [LaporanAkhirController::class, 'show'])->name('laporan-akhir.show');
+
     
 });
 
@@ -62,6 +72,8 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::delete('/kriteria-penilaian/{id}', [KriteriaPenilaianController::class, 'destroy'])->name('kriteria-penilaian.destroy');
     Route::resource('indikator-penilaian', IndikatorPenilaianController::class);
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
+
+
 });
 
 // Rute khusus untuk Dosen

@@ -16,21 +16,41 @@ class UsulanPerbaikanController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {   
-        // Ambil ID user yang sedang login
-        $getuser = Auth::user()->id;
+    {
+        // Ambil user yang sedang login
+        $user = Auth::user();
     
-        // Ambil data Dosen berdasarkan user_id
-        $getdosen = Dosen::where('user_id', $getuser)->first();  // Menambahkan '->first()' untuk mengambil hanya satu data
+        // Jika user memiliki peran 'Kepala LPPM'
+        if ($user->hasRole('Kepala LPPM')) {
+            // Ambil semua data UsulanPerbaikan
+            $usulanPerbaikans = UsulanPerbaikan::all();
+        } 
+        // Jika user bukan Dosen (misalnya role lain)
+        elseif (!$user->hasRole('Dosen')) {
+            // Ambil data Usulan berdasarkan ketua_id yang sesuai
+            $getusulanis = Usulan::where('ketua_dosen_id', $user->id)->get();
     
-        // Ambil data Usulan berdasarkan ketua_dosen_id
-        $getusulanis = Usulan::where('ketua_dosen_id', $getdosen->id)->get();  // Menambahkan '->get()' untuk mengambil koleksi usulan
+            // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+            $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getusulanis->pluck('id'))->get();
+        } 
+        // Jika user adalah Dosen
+        else {
+            // Ambil ID user yang sedang login
+            $getuser = $user->id;
     
-        // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
-        $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getusulanis->pluck('id'))->get();  // Menggunakan pluck untuk mendapatkan array ID usulan
+            // Ambil data Dosen berdasarkan user_id
+            $getdosen = Dosen::where('user_id', $getuser)->first();
+    
+            // Ambil data Usulan berdasarkan ketua_dosen_id
+            $getusulanis = Usulan::where('ketua_dosen_id', $getdosen->id)->get();
+    
+            // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+            $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getusulanis->pluck('id'))->get();
+        }
     
         return view('usulan_perbaikan.index', compact('usulanPerbaikans'));
     }
+    
     
     public function create()
     {
@@ -117,10 +137,41 @@ class UsulanPerbaikanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(UsulanPerbaikan $usulanPerbaikan)
+    public function show($jenis)
     {
-        // Menampilkan detail UsulanPerbaikan
-        return view('usulan_perbaikan.show', compact('usulanPerbaikan'));
+        // Ambil user yang sedang login
+        $user = Auth::user();
+    
+        // Jika user memiliki peran 'Kepala LPPM'
+        if ($user->hasRole('Kepala LPPM')) {
+            // Ambil semua data UsulanPerbaikan
+            $usulanPerbaikans = UsulanPerbaikan::all();
+        } 
+        // Jika user bukan Dosen (misalnya role lain)
+        elseif (!$user->hasRole('Dosen')) {
+            // Ambil data Usulan berdasarkan ketua_id yang sesuai
+            $getusulanis = Usulan::where('ketua_dosen_id', $user->id)->get();
+    
+            // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+            $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getusulanis->pluck('id'))->get();
+        } 
+        // Jika user adalah Dosen
+        else {
+            // Ambil ID user yang sedang login
+            $getuser = $user->id;
+    
+            // Ambil data Dosen berdasarkan user_id
+            $getdosen = Dosen::where('user_id', $getuser)->first();
+    
+            // Ambil data Usulan berdasarkan ketua_dosen_id
+            $getusulanis = Usulan::where('ketua_dosen_id', $getdosen->id)->get();
+    
+            // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+            $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getusulanis->pluck('id'))->get();
+        }
+    
+        return view('usulan_perbaikan.index', compact('usulanPerbaikans'));
+   
     }
 
     /**

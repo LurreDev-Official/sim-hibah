@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('dokumen_luarans', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('laporan_akhirs_id'); // Nama dokumen luaran
             $table->string('nama'); // Nama dokumen luaran
             $table->string('jenis_luaran'); // Jenis luaran
             $table->string('dokumen_pdf'); // Nama file PDF dokumen

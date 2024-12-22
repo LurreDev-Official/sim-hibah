@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('laporan_kemajuans', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('ketua_dosen_id'); // Relasi ke dosen
             $table->unsignedBigInteger('usulan_id'); // Relasi ke usulan
             $table->string('dokumen_laporan_kemajuan'); // File dokumen kemajuan
             $table->string('status');
+            $table->enum('jenis', ['Penelitian', 'Pengabdian']);
             $table->timestamps();
-
+            $table->foreign('ketua_dosen_id')->references('id')->on('dosens')->onDelete('cascade');
             $table->foreign('usulan_id')->references('id')->on('usulans')->onDelete('cascade');
 
         });

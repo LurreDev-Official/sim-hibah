@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('jenis_skema'); // Pengabdian atau penelitian
             $table->year('tahun_pelaksanaan');
             $table->unsignedBigInteger('ketua_dosen_id'); // Relasi ke dosen
+            $table->foreign('ketua_dosen_id')->references('id')->on('dosens')->onDelete('cascade');
+
             $table->string('dokumen_usulan'); // File dokumen usulan
             $table->enum('status', [
                 'draft',        // Dokumen masih dalam tahap penyusunan oleh mahasiswa
@@ -33,7 +35,6 @@ return new class extends Migration
             $table->string('topik_penelitian');
             $table->string('lama_kegiatan');
             $table->timestamps();
-            $table->foreign('ketua_dosen_id')->references('id')->on('dosens')->onDelete('cascade');
 
         });
     }

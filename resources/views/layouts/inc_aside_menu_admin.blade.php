@@ -105,7 +105,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('perbaikan-usulan') }}">
+                            <a class="menu-link" href="{{ url('perbaikan-usulan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="edit"></i>
                                 </span>
@@ -113,7 +113,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-kemajuan') }}">
+                            <a class="menu-link" href="{{ url('laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -121,7 +121,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-akhir') }}">
+                            <a class="menu-link" href="{{ url('laporan-akhir/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
@@ -156,7 +156,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('perbaikan-usulan') }}">
+                            <a class="menu-link" href="{{ url('perbaikan-usulan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="edit"></i>
                                 </span>
@@ -164,7 +164,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-kemajuan') }}">
+                            <a class="menu-link" href="{{ url('laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -172,7 +172,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-akhir') }}">
+                            <a class="menu-link" href="{{ url('laporan-akhir/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
@@ -199,7 +199,7 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('penilaian-usulan') }}">
+                            <a class="menu-link" href="{{ url('penilaian-usulan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="file-text"></i>
                                 </span>
@@ -207,7 +207,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('review-laporan-kemajuan') }}">
+                            <a class="menu-link" href="{{ url('review-laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -215,7 +215,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('review-laporan-akhir') }}">
+                            <a class="menu-link" href="{{ url('review-laporan-akhir/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
