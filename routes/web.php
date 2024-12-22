@@ -12,7 +12,7 @@ use App\Http\Controllers\IndikatorPenilaianController;
 use App\Http\Controllers\FormPenilaianController;
 use App\Http\Controllers\UsulanPerbaikanController;
 use App\Http\Controllers\LaporanKemajuanController;
-
+use App\Http\Controllers\LaporanAkhirController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -60,7 +60,6 @@ Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanContr
 
     Route::resource('laporan-akhir', LaporanAkhirController::class);
     Route::get('laporan-akhir/{jenis}', [LaporanAkhirController::class, 'show'])->name('laporan-akhir.show');
-
     
 });
 

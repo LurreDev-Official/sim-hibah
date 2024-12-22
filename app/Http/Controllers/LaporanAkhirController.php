@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LaporanAkhir;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanAkhirController extends Controller
 {
@@ -59,11 +60,40 @@ class LaporanAkhirController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(LaporanAkhir $laporanAkhir)
+    public function show($jenis = null)
     {
-        // Tampilkan detail laporan akhir
-        return view('laporan_akhir.show', compact('laporanAkhir'));
+        // Cek role pengguna dan filter data berdasarkan role
+        if (Auth::user()->hasRole('Kepala LPPM')) {
+            // Kepala LPPM melihat semua laporan akhir, bisa difilter berdasarkan jenis
+            $laporanAkhir = LaporanAkhir::when($jenis, function ($query, $jenis) {
+                return $query->where('jenis', $jenis);
+            })->get();
+    
+        } elseif (Auth::user()->hasRole('Dosen')) {
+            // Dosen hanya melihat laporan yang dia menjadi ketua
+            $laporanAkhir = LaporanAkhir::where('ketua_dosen_id', Auth::user()->id)
+                ->when($jenis, function ($query, $jenis) {
+                    return $query->where('jenis', $jenis);
+                })
+                ->get();
+    
+        } elseif (Auth::user()->hasRole('Reviewer')) {
+            // Reviewer hanya melihat laporan yang dia ditugaskan sebagai reviewer
+            $laporanAkhir = LaporanAkhir::whereHas('usulan.reviewers', function ($query) {
+                $query->where('reviewer_id', Auth::id());
+            })->when($jenis, function ($query, $jenis) {
+                return $query->where('jenis', $jenis);
+            })->get();
+    
+        } else {
+            // Pengguna tanpa akses valid diarahkan kembali
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+    
+        // Kembalikan ke view dengan data yang difilter
+        return view('laporan_akhir.index', compact('laporanAkhir', 'jenis'));
     }
+    
 
     /**
      * Show the form for editing the specified resource.

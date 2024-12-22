@@ -34,13 +34,13 @@ class HomeController extends Controller
 
         // Cek role user dan arahkan ke view yang sesuai
         if ($user->hasRole('Kepala LPPM')) {
-    $countUsulan = Usulan::count();
-    $countPerbaikanUsulan = Usulan::where('status', 'perbaikan')->count();
+    $countUsulan = Usulan::where('jenis_skema', 'penelitian')->count();
+    $countPerbaikanUsulan = Usulan::where('jenis_skema', 'penelitian')->where('status', 'perbaikan')->count();
     $countLaporanKemajuan = LaporanKemajuan::count();
     $countLaporanAkhir = LaporanAkhir::count();
 
     // Hitung data untuk Pengabdian
-    $countUsulanPengabdian = Usulan::count();
+    $countUsulanPengabdian = Usulan::where('jenis_skema', 'pengabdian')->count();
     $countPerbaikanUsulanPengabdian = Usulan::where('status', 'perbaikan')->count();
     $countLaporanKemajuanPengabdian = LaporanKemajuan::count();
     $countLaporanAkhirPengabdian = LaporanAkhir::count();
@@ -66,13 +66,13 @@ class HomeController extends Controller
     }
 
                 // Jika data dosen sudah ada, tampilkan halaman dashboard
-                $countUsulan = Usulan::count();
-                $countPerbaikanUsulan = Usulan::where('status', 'perbaikan')->count();
+                $countUsulan = Usulan::where('jenis_skema', 'penelitian')->count();
+                $countPerbaikanUsulan = Usulan::where('jenis_skema', 'penelitian')->where('status', 'perbaikan')->count();
                 $countLaporanKemajuan = LaporanKemajuan::count();
                 $countLaporanAkhir = LaporanAkhir::count();
             
                 // Hitung data untuk Pengabdian
-                $countUsulanPengabdian = Usulan::count();
+                $countUsulanPengabdian = Usulan::where('jenis_skema', 'pengabdian')->count();
                 $countPerbaikanUsulanPengabdian = Usulan::where('status', 'perbaikan')->count();
                 $countLaporanKemajuanPengabdian = LaporanKemajuan::count();
                 $countLaporanAkhirPengabdian = LaporanAkhir::count();
@@ -99,7 +99,7 @@ if (!$data) {
             return view('dashboard.reviewer', [
 
                 'user' => $user,
-                'countUsulan' => Usulan::count(),
+                'countUsulan' => Usulan::where('jenis_skema', 'penelitian')->count(),
                 'countLaporanKemajuan' => LaporanKemajuan::count(),
                 'countLaporanAkhir' => LaporanAkhir::count(),
             ]);
