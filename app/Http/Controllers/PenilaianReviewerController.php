@@ -184,4 +184,72 @@ class PenilaianReviewerController extends Controller
         // Return to a Blade view with the fetched data
         return view('penilaian_reviewers.index', compact('penilaianReviewers'));
     }
+
+
+
+    /**
+ * Menampilkan daftar usulan untuk direview.
+ *
+ * @return \Illuminate\View\View
+ */
+public function indexReviewUsulan()
+{
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+
+    if (!$reviewer) {
+        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+    }
+
+    $usulans = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('status_penilaian', 'Pending')
+        ->with('usulan')
+        ->paginate(10);
+
+    return view('penilaian_reviewers.review_usulan', compact('usulans'));
+}
+
+/**
+ * Menampilkan daftar laporan kemajuan untuk direview.
+ *
+ * @return \Illuminate\View\View
+ */
+public function indexReviewLaporanKemajuan()
+{
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+
+    if (!$reviewer) {
+        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+    }
+
+    $laporanKemajuan = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('status_penilaian', 'Laporan Kemajuan')
+        ->with('usulan')
+        ->paginate(10);
+
+    return view('penilaian_reviewers.review_laporan_kemajuan', compact('laporanKemajuan'));
+}
+
+/**
+ * Menampilkan daftar laporan akhir untuk direview.
+ *
+ * @return \Illuminate\View\View
+ */
+public function indexReviewLaporanAkhir()
+{
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+
+    if (!$reviewer) {
+        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+    }
+
+    $laporanAkhir = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('status_penilaian', 'Laporan Akhir')
+        ->with('usulan')
+        ->paginate(10);
+
+    return view('penilaian_reviewers.review_laporan_akhir', compact('laporanAkhir'));
+}
+
+
+
 }

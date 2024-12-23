@@ -1,5 +1,6 @@
 <?php
 namespace App\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,22 +19,31 @@ class PenilaianReviewer extends Model
         'total_nilai'
     ];
 
-     // Relasi ke UsulanPerbaikan (one-to-one)
-     public function usulanPerbaikan()
-     {
-         return $this->hasOne(UsulanPerbaikan::class, 'penilaian_id');
-     }
+    /**
+     * Relasi ke UsulanPerbaikan (one-to-one)
+     * Setiap PenilaianReviewer dapat memiliki satu UsulanPerbaikan.
+     */
+    public function usulanPerbaikan()
+    {
+        return $this->hasOne(UsulanPerbaikan::class, 'penilaian_id');
+    }
 
-    // Relasi ke model Usulan
+    /**
+     * Relasi ke model Usulan (many-to-one)
+     * Setiap PenilaianReviewer terkait dengan satu Usulan.
+     */
     public function usulan()
     {
         return $this->belongsTo(Usulan::class, 'usulan_id');
     }
 
-    // Relasi ke model Reviewer
+    /**
+     * Relasi ke model Reviewer (many-to-one)
+     * Setiap PenilaianReviewer terkait dengan satu Reviewer.
+     */
     public function reviewer()
     {
         return $this->belongsTo(Reviewer::class, 'reviewer_id');
     }
- 
 }
+

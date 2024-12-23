@@ -1,5 +1,9 @@
 @extends('layouts.main_layout')
 
+@section('css')
+    <link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
+@endsection
+
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <!--begin::Toolbar-->
@@ -23,106 +27,121 @@
                         <div class="card-title">
                             <div class="d-flex align-items-center position-relative my-1">
                                 <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
-                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="black" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none">
+                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2"
+                                            rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
+                                        <path
+                                            d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z"
+                                            fill="black" />
                                     </svg>
                                 </span>
-                                <input type="text" class="form-control form-control-solid w-250px ps-14" id="searchInput" placeholder="Cari Kriteria" />
+                                <input type="text" id="searchInput" class="form-control form-control-solid w-250px ps-15"
+                                    placeholder="Cari Kriteria" />
                             </div>
                         </div>
                         <!--end::Card title-->
                         <div class="card-toolbar">
-                            <!--begin::Button-->
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#createModal">
                                 Tambah Kriteria
                             </button>
-                            <!--end::Button-->
                         </div>
                     </div>
                     <!--end::Card header-->
-                    
+
+                    <!--begin::Card body-->
                     <div class="card-body pt-0">
-                        <!--begin::Table-->
-                        <div class="table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5">
-                                <thead>
-                                    <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                        <th>No</th>
-                                        <th>Nama</th>
-                                        <th>jenis</th>
-                                        <th>proses</th>
-                                        <th class="text-end">Actions</th>
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kriteriaTable">
+                            <thead>
+                                <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Jenis</th>
+                                    <th>Proses</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($kriteriaPenilaians as $kriteria)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $kriteria->nama }}</td>
+                                        <td>{{ $kriteria->jenis }}</td>
+                                        <td>{{ ucfirst($kriteria->proses) }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-light btn-active-light-primary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editModal{{ $kriteria->id }}">Edit</button>
+                                            <button class="btn btn-danger btn-sm"
+                                                onclick="deleteKriteria({{ $kriteria->id }})">Hapus</button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="text-gray-600 fw-bold" id="myTable">
-                                    @foreach ($kriteriaPenilaians as $key => $kriteria)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $kriteria->nama }}</td>
-                                            <td>{{ $kriteria->jenis }}</td>
-                                            <td>{{ ucfirst($kriteria->proses) }}</td>
-                                            <td class="text-end">
-                                                <button class="btn btn-light btn-active-light-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $kriteria->id }}">Edit</button>
-                                                <button class="btn btn-danger btn-sm" onclick="deleteKriteria({{ $kriteria->id }})">Hapus</button>
-                                            </td>
-                                        </tr>
 
-                                        <!-- Edit Modal -->
-                                        <div class="modal fade" id="editModal{{ $kriteria->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Edit Kriteria Penilaian</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form action="{{ route('kriteria-penilaian.update', $kriteria->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
+                                    <!-- Edit Modal -->
+                                    <div class="modal fade" id="editModal{{ $kriteria->id }}" tabindex="-1"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit Kriteria Penilaian</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ route('kriteria-penilaian.update', $kriteria->id) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        @method('PUT')
 
-                                                            <div class="mb-3">
-                                                                <label for="nama" class="form-label">Nama Kriteria</label>
-                                                                <input type="text" class="form-control" name="nama" value="{{ $kriteria->nama }}" required>
-                                                            </div>
-                                                       
-                                                            <div class="mb-3">
-                                                                <label for="jenis" class="form-label">jenis</label>
-                                                                <select name="jenis" class="form-select" required>
-                                                                    <option value="penelitian" {{ $kriteria->jenis == 'penelitian' ? 'selected' : '' }}>penelitian</option>
-                                                                    <option value="pengabdian" {{ $kriteria->jenis == 'pengabdian' ? 'selected' : '' }}>pengabdian</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="proses" class="form-label">proses</label>
-                                                                <select name="proses" class="form-select" required>
-                                                                    <option value="usulan" {{ $kriteria->proses == 'usulan' ? 'selected' : '' }}>Usulan</option>
-                                                                    <option value="lapkemajuan" {{ $kriteria->proses == 'lapkemajuan' ? 'selected' : '' }}>Laporan Kemajuan</option>
-                                                                    <option value="lapakhir" {{ $kriteria->proses == 'lapakhir' ? 'selected' : '' }}>Laporan Akhir</option>
-                                                                </select>
-                                                            </div>
+                                                        <div class="mb-3">
+                                                            <label for="nama" class="form-label">Nama Kriteria</label>
+                                                            <input type="text" class="form-control" name="nama"
+                                                                value="{{ $kriteria->nama }}" required>
+                                                        </div>
 
-                                                            <div class="text-end">
-                                                                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
+                                                        <div class="mb-3">
+                                                            <label for="jenis" class="form-label">Jenis</label>
+                                                            <select name="jenis" class="form-select" required>
+                                                                <option value="penelitian"
+                                                                    {{ $kriteria->jenis == 'penelitian' ? 'selected' : '' }}>
+                                                                    Penelitian</option>
+                                                                <option value="pengabdian"
+                                                                    {{ $kriteria->jenis == 'pengabdian' ? 'selected' : '' }}>
+                                                                    Pengabdian</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="proses" class="form-label">Proses</label>
+                                                            <select name="proses" class="form-select" required>
+                                                                <option value="Usulan"
+                                                                    {{ $kriteria->proses == 'Usulan' ? 'selected' : '' }}>
+                                                                    Usulan</option>
+                                                                <option value="Laporan Kemajuan"
+                                                                    {{ $kriteria->proses == 'Laporan Kemajuan' ? 'selected' : '' }}>
+                                                                    Laporan Kemajuan</option>
+                                                                <option value="Laporan Akhir"
+                                                                    {{ $kriteria->proses == 'Laporan Akhir' ? 'selected' : '' }}>
+                                                                    Laporan Akhir</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="text-end">
+                                                            <button type="submit" class="btn btn-primary">Simpan
+                                                                Perubahan</button>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <!--end::Table-->
+                                    </div>
+                                    <!-- End Edit Modal -->
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="py-5">
-                        <!--begin::Pages-->
-                        <ul class="pagination">
-                            {{ $kriteriaPenilaians->links() }}
-                        </ul>
-                        <!--end::Pages-->
-                    </div>
+                    <!--end::Card body-->
                 </div>
                 <!--end::Card-->
             </div>
@@ -141,27 +160,25 @@
                 <div class="modal-body">
                     <form action="{{ route('kriteria-penilaian.store') }}" method="POST">
                         @csrf
-                        
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama Kriteria</label>
                             <input type="text" class="form-control" name="nama" required>
                         </div>
                         <div class="mb-3">
-                            <label for="jenis" class="form-label">jenis</label>
+                            <label for="jenis" class="form-label">Jenis</label>
                             <select name="jenis" class="form-select" required>
                                 <option value="penelitian">Penelitian</option>
                                 <option value="pengabdian">Pengabdian</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="proses" class="form-label">proses</label>
+                            <label for="proses" class="form-label">Proses</label>
                             <select name="proses" class="form-select" required>
-                                <option value="usulan">Usulan</option>
-                                <option value="lapkemajuan">Laporan Kemajuan</option>
-                                <option value="lapakhir">Laporan Akhir</option>
+                                <option value="Usulan">Usulan</option>
+                                <option value="Laporan Kemajuan">Laporan Kemajuan</option>
+                                <option value="Laporan Akhir">Laporan Akhir</option>
                             </select>
                         </div>
-
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>
@@ -170,14 +187,31 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- SweetAlert for Delete Confirmation -->
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@section('js')
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <script>
+        $(document).ready(function() {
+            $('#kriteriaTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
+                },
+                "searching": true,
+                "paging": true,
+                "info": true
+            });
+
+            // Live search for input filter
+            $('#searchInput').on('keyup', function() {
+                $('#kriteriaTable').DataTable().search(this.value).draw();
+            });
+        });
+
         function deleteKriteria(id) {
             Swal.fire({
-                title: 'Anda yakin ingin menghapus?',
-                text: "Data yang dihapus tidak dapat dikembalikan!",
+                title: 'Apakah Anda yakin?',
+                text: "Data ini akan dihapus secara permanen!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -186,25 +220,25 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '{{ url('kriteria-penilaian') }}/' + id, // Pastikan route benar
-                        type: 'POST', // Gunakan POST karena browser biasanya tidak mendukung DELETE secara langsung
+                        url: '{{ url('kriteria-penilaian') }}/' + id,
+                        type: 'POST',
                         data: {
-                            _method: 'DELETE', // Laravel menggunakan _method untuk mendukung DELETE via form
-                            _token: '{{ csrf_token() }}' // Token CSRF untuk keamanan
+                            _method: 'DELETE',
+                            _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
                             Swal.fire(
-                                'Terhapus!',
-                                'Kriteria Penilaian berhasil dihapus.',
+                                'Berhasil!',
+                                'Data telah dihapus.',
                                 'success'
                             ).then(() => {
-                                location.reload(); // Reload halaman setelah sukses
+                                location.reload();
                             });
                         },
-                        error: function(xhr) {
+                        error: function() {
                             Swal.fire(
                                 'Gagal!',
-                                'Terjadi kesalahan saat menghapus data.',
+                                'Terjadi kesalahan.',
                                 'error'
                             );
                         }
@@ -212,17 +246,5 @@
                 }
             });
         }
-    
-        // Pencarian tabel
-        document.getElementById('searchInput').addEventListener('keyup', function () {
-            let value = this.value.toLowerCase();
-            let rows = document.querySelectorAll('#myTable tr');
-            rows.forEach(row => {
-                let match = row.innerText.toLowerCase().includes(value);
-                row.style.display = match ? '' : 'none';
-            });
-        });
     </script>
-    
-    
 @endsection

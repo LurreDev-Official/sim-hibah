@@ -100,6 +100,19 @@ Route::group(['middleware' => ['role:Dosen']], function () {
 // Reviewer Routes
 Route::group(['middleware' => ['role:Reviewer']], function () {
     Route::resource('penilaian-usulan', PenilaianReviewerController::class);
+    // Penilaian Usulan
+    Route::get('penilaian-usulan', [PenilaianReviewerController::class, 'indexPenilaianUsulan'])->name('penilaian-usulan.index');
+    Route::post('penilaian-usulan/{id}', [PenilaianReviewerController::class, 'storePenilaianUsulan'])->name('penilaian-usulan.store');
+
+    // Review Usulan
+    Route::get('review-usulan', [PenilaianReviewerController::class, 'indexReviewUsulan'])->name('review-usulan.index');
+    Route::post('review-usulan/{id}', [PenilaianReviewerController::class, 'storeReviewUsulan'])->name('review-usulan.store');
+
+    // Review Laporan Kemajuan
+    Route::get('review-laporan-kemajuan', [PenilaianReviewerController::class, 'indexReviewLaporanKemajuan'])->name('review-laporan-kemajuan.index');
+    Route::post('review-laporan-kemajuan/{id}', [PenilaianReviewerController::class, 'storeReviewLaporanKemajuan'])->name('review-laporan-kemajuan.store');
+
+    
     Route::resource('form-penilaian', FormPenilaianController::class);
     Route::get('form-penilaian/create/{usulan_id}', [FormPenilaianController::class, 'create'])->name('form-penilaian.input');
     Route::get('perbaikan-penilaian/{usulan_id}', [FormPenilaianController::class, 'perbaikan'])->name('perbaikan-penilaian.lihat');

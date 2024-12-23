@@ -51,7 +51,7 @@ class ProfileController extends Controller
             return view('profile.reviewer_edit', compact('user','reviewer'));
         }
 
-        return redirect()->back()->with('error', 'Unauthorized access.');
+        return redirect()->url('/')->with('success', 'updated successfully.');
     }
 
     public function update(Request $request, $id)

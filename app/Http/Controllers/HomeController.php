@@ -91,13 +91,33 @@ class HomeController extends Controller
         } elseif ($user->hasRole('Reviewer')) {
             
             $data = Reviewer::where('user_id', $user->id)->first();
-                
-            // Jika data data tidak ada, arahkan ke form edit profil data
+            $notifusulan = \App\Models\PenilaianReviewer::where('reviewer_id', $data->id)
+            ->where('status_penilaian', 'Belum Dinilai')
+            // ->whereHas('usulan', function ($query) {
+            //     $query->where('jenis_skema', 'penelitian');
+            // })
+            ->with('usulan') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
+            ->get();
+
+            $notifLaporanKemajuan = \App\Models\LaporanKemajuan::whereHas('usulan.reviewers', function ($query) use ($data) {
+                $query->where('reviewer_id', $data->id);
+            })->where('status', 'Pending')->with(['usulan', 'dosen'])->get();
+
+            $notifLaporanAkhir = \App\Models\LaporanAkhir::whereHas('usulan.reviewers', function ($query) use ($data) {
+                $query->where('reviewer_id', $data->id);
+            })->where('status', 'Pending')->with(['usulan', 'dosen'])->get();
+            
+
+            
+
 if (!$data) {
     return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
 }
             return view('dashboard.reviewer', [
 
+                'notifusulan' => $notifusulan,
+                'notifLaporanKemajuan' => $notifLaporanKemajuan,
+                'notifLaporanAkhir' => $notifLaporanAkhir,
                 'user' => $user,
                 'countUsulan' => Usulan::where('jenis_skema', 'penelitian')->count(),
                 'countLaporanKemajuan' => LaporanKemajuan::count(),

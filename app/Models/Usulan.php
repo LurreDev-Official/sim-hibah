@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,31 +31,53 @@ class Usulan extends Model
 
     /**
      * Relasi ke model Dosen.
-     * Usulan belongs to a Dosen (ketua dosen).
+     * Setiap usulan dimiliki oleh satu dosen sebagai ketua.
      */
     public function ketuaDosen()
     {
         return $this->belongsTo(Dosen::class, 'ketua_dosen_id');
     }
 
-       
-       // Relasi ke Anggota Dosen
-       public function anggotaDosen()
-       {
-           return $this->hasMany(AnggotaDosen::class, 'usulan_id');
-       }
-   
-       // Relasi ke Anggota Mahasiswa
-       public function anggotaMahasiswa()
-       {
-           return $this->hasMany(AnggotaMahasiswa::class, 'usulan_id');
-       }
-       
+    /**
+     * Relasi ke Anggota Dosen.
+     * Satu usulan dapat memiliki banyak anggota dosen.
+     */
+    public function anggotaDosen()
+    {
+        return $this->hasMany(AnggotaDosen::class, 'usulan_id');
+    }
 
+    /**
+     * Relasi ke Anggota Mahasiswa.
+     * Satu usulan dapat memiliki banyak anggota mahasiswa.
+     */
+    public function anggotaMahasiswa()
+    {
+        return $this->hasMany(AnggotaMahasiswa::class, 'usulan_id');
+    }
+
+    /**
+     * Relasi ke Penilaian Reviewer.
+     * Usulan dapat memiliki banyak penilaian dari reviewer.
+     */
+    public function penilaianReviewers()
+    {
+        return $this->hasMany(PenilaianReviewer::class, 'usulan_id');
+    }
+
+    /**
+     * Relasi ke Reviewer (many-to-many melalui tabel PenilaianReviewer).
+     * Usulan dapat diulas oleh banyak reviewer.
+     */
     public function reviewers()
     {
-        return $this->belongsToMany(Reviewer::class, 'usulan_reviewer', 'usulan_id', 'reviewer_id')
-                    ->withTimestamps();
+        return $this->hasManyThrough(
+            Reviewer::class,
+            PenilaianReviewer::class,
+            'usulan_id',   // Foreign key di tabel PenilaianReviewer
+            'id',          // Foreign key di tabel Reviewer
+            'id',          // Local key di tabel Usulan
+            'reviewer_id'  // Local key di tabel PenilaianReviewer
+        );
     }
-    
 }

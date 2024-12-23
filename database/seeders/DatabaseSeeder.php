@@ -7,8 +7,11 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
+
+
 class DatabaseSeeder extends Seeder
 {
+    
     public function run()
     {
         // Reset cached roles and permissions
@@ -84,5 +87,16 @@ foreach ($permissions as $permission) {
             // Berikan peran 'Reviewer' untuk setiap user
             $reviewer->assignRole('Reviewer');
         }
+
+        $this->call([
+            KriteriaPenilaianSeeder::class,
+        ]);
+
+       
+
+
     }
+
+
+    
 }

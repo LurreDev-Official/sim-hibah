@@ -64,7 +64,7 @@
                             <div class="row mt-4">
                                 @php
                                     $notifikasi = [];
-                            
+
                                     // Logika berdasarkan role
                                     if (Auth::user()->hasRole('Kepala LPPM')) {
                                         // Kepala LPPM melihat semua usulan dengan status tertentu
@@ -72,25 +72,43 @@
                                     } elseif (Auth::user()->hasRole('Dosen')) {
                                         // Ambil dosen terkait user login
                                         $dosen = \App\Models\Dosen::where('user_id', Auth::id())->first();
-                            
+
                                         if ($dosen) {
                                             // Dosen melihat usulan di mana dia sebagai ketua atau anggota dengan status belum disetujui
                                             $notifikasi = \App\Models\Usulan::where('ketua_dosen_id', $dosen->id)
                                                 ->orWhereHas('anggotaDosen', function ($query) use ($dosen) {
-                                                    $query->where('dosen_id', $dosen->id)->where('status', 'belum disetujui');
+                                                    $query
+                                                        ->where('dosen_id', $dosen->id)
+                                                        ->where('status', 'belum disetujui');
                                                 })
-                                                ->with(['anggotaDosen' => function ($query) use ($dosen) {
-                                                    $query->where('dosen_id', $dosen->id)->where('status', 'belum disetujui');
-                                                }])->get();
+                                                ->with([
+                                                    'anggotaDosen' => function ($query) use ($dosen) {
+                                                        $query
+                                                            ->where('dosen_id', $dosen->id)
+                                                            ->where('status', 'belum disetujui');
+                                                    },
+                                                ])
+                                                ->get();
                                         }
                                     } elseif (Auth::user()->hasRole('Reviewer')) {
-                                        // Reviewer melihat usulan yang harus direview
-                                        $notifikasi = \App\Models\Usulan::whereHas('reviewers', function ($query) {
-                                            $query->where('reviewer_id', Auth::id());
-                                        })->where('status', 'Pending')->get();
+                                        // Ambil reviewer terkait user yang sedang login
+                                        $reviewer = \App\Models\Reviewer::where('user_id', Auth::id())->first();
+
+                                        if ($reviewer) {
+                                            // Reviewer melihat usulan yang berstatus Pending dan terkait dengan reviewer tersebut
+                                            $notifikasi = \App\Models\PenilaianReviewer::where(
+                                                'reviewer_id',
+                                                $reviewer->id,
+                                            )
+                                                ->where('status_penilaian', 'Pending')
+                                                ->with('usulan') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
+                                                ->get();
+                                        } else {
+                                            $notifikasi = collect(); // Kosongkan notifikasi jika reviewer tidak ditemukan
+                                        }
                                     }
                                 @endphp
-                            
+
                                 @if (count($notifikasi) > 0)
                                     <div class="col-12">
                                         <div class="card">
@@ -100,20 +118,25 @@
                                             <div class="card-body">
                                                 <ul class="list-group">
                                                     @foreach ($notifikasi as $notif)
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <li
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
                                                             <div>
                                                                 @if (Auth::user()->hasRole('Kepala LPPM'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong> 
-                                                                    dengan status <em>{{ $notif->status }}</em> menunggu diteruskan ke reviewer.
+                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
+                                                                    dengan status <em>{{ $notif->status }}</em> menunggu
+                                                                    diteruskan ke reviewer.
                                                                 @elseif (Auth::user()->hasRole('Dosen'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong> 
-                                                                    dengan status <em>{{ $notif->status }}</em> belum disetujui.
+                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
+                                                                    dengan status <em>{{ $notif->status }}</em> belum
+                                                                    disetujui.
                                                                     <button class="btn btn-info btn-sm"
-                                                                    onclick="showDetailUsulan('{{ $notif->id }}')">
-                                                                    <i class="fas fa-eye"></i> Detail
-                                                                </button>
+                                                                        onclick="showDetailUsulan('{{ $notif->jenis_skema }}', {{ $notif->id }})">
+                                                                        <i class="fas fa-eye"></i> Detail
+                                                                    </button>
+
+                                                                    </button>
                                                                 @elseif (Auth::user()->hasRole('Reviewer'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong> 
+                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
                                                                     menunggu ulasan Anda.
                                                                 @endif
                                                             </div>
@@ -133,24 +156,18 @@
                                     </div>
                                 @endif
                             </div>
-                            
                             <script>
-                                function showDetailUsulan(id) {
-                                    // Navigasi ke URL detail usulan
-                                    const url = `/usulan/detail/${id}`;
+                                function showDetailUsulan(jenis, id) {
+                                    // Navigasi ke URL detail usulan dengan parameter jenis dan id
+                                    const url = `/detail-usulan/${jenis}/${id}`;
                                     window.location.href = url;
                                 }
                             </script>
-                            
+
+
                         </div>
 
-                        <script>
-                            function showDetailUsulan(jenis, id) {
-                                // Navigasi ke URL detail usulan dengan parameter jenis dan id
-                                const url = `/detail-usulan/${jenis}/${id}`;
-                                window.location.href = url;
-                            }
-                        </script>
+
                     </div>
                 </div>
 

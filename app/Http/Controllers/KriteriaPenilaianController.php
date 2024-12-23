@@ -13,7 +13,7 @@ class KriteriaPenilaianController extends Controller
     public function index()
     {
         // Ambil semua data kriteria penilaian dari database
-        $kriteriaPenilaians = KriteriaPenilaian::paginate(10);
+        $kriteriaPenilaians = KriteriaPenilaian::all();
         return view('kriteria_penilaian.index', compact('kriteriaPenilaians'));
     }
 
