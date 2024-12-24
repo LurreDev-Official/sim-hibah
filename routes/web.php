@@ -107,7 +107,9 @@ Route::group(['middleware' => ['role:Reviewer']], function () {
     // Review Usulan
     Route::get('review-usulan', [PenilaianReviewerController::class, 'indexReviewUsulan'])->name('review-usulan.index');
     Route::post('review-usulan/{id}', [PenilaianReviewerController::class, 'storeReviewUsulan'])->name('review-usulan.store');
+    Route::get('review-usulan-lihat/{id}', [PenilaianReviewerController::class, 'lihatReviewUsulan'])->name('review-usulan.lihat');
 
+    
     // Review Laporan Kemajuan
     Route::get('review-laporan-kemajuan', [PenilaianReviewerController::class, 'indexReviewLaporanKemajuan'])->name('review-laporan-kemajuan.index');
     Route::post('review-laporan-kemajuan/{id}', [PenilaianReviewerController::class, 'storeReviewLaporanKemajuan'])->name('review-laporan-kemajuan.store');

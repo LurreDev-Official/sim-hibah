@@ -16,6 +16,7 @@ class FormPenilaian extends Model
     protected $fillable = [
         'penilaian_reviewers_id',
         'id_kriteria',
+        'id_indikator',
         'catatan',
         'sub_total',
         'status',
@@ -25,6 +26,11 @@ class FormPenilaian extends Model
     public function kriteria()
     {
         return $this->belongsTo(KriteriaPenilaian::class, 'id_kriteria');
+    }
+
+    public function indikator()
+    {
+        return $this->belongsTo(IndikatorPenilaian::class, 'id_indikator');
     }
 
     // Relasi ke model PenilaianReviewers

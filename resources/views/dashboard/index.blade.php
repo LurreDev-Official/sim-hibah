@@ -85,7 +85,7 @@
                                                     'anggotaDosen' => function ($query) use ($dosen) {
                                                         $query
                                                             ->where('dosen_id', $dosen->id)
-                                                            ->where('status', 'belum disetujui');
+                                                            ->where('status','=', 'belum disetujui');
                                                     },
                                                 ])
                                                 ->get();

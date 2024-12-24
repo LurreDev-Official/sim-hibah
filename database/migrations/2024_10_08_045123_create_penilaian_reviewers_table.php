@@ -28,13 +28,15 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('penilaian_reviewers_id');
             $table->unsignedBigInteger('id_kriteria')->nullable(); // Relasi ke kriteria penilaian (bisa null)
+            $table->unsignedBigInteger('id_indikator')->nullable(); // Relasi ke kriteria penilaian (bisa null)
             $table->text('catatan')->nullable(); // Catatan terkait penilaian
             $table->string('sub_total'); // Status penilaian
             $table->string('status'); // Status penilaian
             $table->timestamps();
             // Menambahkan foreign key
             $table->foreign('id_kriteria')->references('id')->on('kriteria_penilaians')->onDelete('cascade');
-            $table->foreign('penilaian_reviewers_id')->references('id')->on('penilaian_reviewers')->onDelete('cascade');
+            $table->foreign('id_indikator')->references('id')->on('kriteria_penilaians')->onDelete('cascade');
+            $table->foreign('penilaian_reviewers_id')->references('id')->on('indikator_penilaians')->onDelete('cascade');
         });
 
     }

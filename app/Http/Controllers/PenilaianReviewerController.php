@@ -7,7 +7,13 @@ use App\Models\Dosen;
 use App\Models\AnggotaDosen;
 use App\Models\AnggotaMahasiswa;
 use App\Models\Reviewer;
+use App\Models\Usulan;
 use App\Models\FormPenilaian;
+use App\Models\KriteriaPenilaian;
+use App\Models\IndikatorPenilaian;
+use App\Models\UsulanPerbaikan;
+
+
 use Illuminate\Http\Request;
 class PenilaianReviewerController extends Controller
 {
@@ -136,19 +142,35 @@ class PenilaianReviewerController extends Controller
      */
     public function update(Request $request, PenilaianReviewer $penilaianReviewer)
     {
-        // Validate incoming request data
-        $validated = $request->validate([
-            'usulan_id' => 'required|integer',
-            'status_penilaian' => 'required|string',
-            'form_penilaian_id' => 'required|integer',
-            'reviewer_id' => 'required|integer',
+         // Validate incoming request data for FormPenilaian
+         $formValidated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'id_kriteria' => 'nullable|integer|exists:kriteria_penilaians,id',
+            'catatan' => 'nullable|string',
+            'status' => 'required|string|max:255',
+            'total_semua_kriteria' => 'nullable|numeric|min:0',
         ]);
 
-        // Update the existing PenilaianReviewer record
-        $penilaianReviewer->update($validated);
+        // Save the FormPenilaian data
+        $formPenilaian = FormPenilaian::create($formValidated);
 
-        // Redirect back to the index page with a success message
-        return redirect()->route('penilaian_reviewers.index')->with('success', 'Penilaian Reviewer updated successfully.');
+        // Get the ID of the saved FormPenilaian
+        $formPenilaianId = $formPenilaian->id;
+
+        // Validate incoming request data for PenilaianReviewer
+        $reviewerValidated = $request->validate([
+            'usulan_id' => 'required|integer|exists:usulans,id',
+            'status_penilaian' => 'required|string|max:255',
+            'reviewer_id' => 'required|integer|exists:reviewers,id',
+        ]);
+
+        // Add form_penilaian_id to the validated data
+        $reviewerValidated['form_penilaian_id'] = $formPenilaianId;
+
+        // Update the existing PenilaianReviewer record
+        $penilaianReviewer->update($reviewerValidated);
+
+
     }
 
     /**
@@ -201,11 +223,14 @@ public function indexReviewUsulan()
     }
 
     $usulans = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-        ->where('status_penilaian', 'Pending')
+        ->where('status_penilaian', 'sudah dinilai')
         ->with('usulan')
-        ->paginate(10);
+        ->get();
+    
+       // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+       $usulanPerbaikans = UsulanPerbaikan::all();
 
-    return view('penilaian_reviewers.review_usulan', compact('usulans'));
+    return view('penilaian_reviewers.review_usulan', compact('usulans','usulanPerbaikans'));
 }
 
 /**
@@ -248,6 +273,40 @@ public function indexReviewLaporanAkhir()
         ->paginate(10);
 
     return view('penilaian_reviewers.review_laporan_akhir', compact('laporanAkhir'));
+}
+
+
+public function lihatReviewUsulan($usulanId)
+{
+    // Ambil data usulan berdasarkan ID
+    $usulan = Usulan::findOrFail($usulanId);
+
+    // Ambil data user yang sedang login
+    $user = auth()->user();
+
+    // Cari reviewer berdasarkan user login
+    $reviewer = Reviewer::where('user_id', $user->id)->first();
+
+    // Ambil jenis skema dari usulan
+    $jenis_skema = $usulan->jenis_skema;
+
+    // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses 'usulan'
+    $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
+                                         ->where('proses', 'usulan')
+                                         ->pluck('id');
+
+    // Ambil semua IndikatorPenilaian berdasarkan KriteriaPenilaian yang sesuai
+    $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+                                              ->whereIn('kriteria_id', $matchingKriteria)
+                                              ->get();
+
+    // Ambil data penilaian reviewer
+    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+                                          ->where('usulan_id', $usulanId)
+                                          ->firstOrFail();
+
+    // Kirim data ke view
+    return view('penilaian_reviewers.update_penilaian', compact('usulan', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));
 }
 
 

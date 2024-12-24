@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama'); // Nama kriteria
             $table->string('jenis'); // Nama pengabdian//penelitian
-            $table->enum('proses', ['usulan', 'lapkemajuan', 'lapakhir']); // Jenis kriteria
+            $table->enum('proses', ['Usulan', 'Laporan Kemajuan', 'Laporan Akhir']); // Jenis kriteria
             $table->timestamps();
         });
     }
