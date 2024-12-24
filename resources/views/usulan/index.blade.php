@@ -133,7 +133,9 @@
                                                     @endphp
                                                     <ul>
                                                         @forelse ($getreviewer as $item)
-                                                            {{-- <li> {{ $item->reviewer->user->name }}</li> --}}
+                                                        @role('Kepala LPPM')
+                                                            <li> {{ $item->reviewer->user->name }}</li>
+                                                        @endrole
                                                         @empty
                                                             <li>Belum ada reviewer yang ditugaskan</li>
                                                         @endforelse
