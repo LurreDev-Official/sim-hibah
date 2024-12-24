@@ -91,13 +91,22 @@ class HomeController extends Controller
         } elseif ($user->hasRole('Reviewer')) {
             
             $data = Reviewer::where('user_id', $user->id)->first();
+            if (!$data) {
+                return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
+            }
+
             $notifusulan = \App\Models\PenilaianReviewer::where('reviewer_id', $data->id)
+           
             ->where('status_penilaian', 'Belum Dinilai')
             // ->whereHas('usulan', function ($query) {
             //     $query->where('jenis_skema', 'penelitian');
             // })
             ->with('usulan') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
             ->get();
+
+            if (!$notifusulan) {
+                return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
+            }
 
             $notifLaporanKemajuan = \App\Models\LaporanKemajuan::whereHas('usulan.reviewers', function ($query) use ($data) {
                 $query->where('reviewer_id', $data->id);
@@ -110,9 +119,7 @@ class HomeController extends Controller
 
             
 
-if (!$data) {
-    return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
-}
+
             return view('dashboard.reviewer', [
 
                 'notifusulan' => $notifusulan,

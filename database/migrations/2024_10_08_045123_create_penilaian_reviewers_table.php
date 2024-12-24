@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_kriteria')->nullable(); // Relasi ke kriteria penilaian (bisa null)
             $table->unsignedBigInteger('id_indikator')->nullable(); // Relasi ke kriteria penilaian (bisa null)
             $table->text('catatan')->nullable(); // Catatan terkait penilaian
-            $table->string('sub_total'); // Status penilaian
+            $table->string('sub_total')->nullable(); /// Status penilaian
             $table->string('status'); // Status penilaian
             $table->timestamps();
             // Menambahkan foreign key

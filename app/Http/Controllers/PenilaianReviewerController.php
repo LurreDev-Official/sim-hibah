@@ -209,6 +209,27 @@ class PenilaianReviewerController extends Controller
 
 
 
+    
+    public function indexPenilaianUsulan()
+{
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+
+    if (!$reviewer) {
+        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+    }
+
+    $usulans = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('status_penilaian', 'sudah dinilai')
+        ->with('usulan')
+        ->get();
+    
+       // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
+       $usulanPerbaikans = UsulanPerbaikan::all();
+
+    return view('penilaian_reviewers.review_usulan', compact('usulans','usulanPerbaikans'));
+}
+
+
     /**
  * Menampilkan daftar usulan untuk direview.
  *

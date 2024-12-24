@@ -94,59 +94,63 @@
                                 <div class="card-body">
                                     <form id="penilaianForm" action="{{ url('form-penilaian') }}" method="POST">
                                         @csrf
-
-                                        <input type="hidden" name="penilaian_reviewers_id"
-                                            value="{{ $penilaianReviewer->id }}">
-
+                                    
+                                        <input type="hidden" name="penilaian_reviewers_id" value="{{ $penilaianReviewer->id }}">
+                                    
                                         <!-- Table for Input Fields -->
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th>Kriteria</th>
+                                                    <th colspan="1"> </th>
                                                     <th>Nama Indikator</th>
-                                                    <th>Jumlah Bobot</th>
+                                                    <th>Nilai</th>
+                                                    <th>Catatan</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($indikatorPenilaians as $indikator)
+                                                @php
+                                                $currentKriteria = null;
+                                            @endphp
+                                
+                                            @foreach ($indikatorPenilaians as $indikator)
+                                                @if ($currentKriteria !== $indikator->kriteriaPenilaian->nama)
+                                                    @php
+                                                        $currentKriteria = $indikator->kriteriaPenilaian->nama;
+                                                    @endphp
+                                                    <!-- Group Header Row for Kriteria -->
                                                     <tr>
-                                                        <!-- Display Kriteria and Nama Indikator as Text -->
-                                                        <td>{{ $indikator->kriteriaPenilaian->nama }}</td>
-                                                        <td>{{ $indikator->nama_indikator }}</td>
-
-                                                        <!-- Input for Jumlah Bobot -->
-                                                        <td>
-                                                            <select name="indikator[{{ $indikator->id }}][jumlah_bobot]"
-                                                                class="form-control bobot-selector" required>
-                                                                <option value="1"
-                                                                    {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 1 ? 'selected' : '' }}>
-                                                                    1</option>
-                                                                <option value="2"
-                                                                    {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 2 ? 'selected' : '' }}>
-                                                                    2</option>
-                                                                <option value="3"
-                                                                    {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 3 ? 'selected' : '' }}>
-                                                                    3</option>
-                                                                <option value="4"
-                                                                    {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 4 ? 'selected' : '' }}>
-                                                                    4</option>
-                                                                <option value="5"
-                                                                    {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 5 ? 'selected' : '' }}>
-                                                                    5</option>
-                                                            </select>
-                                                        </td>
+                                                        <td colspan="4" class="bg-light font-weight-bold text-uppercase text-center">{{ $currentKriteria }}</td>
                                                     </tr>
-                                                @endforeach
+                                                @endif
+                                
+                                                <!-- Display Nama Indikator, Jumlah Bobot, and Catatan -->
+                                                <tr>
+                                                    <td></td>
+                                                    <td>{{ $indikator->nama_indikator }}</td>
+                                                    <td>
+                                                        <select name="indikator[{{ $indikator->id }}][jumlah_bobot]" class="form-control bobot-selector" required>
+                                                            <option value="1" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 1 ? 'selected' : '' }}>1</option>
+                                                            <option value="2" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 2 ? 'selected' : '' }}>2</option>
+                                                            <option value="3" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 3 ? 'selected' : '' }}>3</option>
+                                                            <option value="4" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 4 ? 'selected' : '' }}>4</option>
+                                                            <option value="5" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 5 ? 'selected' : '' }}>5</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" value="{{ old('indikator.' . $indikator->id . '.catatan', '') }}" required >
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                             </tbody>
                                         </table>
-
-                                        <!-- Total Bobot Display -->
+                                    
                                         <!-- Total Bobot Display -->
                                         <div class="mt-4">
-                                            <h5>Total Bobot: <span id="totalBobot">0</span></h5>
-                                            <h5>Rata-rata Bobot: <span id="averageBobot">0</span></h5>
-                                            <h5>Bobot Persentase: <span id="percentageBobot">0%</span></h5>
+                                            <h5>Nilai Review : <span id="totalBobot">0</span></h5>
+                                            {{-- <h5>Rata-rata Bobot: <span id="averageBobot">0</span></h5> --}}
+                                            {{-- <h5>Nilai Review: <span id="percentageBobot">0%</span></h5> --}}
                                         </div>
+                                    
                                         <script>
                                             // Function to calculate total, average, and percentage bobot
                                             document.addEventListener('DOMContentLoaded', function() {
@@ -154,11 +158,11 @@
                                                 const totalBobotDisplay = document.getElementById('totalBobot');
                                                 const averageBobotDisplay = document.getElementById('averageBobot');
                                                 const percentageBobotDisplay = document.getElementById('percentageBobot');
-
+                                    
                                                 function calculateBobot() {
                                                     let total = 0;
                                                     let count = 0;
-
+                                    
                                                     bobotSelectors.forEach(selector => {
                                                         const value = parseInt(selector.value, 10);
                                                         if (!isNaN(value)) { // Ensure valid number
@@ -166,33 +170,32 @@
                                                             count++;
                                                         }
                                                     });
-
+                                    
                                                     const average = count > 0 ? (total / count).toFixed(2) : 0;
                                                     const maxTotal = count * 5; // Maximum possible total based on 5 per indicator
                                                     const percentage = maxTotal > 0 ? ((total / maxTotal) * 100).toFixed(2) : 0;
-
+                                    
                                                     totalBobotDisplay.textContent = total; // Update total bobot
                                                     averageBobotDisplay.textContent = average; // Update average bobot
                                                     percentageBobotDisplay.textContent = `${percentage}%`; // Update percentage bobot
                                                 }
-
+                                    
                                                 // Recalculate when a bobot value is changed
                                                 bobotSelectors.forEach(selector => {
                                                     selector.addEventListener('change', calculateBobot);
                                                 });
-
+                                    
                                                 // Initial calculation
                                                 calculateBobot();
                                             });
                                         </script>
-
-
-
+                                    
                                         <!-- Submit Button -->
                                         <div class="text-end mt-4">
                                             <button type="submit" class="btn btn-primary">Submit Penilaian</button>
                                         </div>
                                     </form>
+                                    
                                 </div>
                             </div>
                         </div>
