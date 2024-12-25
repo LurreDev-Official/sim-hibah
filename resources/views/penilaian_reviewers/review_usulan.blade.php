@@ -63,7 +63,7 @@
                                                     @endphp
 
                                                     @if ($usulanPerbaikan->dokumen_usulan)
-                                                        <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                                                             data-bs-target="#perbaikanModal{{ $usulan->id }}">
                                                             Lihat Perbaikan
                                                         </button>
@@ -74,50 +74,48 @@
                                             </td>
 
                                             <!-- Modal for Perbaikan -->
-                                            @if ($usulanPerbaikan)
-                                                <div class="modal fade" id="perbaikanModal{{ $usulan->id }}"
-                                                    tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog modal-lg">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title"
-                                                                    id="perbaikanModalLabel{{ $usulan->id }}">
-                                                                    Detail Perbaikan: {{ $usulan->judul_usulan }}
-                                                                </h5>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <iframe
-                                                                    src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}"
-                                                                    width="100%" height="500px" frameborder="0"></iframe>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <form
-                                                                    action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}"
-                                                                    method="POST">
-                                                                    @csrf
-                                                                    @method('PUT')
-                                                                    <div class="d-flex align-items-center">
-                                                                        <label for="status{{ $usulan->id }}"
-                                                                            class="form-label me-2">Status:</label>
-                                                                        <select name="status"
-                                                                            id="status{{ $usulan->id }}"
-                                                                            class="form-select me-3" required>
-                                                                            <option value="Diterima"
-                                                                                {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
-                                                                                Diterima</option>
-                                                                        </select>
-                                                                        <button type="submit"
-                                                                            class="btn btn-success">Simpan</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                            @php
+                                            $usulanPerbaikan = $usulanPerbaikans->firstWhere('usulan_id', $usulan->id);
+                                        @endphp
+                                    
+                                    @if ($usulanPerbaikan)
+                                    <div class="modal fade" id="perbaikanModal{{ $usulan->id }}" tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="perbaikanModalLabel{{ $usulan->id }}">
+                                                        Detail Perbaikan: {{ $usulan->judul_usulan }}
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-                                            @endif
+                                                <div class="modal-body">
+                                                    <!-- Displaying the uploaded file (Perbaikan) -->
+                                                    <iframe src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}" width="100%" height="500px" frameborder="0"></iframe>
+                                                </div>
+                            
+                                                <div class="modal-footer">
+                                                    <!-- Form to update status of perbaikan -->
+                                                    <form action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PUT')
+                            
+                                                        <!-- Status Dropdown -->
+                                                        <div class="d-flex align-items-center">
+                                                            <label for="status{{ $usulan->id }}" class="form-label me-2">Status:</label>
+                                                            <select name="status" id="status{{ $usulan->id }}" class="form-select me-3" required>
+                                                                <option value="Diterima" {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
+                                                                    Diterima
+                                                                </option>
+                                                               
+                                                            </select>
+                                                            <button type="submit" class="btn btn-success">Simpan</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
 
                                             <td>

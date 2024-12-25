@@ -237,22 +237,26 @@ class PenilaianReviewerController extends Controller
  */
 public function indexReviewUsulan()
 {
+    // Get the reviewer for the authenticated user
     $reviewer = Reviewer::where('user_id', auth()->id())->first();
 
+    // Check if the reviewer exists
     if (!$reviewer) {
         return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
     }
 
+    // Fetch the usulans that have been reviewed by the current reviewer
     $usulans = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-        ->where('status_penilaian', 'sudah dinilai')
-        ->with('usulan')
+        // ->where('status_penilaian', 'sudah dinilai')
+        ->with('usulan') // Eager load 'usulan' relationship
         ->get();
     
-       // Ambil semua UsulanPerbaikan yang terkait dengan usulan_id yang ditemukan
-       $usulanPerbaikans = UsulanPerbaikan::all();
+    // Fetch all related UsulanPerbaikan (for revisions)
+    $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $usulans->pluck('usulan_id'))->get();
 
-    return view('penilaian_reviewers.review_usulan', compact('usulans','usulanPerbaikans'));
+    return view('penilaian_reviewers.review_usulan', compact('usulans', 'usulanPerbaikans'));
 }
+
 
 /**
  * Menampilkan daftar laporan kemajuan untuk direview.

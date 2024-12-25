@@ -11,6 +11,14 @@ use App\Models\AnggotaMahasiswa;
 use App\Models\Reviewer;
 use App\Models\PenilaianReviewer;
 use App\Models\FormPenilaian;
+use App\Models\KriteriaPenilaian;
+use App\Models\IndikatorPenilaian;
+use App\Models\UsulanPerbaikan;
+
+use PDF;
+use Milon\Barcode\DNS1D;
+use Milon\Barcode\DNS2D;
+
 
 class UsulanController extends Controller
 {
@@ -28,8 +36,24 @@ class UsulanController extends Controller
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
         if ($user->hasRole('Kepala LPPM')) {
             // Ambil semua usulan tanpa filter
-            $usulans = Usulan::where('jenis_skema', $jenis)->paginate(10);
-            $reviewers = Reviewer::with('user')->get();
+            $usulans = Usulan::where('jenis_skema', $jenis)
+            ->with('penilaianReviewers.reviewer') // Eager load penilaianReviewers and related reviewers
+            ->paginate(10);
+
+      // Check if all reviewers for each usulan have accepted (status == 'Diterima')
+      foreach ($usulans as $usulan) {
+        // Count the total number of reviewers
+        $totalReviewers = $usulan->penilaianReviewers->count();
+
+        // Count the number of reviewers who have accepted (status == 'Diterima')
+        $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+
+        // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
+        $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+    }
+   // Fetch all reviewers (if you need to display them too)
+   $reviewers = Reviewer::with('user')->get();
+    
             return view('usulan.index', compact('usulans', 'jenis','reviewers'));
         }
     
@@ -265,12 +289,30 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
         $user = auth()->user(); // Ambil data user yang sedang login
     
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
-        if ($user->hasRole('Kepala LPPM')) {
-            // Ambil semua usulan tanpa filter
-            $usulans = Usulan::where('jenis_skema', $jenis)->paginate(10);
-            $reviewers = Reviewer::with('user')->get();
-            return view('usulan.index', compact('usulans', 'jenis','reviewers'));
+        // Check if the user has the 'Kepala LPPM' role
+    if ($user->hasRole('Kepala LPPM')) {
+        // Get all Usulan for the specified 'jenis_skema' and paginate
+        $usulans = Usulan::where('jenis_skema', $jenis)
+            ->with('penilaianReviewers.reviewer') // Eager load penilaianReviewers and related reviewers
+            ->paginate(10);
+
+        // Check if all reviewers for each usulan have accepted (status == 'Diterima')
+        foreach ($usulans as $usulan) {
+            // Count the total number of reviewers
+            $totalReviewers = $usulan->penilaianReviewers->count();
+
+            // Count the number of reviewers who have accepted (status == 'Diterima')
+            $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+
+            // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
+            $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
         }
+
+        // Fetch all reviewers (if you need to display them too)
+        $reviewers = Reviewer::with('user')->get();
+
+        return view('usulan.index', compact('usulans', 'reviewers', 'jenis'));
+    }
     
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
         elseif ($user->hasRole('Dosen')) {
@@ -418,6 +460,122 @@ public function kirim(Request $request)
     }
 
     return redirect()->back()->with('error', 'Aksi tidak dikenali.');
+}
+
+
+
+public function perbaikiRevisi($jenis, $id)
+    {
+        // Fetch the usulan by ID
+        $usulan = Usulan::findOrFail($id);
+
+        // Fetch related penilaianReviewer and indikatorPenilaians
+        $penilaianReviewer = PenilaianReviewer::where('usulan_id', $id)->firstOrFail();
+        $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+            ->whereIn('kriteria_id', KriteriaPenilaian::where('jenis', $usulan->jenis_skema)->where('proses', 'Usulan')->pluck('id'))
+            ->get();
+// Fetch the related UsulanPerbaikan (if exists)
+$usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $id)
+->where('penilaian_id', $penilaianReviewer->id)
+->first(); // Fetch the existing UsulanPerbaikan record
+
+// Return the perbaiki revisi view with the additional usulanPerbaikan variable
+return view('usulan.perbaiki_revisi', compact('usulan', 'penilaianReviewer', 'indikatorPenilaians', 'usulanPerbaikan'));
+    }
+
+    public function simpanPerbaikan(Request $request, $id)
+    {
+        // Validate input
+        $request->validate([
+            'file_perbaikan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
+        ]);
+    
+        // Fetch the related PenilaianReviewer
+        $penilaianReviewer = PenilaianReviewer::where('usulan_id', $id)->firstOrFail();
+    
+        // Handle file upload
+        $file = $request->file('file_perbaikan');
+        $filePath = $file->store('usulan_perbaikans', 'public'); // Save file path
+        $originalFileName = $file->getClientOriginalName(); // Save original file name
+    
+        // Fetch or create the UsulanPerbaikan record
+        $usulanPerbaikan = UsulanPerbaikan::updateOrCreate(
+            ['usulan_id' => $id, 'penilaian_id' => $penilaianReviewer->id], // Match these columns
+            [
+                'dokumen_usulan' => $filePath,
+                'status' => 'sudah diperbaiki', // Update or set this status
+                'original_filename' => $originalFileName, // Save original file name
+            ]
+        );
+
+        $usulan = Usulan::findOrFail($usulanId);
+        $usulan->status = 'waiting approved';
+        $usulan->save();
+        return redirect()->back()->with('success', 'Berhasil di simpan.');
+    
+      
+    }
+
+
+
+    public function updateStatus($id, Request $request)
+{
+    // Find the Usulan by ID
+    $usulan = Usulan::findOrFail($id);
+
+    // Validate the request data
+    $validated = $request->validate([
+        'status' => 'required|in:approved,rejected', // Only allow 'approved' or 'rejected' status
+    ]);
+
+    // Update the status of the Usulan
+    $usulan->status = $validated['status'];
+    $usulan->save(); // Save the updated status
+    return redirect()->back()->with('success', 'Berhasil di simpan.');
+}
+ 
+
+
+public function cetakBuktiACC($id)
+{
+    // Ambil data usulan dengan relasi terkait
+    $usulan = Usulan::with(['ketuaDosen', 'anggotaDosen.dosen.user', 'anggotaMahasiswa'])
+                    ->findOrFail($id);
+
+    // Ambil timestamp Unix
+    $timestamp = time(); // Mendapatkan timestamp Unix saat ini
+
+    // Generate Barcode 2D (QR Code) menggunakan milon/barcode
+    // Menggabungkan ID usulan dan timestamp ke dalam QR Code
+    $dataToEncode = [
+        'id' => $usulan->id,
+        'timestamp' => $timestamp,
+    ];
+    
+    // Encode data menjadi JSON string
+    $jsonData = json_encode($dataToEncode);
+
+    // Generate QR Code dalam format PNG
+    $barcode2D = \DNS2D::getBarcodePNG($jsonData, 'QRCODE'); // Menghasilkan barcode dalam format PNG
+
+    // Simpan Barcode 2D ke file sementara di storage
+    $barcode2DPath = 'public/images/ttd_usulan_2D_' . $usulan->id . '.png';
+    \Storage::put($barcode2DPath, base64_decode($barcode2D)); // Decode base64 sebelum disimpan
+
+    // Dapatkan URL untuk QR Code yang disimpan
+    $barcode2DUrl = \Storage::url($barcode2DPath); // Mendapatkan URL yang dapat diakses publik
+
+    // Mengonversi QR Code ke Base64
+    $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/' . $barcode2DPath)));
+
+    // Generate PDF
+    $pdf = \PDF::loadView('usulan.bukti_acc', [
+        'usulan' => $usulan,
+        'barcodeBase64' => $barcodeBase64, // Kirim Base64 barcode ke view
+    ]);
+
+    // Kembalikan file PDF untuk diunduh
+    return $pdf->download('bukti_acc_' . $usulan->id . '.pdf');
 }
 
 

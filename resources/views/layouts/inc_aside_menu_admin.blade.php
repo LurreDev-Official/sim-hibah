@@ -118,14 +118,6 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('perbaikan-usulan/penelitian') }}">
-                                <span class="menu-bullet">
-                                    <i class="align-middle" data-feather="edit"></i>
-                                </span>
-                                <span class="menu-title">Perbaikan Usulan</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
                             <a class="menu-link" href="{{ url('laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
@@ -164,14 +156,6 @@
                                     <i class="align-middle" data-feather="file-text"></i>
                                 </span>
                                 <span class="menu-title">Usulan</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link" href="{{ url('perbaikan-usulan/penelitian') }}">
-                                <span class="menu-bullet">
-                                    <i class="align-middle" data-feather="edit"></i>
-                                </span>
-                                <span class="menu-title">Perbaikan Usulan</span>
                             </a>
                         </div>
                         <div class="menu-item">

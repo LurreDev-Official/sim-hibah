@@ -133,15 +133,17 @@
                                                     @endphp
                                                     <ul>
                                                         @forelse ($getreviewer as $item)
-                                                        @role('Kepala LPPM')
-                                                            <li> {{ $item->reviewer->user->name }}</li>
-                                                        @endrole
+                                                            @role('Kepala LPPM')
+                                                                <li> {{ $item->reviewer->user->name }}</li>
+                                                            @endrole
                                                         @empty
                                                             <li>Belum ada reviewer yang ditugaskan</li>
                                                         @endforelse
                                                     </ul>
                                                 @elseif ($usulan->status == 'revision')
                                                     <span class="badge bg-secondary">Needs Revision</span>
+                                                @elseif ($usulan->status == 'waiting approved')
+                                                    <span class="badge bg-secondary text-black">waiting approved</span>
                                                 @elseif ($usulan->status == 'approved')
                                                     <span class="badge bg-success">Approved</span>
                                                 @elseif ($usulan->status == 'rejected')
@@ -195,6 +197,24 @@
                                                             <i class="fas fa-eye"></i> Detail
                                                         </button>
                                                     </div>
+                                                    <div class="col p-2">
+                                                        <a href="{{ route('usulan.cetakBuktiACC', $usulan->id) }}" class="btn btn-success btn-sm" target="_blank">
+                                                            <i class="fas fa-download"></i> Download Bukti ACC
+                                                        </a>
+                                                    </div>
+
+                                                    
+                                                    <!-- Tombol Detail -->
+                                                    @if ($usulan->status == 'revision')
+                                                        <div class="d-flex justify-content-end mt-4">
+                                                            <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $usulan->id]) }}"
+                                                                class="btn btn-secondary">
+                                                                <i class="fas fa-edit"></i> Perbaiki Revisi
+                                                            </a>
+                                                        </div>
+                                                    @else
+                                                    @endif
+
 
                                                     <script>
                                                         function showDetailUsulan(jenis, id) {
@@ -364,12 +384,62 @@
                                                     </script>
 
                             </div>
+                            @if ($usulan->allReviewersAccepted)
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#approveRejectModal{{ $usulan->id }}">
+                                    Approve or Reject
+                                </button>
+
+                                <!-- Modal for Approving or Rejecting Usulan -->
+                                @if ($usulan->allReviewersAccepted)
+                                    <div class="modal fade" id="approveRejectModal{{ $usulan->id }}" tabindex="-1"
+                                        aria-labelledby="approveRejectModalLabel{{ $usulan->id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="approveRejectModalLabel{{ $usulan->id }}">
+                                                        Approve or Reject Usulan</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ route('usulan.updateStatus', $usulan->id) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        @method('PUT')
+
+                                                        <!-- Dropdown to choose status -->
+                                                        <div class="form-group">
+                                                            <label for="status">Select Status:</label>
+                                                            <select name="status" id="status" class="form-select"
+                                                                required>
+                                                                <option value="approved">Approve</option>
+                                                                <option value="rejected">Reject</option>
+                                                            </select>
+                                                        </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @else
+                                <span class="text-danger">Waiting for approval from all reviewers.</span>
+                            @endif
+
+
                             <div class="col p-2">
                                 <button class="btn btn-danger btn-sm"
                                     onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})" <i
                                     class="fas fa-trash-alt"></i> Hapus
                                 </button>
                             </div>
+
 
 
                             </td>
@@ -463,7 +533,7 @@
     <!--end::Post-->
     </div>
 @endsection
- 
+
 <script>
     document.getElementById('myInput').addEventListener('keyup', function() {
         var input, filter, table, tr, td, i, txtValue;

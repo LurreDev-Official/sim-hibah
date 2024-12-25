@@ -23,7 +23,7 @@
                         <!--begin::Card toolbar-->
                         <div class="card-toolbar">
                             <div class="d-flex justify-content-end">
-                                <a class="btn btn-primary" href="{{ url()->previous() }}">Kembali</a>
+                                <a class="btn btn-primary" href="{{ url('review-usulan') }}">Kembali</a>
                             </div>
                         </div>
                         <!--end::Card toolbar-->
@@ -83,101 +83,52 @@
 
                 <br>
 
-                {{-- <div class="card">
+                <div class="card">
                     <div class="card-body">
-                        <div class="mb-5">
-                            <h4 class="fw-bold">Form Update Penilaian</h4>
-                            <!-- Form Container -->
-                            <div class="card">
-                                <div class="card-body">
-                                    <form id="penilaianForm" action="{{ url('update-penilaian/' . $penilaianReviewer->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT') <!-- Menggunakan PUT untuk update -->
-                                    
-                                        <input type="hidden" name="penilaian_reviewers_id" value="{{ $penilaianReviewer->id }}">
-                                    
-                                        <!-- Table for Input Fields -->
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
+                        <h4 class="fw-bold mb-4">Lihat Penilaian</h4>
+                
+                        <!-- Penilaian Details Grouped by Kriteria -->
+                        <div class="mb-4">
+                            @foreach ($indikatorPenilaians->groupBy('kriteria_id') as $kriteriaId => $indikators)
+                                <div class="mb-4">
+                                    <h5 class="text-primary"><strong>Kriteria: {{ $indikators->first()->kriteriaPenilaian->nama }}</strong></h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                            <thead class="table-light">
                                                 <tr>
-                                                    <th>Kriteria</th>
-                                                    <th>Nama Indikator</th>
-                                                    <th>Jumlah Bobot</th>
+                                                    <th class="text-center" style="width: 50px;">#</th>
+                                                    <th>Indikator</th>
+                                                    <th class="text-center" style="width: 120px;">Nilai</th>
+                                                    <th>Catatan</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($indikatorPenilaians as $indikator)
+                                                @foreach ($indikators as $indikator)
                                                     <tr>
-                                                        <td>{{ $indikator->kriteriaPenilaian->nama }}</td>
+                                                        <td class="text-center">{{ $loop->iteration }}</td>
                                                         <td>{{ $indikator->nama_indikator }}</td>
-                                    
-                                                        <td>
-                                                            <select name="indikator[{{ $indikator->id }}][jumlah_bobot]" class="form-control bobot-selector" required>
-                                                                @for ($i = 1; $i <= 5; $i++)
-                                                                    <option value="{{ $i }}" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? $penilaianReviewer->indikatorPenilaians()->where('id', $indikator->id)->first()->pivot->jumlah_bobot ?? '') == $i ? 'selected' : '' }}>
-                                                                        {{ $i }}
-                                                                    </option>
-                                                                @endfor
-                                                            </select>
-                                                        </td>
+                                                        <td class="text-center">{{ $penilaianReviewer->total_nilai ?? '0' }}</td>
+                                                        <td>{{ $penilaianReviewer->catatan[$indikator->id] ?? '-' }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                    
-                                        <!-- Total Bobot Display -->
-                                        <div class="mt-4">
-                                            <h5>Total Bobot: <span id="totalBobot">0</span></h5>
-                                            <h5>Rata-rata Bobot: <span id="averageBobot">0</span></h5>
-                                            <h5>Bobot Persentase: <span id="percentageBobot">0%</span></h5>
-                                        </div>
-                                    
-                                        <script>
-                                            document.addEventListener('DOMContentLoaded', function() {
-                                                const bobotSelectors = document.querySelectorAll('.bobot-selector');
-                                                const totalBobotDisplay = document.getElementById('totalBobot');
-                                                const averageBobotDisplay = document.getElementById('averageBobot');
-                                                const percentageBobotDisplay = document.getElementById('percentageBobot');
-                                    
-                                                function calculateBobot() {
-                                                    let total = 0;
-                                                    let count = 0;
-                                    
-                                                    bobotSelectors.forEach(selector => {
-                                                        const value = parseInt(selector.value, 10);
-                                                        if (!isNaN(value)) {
-                                                            total += value;
-                                                            count++;
-                                                        }
-                                                    });
-                                    
-                                                    const average = count > 0 ? (total / count).toFixed(2) : 0;
-                                                    const maxTotal = count * 5;
-                                                    const percentage = maxTotal > 0 ? ((total / maxTotal) * 100).toFixed(2) : 0;
-                                    
-                                                    totalBobotDisplay.textContent = total;
-                                                    averageBobotDisplay.textContent = average;
-                                                    percentageBobotDisplay.textContent = `${percentage}%`;
-                                                }
-                                    
-                                                bobotSelectors.forEach(selector => {
-                                                    selector.addEventListener('change', calculateBobot);
-                                                });
-                                    
-                                                calculateBobot();
-                                            });
-                                        </script>
-                                    
-                                        <!-- Submit Button -->
-                                        <div class="text-end mt-4">
-                                            <button type="submit" class="btn btn-primary">Update Penilaian</button>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
-                            </div>
+                            @endforeach
+                        </div>
+                
+                        <!-- Total Nilai -->
+                        <div class="bg-light p-3 rounded">
+                            <h5 class="mb-2">Total Nilai</h5>
+                            <p class="fw-bold text-primary fs-4 mb-0">{{ $penilaianReviewer->total_nilai }}</p>
                         </div>
                     </div>
-                </div> --}}
+                </div>
+                
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>

@@ -48,13 +48,20 @@ Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])-
     // Rute terkait usulan
     Route::get('usulan/{jenis}', [UsulanController::class, 'show'])->name('usulan.show');
     Route::delete('usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
+
+    Route::put('usulan/{id}/update-status', [UsulanController::class, 'updateStatus'])->name('usulan.updateStatus');
+    Route::get('usulan/{id}/cetak-bukti-acc', [UsulanController::class, 'cetakBuktiACC'])->name('usulan.cetakBuktiACC');
+
     Route::resource('perbaikan-usulan', UsulanPerbaikanController::class);
+
     Route::get('perbaikan-usulan/{jenis}', [UsulanPerbaikanController::class, 'show'])->name('perbaikan-usulan.show');
 
     Route::get('/perbaikan-usulan/{usulan}/detail-revisi', [UsulanPerbaikanController::class, 'detailRevisi'])->name('perbaikan-usulan.detail_revisi');
 // Route untuk upload PDF perbaikan revisi
 Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanController::class, 'uploadRevisi'])
     ->name('perbaikan-usulan.upload_revisi');
+
+    
     Route::resource('laporan-kemajuan', LaporanKemajuanController::class);
     Route::get('laporan-kemajuan/{jenis}', [LaporanKemajuanController::class, 'show'])->name('laporan-kemajuan.show');
 
@@ -72,7 +79,6 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::resource('indikator-penilaian', IndikatorPenilaianController::class);
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
 
-
 });
 
 // Rute khusus untuk Dosen
@@ -84,6 +90,10 @@ Route::group(['middleware' => ['role:Dosen']], function () {
     Route::put('usulan/{jenis}/{id}', [UsulanController::class, 'update'])->name('usulan.update'); // Proses edit usulan
     Route::patch('/usulan/{jenis}/{usulan}/submit', [UsulanController::class, 'submit'])->name('usulan.submit');
     Route::get('detail-usulan/{jenis}/{id}', [UsulanController::class, 'detail'])->name('usulan.detail');
+    // Route for Perbaiki Revisi
+    Route::get('detail-usulan/{jenis}/{id}/perbaiki-revisi', [UsulanController::class, 'perbaikiRevisi'])->name('usulan.perbaikiRevisi');
+    // Route for saving Perbaikan Revisi
+    Route::post('detail-usulan/{id}/perbaiki-revisi', [UsulanController::class, 'simpanPerbaikan'])->name('usulan.simpanPerbaikan');
 
     // Rute untuk anggota dosen
     Route::post('/anggota-dosen', [AnggotaDosenController::class, 'store'])->name('anggota-dosen.store');
@@ -123,77 +133,3 @@ Route::group(['middleware' => ['role:Reviewer']], function () {
     Route::resource('reviewer', ReviewerController::class);
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Route::resource('usulan', UsulanController::class);
-// Route::resource('usulan-perbaikan', UsulanPerbaikanController::class);
-// Route::resource('laporan-kemajuan', LaporanKemajuanController::class);
-// Route::resource('laporan-akhir', LaporanAkhirController::class);
-// Route::resource('dokumen-luaran', DokumenLuaranController::class);
-
-// //kepala lppm
-
-
-// Route::group(['middleware' => ['role:Kepala LPPM']], function () {
-
-
-//     Route::resource('dosen', DosenController::class);
-//     Route::resource('reviewer', ReviewerController::class);
-//     Route::get('/get-dosen', [AnggotaDosenController::class, 'getDosen'])->name('get.dosen');
-//     Route::delete('/dosen/{id}', [AnggotaDosenController::class, 'destroy'])->name('anggota-dosen.destroy');
-//    
-//     Route::resource('usulan-perbaikan', UsulanPerbaikanController::class);
-
-// });
-
-// Route::group(['middleware' => ['role:Dosen']], function () {
-
-// Route::get('usulan/{jenis}', [App\Http\Controllers\UsulanController::class, 'index']);
-// Route::get('usulan/{jenis}/create', [UsulanController::class, 'create'])->name('usulan.create'); // Form tambah usulan
-// Route::post('usulan/{jenis}', [UsulanController::class, 'store'])->name('usulan.store'); // Proses tambah usulan
-// Route::get('usulan/{jenis}/{id}/edit', [UsulanController::class, 'edit'])->name('usulan.edit'); // Form edit usulan
-// Route::put('usulan/{jenis}/{id}', [UsulanController::class, 'update'])->name('usulan.update'); // Proses edit usulan
-// Route::get('/usulan/{jenis}/{id}', [UsulanController::class, 'show'])->name('usulan.show');
-// // Route untuk menyetujui usulan, ditambahkan parameter jenis
-// Route::patch('/usulan/{jenis}/{usulan}/submit', [UsulanController::class, 'submit'])->name('usulan.submit');
-// // Rute untuk menghapus usulan (soft delete)
-// Route::delete('usulan/{jenis}/{id}', [UsulanController::class, 'destroy'])->name('usulan.destroy');
-
-// Route::post('/anggota-dosen', [AnggotaDosenController::class, 'store'])->name('anggota-dosen.store');
-// // Route untuk edit anggota dosen
-// Route::put('/anggota-dosen/{anggota_dosen}', [AnggotaDosenController::class, 'update'])->name('anggota-dosen.update');
-// // Route untuk hapus anggota dosen
-// Route::delete('/anggota-dosen/{anggota_dosen}', [AnggotaDosenController::class, 'destroy'])->name('anggota-dosen.destroy');
-// // Route untuk menyetujui anggota dosen berdasarkan usulan
-// Route::patch('/anggota-dosen/{usulan_id}/{anggota_dosen}/approve', [AnggotaDosenController::class, 'approve'])->name('anggota-dosen.approve');
-
-// // Route untuk menolak anggota dosen berdasarkan usulan
-// Route::patch('/anggota-dosen/{usulan_id}/{anggota_dosen}/reject', [AnggotaDosenController::class, 'reject'])->name('anggota-dosen.reject');
-
-// // Route untuk menghapus anggota dosen
-// Route::delete('/anggota-dosen/{anggota_dosen}', [AnggotaDosenController::class, 'destroy'])->name('anggota-dosen.destroy');
-
-
-// Route::post('/anggota-mahasiswa/store', [AnggotaMahasiswaController::class, 'store'])->name('anggota-mahasiswa.store');
-// // Rute untuk menghapus data
-// Route::delete('/anggota-mahasiswa/{id}', [AnggotaMahasiswaController::class, 'destroy'])->name('anggota-mahasiswa.destroy');
-
-
-// });
-
-
- 
