@@ -54,19 +54,43 @@
                     <div class="mb-4">
                         <h5 class="text-warning">Catatan Revisi</h5>
                         @if ($indikatorPenilaians->isNotEmpty())
-                            @foreach ($indikatorPenilaians->groupBy('kriteria_id') as $kriteriaId => $indikators)
-                                <div class="mb-3">
-                                    <h6 class="text-primary"><strong>Kriteria: {{ $indikators->first()->kriteriaPenilaian->nama }}</strong></h6>
-                                    <ul class="list-group">
+                        @foreach ($indikatorPenilaians->groupBy('kriteria_id') as $kriteriaId => $indikators)
+                        <div class="mb-4">
+                            <h5 class="text-primary"><strong>Kriteria: {{ $indikators->first()->kriteriaPenilaian->nama }}</strong></h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">#</th>
+                                            <th>Indikator</th>
+                                            <th class="text-center" style="width: 120px;">Nilai</th>
+                                            <th>Catatan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         @foreach ($indikators as $indikator)
-                                            <li class="list-group-item">
-                                                <strong>Indikator:</strong> {{ $indikator->nama_indikator }} <br>
-                                                <strong>Catatan:</strong> {{ $penilaianReviewer->catatan[$indikator->id] ?? 'Tidak ada catatan.' }}
-                                            </li>
+                                        @php
+                                                        // Find the 'formPenilaian' record for the specific indikator
+                                                        $formPenilaian = $penilaianReviewer->formPenilaians->firstWhere('id_indikator', $indikator->id);
+                                                    @endphp
+                                            <tr>
+                                                <td class="text-center">{{ $loop->iteration }}</td>
+                                                <td>{{ $indikator->nama_indikator }}</td>
+                                                <td class="text-center">
+                                                    {{ $formPenilaian->nilai ?? '0' }}
+                                                </td>
+                                                <td>
+                                                    
+                                                    {{ $formPenilaian->catatan ?? '-' }}
+                                                </td>
+                                            </tr>
                                         @endforeach
-                                    </ul>
-                                </div>
-                            @endforeach
+                                    </tbody>
+                                    
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
                         @else
                             <p class="text-muted">Tidak ada catatan revisi.</p>
                         @endif

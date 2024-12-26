@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('usulan_perbaikans', function (Blueprint $table) {
             $table->id();
-            $table->string('dokumen_usulan'); // Kolom untuk menyimpan nama file dokumen usulan
+            $table->string('dokumen_usulan')->nullable();
             $table->unsignedBigInteger('penilaian_id'); // Relasi ke tabel penilaian
             $table->enum('status', ['revisi','didanai', 'tidak didanai']); // Status usulan perbaikan
             $table->unsignedBigInteger('usulan_id'); // Relasi ke tabel usulan

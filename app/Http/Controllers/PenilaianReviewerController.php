@@ -326,9 +326,14 @@ public function lihatReviewUsulan($usulanId)
                                               ->get();
 
     // Ambil data penilaian reviewer
-    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-                                          ->where('usulan_id', $usulanId)
-                                          ->firstOrFail();
+   // Ambil data penilaian reviewer dengan kondisi where pada relasi
+$penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+->where('usulan_id', $usulanId)
+->with(['formPenilaians' => function ($query) {
+    $query->with('indikator');
+}])
+->firstOrFail();
+
 
     // Kirim data ke view
     return view('penilaian_reviewers.update_penilaian', compact('usulan', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));

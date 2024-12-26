@@ -159,7 +159,7 @@ else {
     $validator = Validator::make($request->all(), [
         'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
         'indikator' => 'required|array', // Pastikan indikator adalah array
-        'indikator.*.jumlah_bobot' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
+        'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
         'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
     ]);
 
@@ -183,35 +183,31 @@ else {
             if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
                 $kriteriaTotals[$indikator->kriteria_id] = 0;
             }
-            $kriteriaTotals[$indikator->kriteria_id] += $data['jumlah_bobot'];
+            $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
 
             // Simpan data indikator ke dalam tabel FormPenilaian
             FormPenilaian::create([
                 'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
                 'id_kriteria' => $indikator->kriteria_id,
                 'id_indikator' => $indikator->id,
-                'jumlah_bobot' => $data['jumlah_bobot'],
                 'catatan' => $data['catatan'] ?? null,
-                'sub_total' => null, // Kosong untuk data per indikator
+                'nilai' => $data['nilai'], // Menyimpan nilai per indikator
                 'status' => 'sudah dinilai',
             ]);
 
             // Tambahkan nilai indikator ke total nilai keseluruhan
-            $totalNilai += $data['jumlah_bobot'];
+            $totalNilai += $data['nilai'];
         }
     }
 
     // Simpan total nilai (sub_total) per kriteria di tabel FormPenilaian
-    foreach ($kriteriaTotals as $kriteriaId => $subTotal) {
-        FormPenilaian::create([
-            'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
-            'id_kriteria' => $kriteriaId,
-            'id_indikator' => null, // Tidak terkait dengan indikator tertentu
-            'jumlah_bobot' => null, // Kosong untuk data sub_total
-            'sub_total' => $subTotal, // Total nilai dari semua indikator dalam kriteria
-            'status' => 'sudah dinilai',
-        ]);
-    }
+    // foreach ($kriteriaTotals as $kriteriaId => $subTotal) {
+    //     FormPenilaian::create([
+    //         'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
+    //         'id_kriteria' => $kriteriaId,
+    //         'status' => 'sudah dinilai',
+    //     ]);
+    // }
 
     // Update status dan total nilai di tabel PenilaianReviewer
     $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);

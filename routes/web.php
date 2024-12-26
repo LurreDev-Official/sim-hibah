@@ -64,6 +64,9 @@ Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanContr
     
     Route::resource('laporan-kemajuan', LaporanKemajuanController::class);
     Route::get('laporan-kemajuan/{jenis}', [LaporanKemajuanController::class, 'show'])->name('laporan-kemajuan.show');
+    Route::get('laporan-kemajuan/create/{jenis?}', [LaporanKemajuanController::class, 'create'])->name('laporan-kemajuan.create');
+// Route for deleting laporan kemajuan with only id parameter
+Route::delete('laporan-kemajuan/{id}', [LaporanKemajuanController::class, 'destroy'])->name('laporan-kemajuan.destroy');
 
     Route::resource('laporan-akhir', LaporanAkhirController::class);
     Route::get('laporan-akhir/{jenis}', [LaporanAkhirController::class, 'show'])->name('laporan-akhir.show');

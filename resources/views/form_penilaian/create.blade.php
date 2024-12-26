@@ -128,12 +128,12 @@
                                                     <td></td>
                                                     <td>{{ $indikator->nama_indikator }}</td>
                                                     <td>
-                                                        <select name="indikator[{{ $indikator->id }}][jumlah_bobot]" class="form-control bobot-selector" required>
-                                                            <option value="1" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 1 ? 'selected' : '' }}>1</option>
-                                                            <option value="2" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 2 ? 'selected' : '' }}>2</option>
-                                                            <option value="3" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 3 ? 'selected' : '' }}>3</option>
-                                                            <option value="4" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 4 ? 'selected' : '' }}>4</option>
-                                                            <option value="5" {{ old('indikator.' . $indikator->id . '.jumlah_bobot', $indikator->jumlah_bobot ?? '') == 5 ? 'selected' : '' }}>5</option>
+                                                        <select name="indikator[{{ $indikator->id }}][nilai]" class="form-control bobot-selector" required>
+                                                            <option value="1" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 1 ? 'selected' : '' }}>1</option>
+                                                            <option value="2" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 2 ? 'selected' : '' }}>2</option>
+                                                            <option value="3" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 3 ? 'selected' : '' }}>3</option>
+                                                            <option value="4" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 4 ? 'selected' : '' }}>4</option>
+                                                            <option value="5" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 5 ? 'selected' : '' }}>5</option>
                                                         </select>
                                                     </td>
                                                     <td>

@@ -18,7 +18,7 @@ class FormPenilaian extends Model
         'id_kriteria',
         'id_indikator',
         'catatan',
-        'sub_total',
+        'nilai',
         'status',
     ];
 

@@ -158,10 +158,58 @@
                                             <td>{{ $usulan->lama_kegiatan }} tahun</td>
                                             <td>{{ $usulan->ketuaDosen->user->name }}</td>
                                             <td>
-                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#pdfModal{{ $usulan->id }}">
-                                                    Lihat Dokumen
-                                                </button>
+                                                <div class="d-flex justify-content-start gap-3">
+                                                    <!-- Button for "Lihat Dokumen Asli" -->
+                                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pdfModal{{ $usulan->id }}">
+                                                        Lihat Dokumen Asli
+                                                    </button>
+                                                
+                                                    <!-- Button for "Lihat Dokumen Perbaikan" -->
+                                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#perbaikanModal{{ $usulan->id }}">
+                                                        Lihat Dokumen Perbaikan
+                                                    </button>
+                                                </div>
+                                                
+
+                                                <!-- Modal for viewing the corrected document -->
+                                                <div class="modal fade" id="perbaikanModal{{ $usulan->id }}"
+                                                    tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="perbaikanModalLabel{{ $usulan->id }}">Dokumen
+                                                                    Perbaikan Usulan</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <!-- Fetch the UsulanPerbaikan related to this Usulan -->
+                                                                @php
+                                                                    $usulanPerbaikan = \App\Models\UsulanPerbaikan::where('usulan_id', $usulan->id)->first();
+                                                                @endphp
+                                                            
+                                                                @if ($usulanPerbaikan && $usulanPerbaikan->dokumen_usulan)
+                                                                    <!-- Embed the corrected document or provide a link to download -->
+                                                                    <embed 
+                                                                        src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}" 
+                                                                        type="application/pdf" 
+                                                                        width="100%" 
+                                                                        height="500px" />
+                                                                @else
+                                                                    <p>Dokumen perbaikan tidak tersedia.</p>
+                                                                @endif
+                                                            </div>
+                                                            
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </td>
                                             <!-- Modal -->
                                             <!-- Modal -->
@@ -170,10 +218,11 @@
                                                 <div class="modal-dialog modal-fullscreen">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="pdfModalLabel{{ $usulan->id }}">
+                                                            <h5 class="modal-title"
+                                                                id="pdfModalLabel{{ $usulan->id }}">
                                                                 Preview Dokumen</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <iframe src="{{ Storage::url($usulan->dokumen_usulan) }}"
@@ -189,7 +238,14 @@
                                             </div>
                                             @role('Dosen')
                                                 <td>
-
+                                                    @if ($usulan->status == 'approved')
+                                                        <div class="col p-2">
+                                                            <a href="{{ route('usulan.cetakBuktiACC', $usulan->id) }}"
+                                                                class="btn btn-success btn-sm" target="_blank">
+                                                                <i class="fas fa-download"></i> Download Bukti ACC
+                                                            </a>
+                                                        </div>
+                                                    @endif
                                                     <div class="col p-2">
                                                         <!-- Tombol Detail -->
                                                         <button class="btn btn-info btn-sm"
@@ -197,13 +253,8 @@
                                                             <i class="fas fa-eye"></i> Detail
                                                         </button>
                                                     </div>
-                                                    <div class="col p-2">
-                                                        <a href="{{ route('usulan.cetakBuktiACC', $usulan->id) }}" class="btn btn-success btn-sm" target="_blank">
-                                                            <i class="fas fa-download"></i> Download Bukti ACC
-                                                        </a>
-                                                    </div>
 
-                                                    
+
                                                     <!-- Tombol Detail -->
                                                     @if ($usulan->status == 'revision')
                                                         <div class="d-flex justify-content-end mt-4">
@@ -293,12 +344,11 @@
                                                     }
                                                 </script>
                                             @endrole
-
                                             @role('Kepala LPPM')
                                                 <td>
                                                     <div class="col p-2">
                                                         <!-- Button Pilih/Kirim Ke Reviewer -->
-                                                        @if ($usulan->status !== 'draft')
+                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted')
                                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
                                                                 data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
                                                                 <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
@@ -385,10 +435,13 @@
 
                             </div>
                             @if ($usulan->allReviewersAccepted)
-                                <button class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#approveRejectModal{{ $usulan->id }}">
-                                    Approve or Reject
-                                </button>
+                                @if ($usulan->status !== 'approved')
+                                    <button class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#approveRejectModal{{ $usulan->id }}">
+                                        Approve or Reject
+                                    </button>
+                                @endif
+
 
                                 <!-- Modal for Approving or Rejecting Usulan -->
                                 @if ($usulan->allReviewersAccepted)
@@ -431,15 +484,12 @@
                             @else
                                 <span class="text-danger">Waiting for approval from all reviewers.</span>
                             @endif
-
-
                             <div class="col p-2">
                                 <button class="btn btn-danger btn-sm"
                                     onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})" <i
                                     class="fas fa-trash-alt"></i> Hapus
                                 </button>
                             </div>
-
 
 
                             </td>

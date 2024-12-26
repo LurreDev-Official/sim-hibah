@@ -80,4 +80,10 @@ class Usulan extends Model
             'reviewer_id'  // Local key di tabel PenilaianReviewer
         );
     }
+
+    public function usulanPerbaikans()
+{
+    return $this->hasMany(UsulanPerbaikan::class);
+}
+
 }

@@ -104,14 +104,24 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($indikators as $indikator)
+                                                @php
+                                                                // Find the 'formPenilaian' record for the specific indikator
+                                                                $formPenilaian = $penilaianReviewer->formPenilaians->firstWhere('id_indikator', $indikator->id);
+                                                            @endphp
                                                     <tr>
                                                         <td class="text-center">{{ $loop->iteration }}</td>
                                                         <td>{{ $indikator->nama_indikator }}</td>
-                                                        <td class="text-center">{{ $penilaianReviewer->total_nilai ?? '0' }}</td>
-                                                        <td>{{ $penilaianReviewer->catatan[$indikator->id] ?? '-' }}</td>
+                                                        <td class="text-center">
+                                                            {{ $formPenilaian->nilai ?? '0' }}
+                                                        </td>
+                                                        <td>
+                                                            
+                                                            {{ $formPenilaian->catatan ?? '-' }}
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
+                                            
                                         </table>
                                     </div>
                                 </div>

@@ -484,37 +484,42 @@ return view('usulan.perbaiki_revisi', compact('usulan', 'penilaianReviewer', 'in
     }
 
     public function simpanPerbaikan(Request $request, $id)
-    {
-        // Validate input
-        $request->validate([
-            'file_perbaikan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
-        ]);
+{
+    // Validate input
+    $request->validate([
+        'file_perbaikan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
+    ]);
     
-        // Fetch the related PenilaianReviewer
-        $penilaianReviewer = PenilaianReviewer::where('usulan_id', $id)->firstOrFail();
+    // Fetch the related PenilaianReviewer
+    $penilaianReviewer = PenilaianReviewer::where('usulan_id', $id)->firstOrFail();
     
-        // Handle file upload
-        $file = $request->file('file_perbaikan');
-        $filePath = $file->store('usulan_perbaikans', 'public'); // Save file path
-        $originalFileName = $file->getClientOriginalName(); // Save original file name
+    // Handle file upload
+    $file = $request->file('file_perbaikan');
     
-        // Fetch or create the UsulanPerbaikan record
-        $usulanPerbaikan = UsulanPerbaikan::updateOrCreate(
-            ['usulan_id' => $id, 'penilaian_id' => $penilaianReviewer->id], // Match these columns
-            [
-                'dokumen_usulan' => $filePath,
-                'status' => 'sudah diperbaiki', // Update or set this status
-                'original_filename' => $originalFileName, // Save original file name
-            ]
-        );
+    // Get the original file name
+    $originalFileName = $file->getClientOriginalName(); 
+    
+    // Define the storage path and store the file with its original name
+    $filePath = $file->storeAs('usulan_perbaikans', $originalFileName, 'public'); // Store with original name
+    
+    // Fetch or create the UsulanPerbaikan record
+    $usulanPerbaikan = UsulanPerbaikan::updateOrCreate(
+        ['usulan_id' => $id, 'penilaian_id' => $penilaianReviewer->id], // Match these columns
+        [
+            'dokumen_usulan' => $filePath, // Store the path to the file
+            'status' => 'sudah diperbaiki', // Update or set this status
+        ]
+    );
 
-        $usulan = Usulan::findOrFail($usulanId);
-        $usulan->status = 'waiting approved';
-        $usulan->save();
-        return redirect()->back()->with('success', 'Berhasil di simpan.');
-    
-      
-    }
+    // Update the status of Usulan to 'waiting approved'
+    $usulan = Usulan::findOrFail($id);
+    $usulan->status = 'waiting approved';
+    $usulan->save();
+
+    // Redirect back with success message
+    return redirect()->back()->with('success', 'Berhasil di simpan.');
+}
+
 
 
 

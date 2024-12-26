@@ -45,5 +45,12 @@ class PenilaianReviewer extends Model
     {
         return $this->belongsTo(Reviewer::class, 'reviewer_id');
     }
+
+    // PenilaianReviewer Model
+public function formPenilaians()
+{
+    return $this->hasMany(FormPenilaian::class, 'penilaian_reviewers_id');
+}
+
 }
 

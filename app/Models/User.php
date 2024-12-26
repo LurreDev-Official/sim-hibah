@@ -42,4 +42,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // In User model
+public function dosen()
+{
+    return $this->hasOne(Dosen::class, 'user_id');
+}
+
 }
