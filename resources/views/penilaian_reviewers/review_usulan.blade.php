@@ -43,7 +43,7 @@
                                 <!--end::Table head-->
                                 <!--begin::Table body-->
                                 <tbody class="text-gray-600 fw-bold">
-                                    @foreach ($usulans as $key => $usulan)
+                                    @foreach ($getpenilaianreview as $key => $usulan)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $usulan->usulan->judul_usulan }}</td>
@@ -58,13 +58,14 @@
                                                 @if ($usulan->status_penilaian = 'sudah dinilai')
                                                     @php
                                                         $usulanPerbaikan = $usulanPerbaikans
-                                                            ->where('usulan_id', $usulan->id)
+                                                            ->where('usulan_id', $usulan->usulan_id)
                                                             ->first();
                                                     @endphp
 
-                                                    @if ($usulanPerbaikan->dokumen_usulan)
-                                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
-                                                            data-bs-target="#perbaikanModal{{ $usulan->id }}">
+                                                    @if ($usulanPerbaikan && $usulanPerbaikan->dokumen_usulan !== null)
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#perbaikanModal{{ $usulan->usulan_id }}">
                                                             Lihat Perbaikan
                                                         </button>
                                                     @else
@@ -75,51 +76,67 @@
 
                                             <!-- Modal for Perbaikan -->
                                             @php
-                                            $usulanPerbaikan = $usulanPerbaikans->firstWhere('usulan_id', $usulan->id);
-                                        @endphp
-                                    
-                                    @if ($usulanPerbaikan)
-                                    <div class="modal fade" id="perbaikanModal{{ $usulan->id }}" tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="perbaikanModalLabel{{ $usulan->id }}">
-                                                        Detail Perbaikan: {{ $usulan->judul_usulan }}
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <!-- Displaying the uploaded file (Perbaikan) -->
-                                                    <iframe src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}" width="100%" height="500px" frameborder="0"></iframe>
-                                                </div>
-                            
-                                                <div class="modal-footer">
-                                                    <!-- Form to update status of perbaikan -->
-                                                    <form action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                            
-                                                        <!-- Status Dropdown -->
-                                                        <div class="d-flex align-items-center">
-                                                            <label for="status{{ $usulan->id }}" class="form-label me-2">Status:</label>
-                                                            <select name="status" id="status{{ $usulan->id }}" class="form-select me-3" required>
-                                                                <option value="Diterima" {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
-                                                                    Diterima
-                                                                </option>
-                                                               
-                                                            </select>
-                                                            <button type="submit" class="btn btn-success">Simpan</button>
+                                                $usulanPerbaikan = $usulanPerbaikans->firstWhere(
+                                                    'usulan_id',
+                                                    $usulan->usulan_id,
+                                                );
+                                            @endphp
+
+                                            @if ($usulanPerbaikan)
+                                                <div class="modal fade" id="perbaikanModal{{ $usulan->usulan_id }}"
+                                                    tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->usulan_id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="perbaikanModalLabel{{ $usulan->usulan_id }}">
+                                                                    Detail Perbaikan: {{ $usulan->judul_usulan }}
+                                                                </h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <!-- Displaying the uploaded file (Perbaikan) -->
+                                                                <iframe
+                                                                    src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}"
+                                                                    width="100%" height="500px" frameborder="0"></iframe>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <!-- Form to update status of perbaikan -->
+                                                                <form
+                                                                    action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PUT')
+
+                                                                    <!-- Status Dropdown -->
+                                                                    <div class="d-flex align-items-center">
+                                                                        <label for="status{{ $usulan->usulan_id }}"
+                                                                            class="form-label me-2">Status:</label>
+                                                                        <select name="status"
+                                                                            id="status{{ $usulan->usulan_id }}"
+                                                                            class="form-select me-3" required>
+                                                                            <option value="Diterima"
+                                                                                {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
+                                                                                Diterima
+                                                                            </option>
+
+                                                                        </select>
+                                                                        <button type="submit"
+                                                                            class="btn btn-success">Simpan</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
                                                         </div>
-                                                    </form>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                                            @endif
 
 
                                             <td>
-                                                <a href="{{ route('review-usulan.lihat', ['id' => $usulan->id]) }}"
+                                                <a href="{{ route('review-usulan.lihat', ['id' => $usulan->usulan_id]) }}"
                                                     class="btn btn-info">
                                                     Lihat Detail
                                                 </a>

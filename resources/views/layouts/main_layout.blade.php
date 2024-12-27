@@ -342,6 +342,8 @@
                         <div class="text-dark order-2 order-md-1">
                             <span class="text-muted fw-bold me-1">2024©</span>
                             <a href="www.lurredev.com" target="_blank" class="text-gray-800 text-hover-primary">SIM HIBAH UNHASY</a>
+                            <span class="text-muted fw-bold me-1"> | Hak Cipta oleh Edwin Hap</span>
+                            <a href="https://wa.me/08123443565" target="_blank" class="text-gray-800 text-hover-primary">Hubungi kami di WhatsApp</a>
                         </div>
                         <!--end::Copyright-->
                     </div>

@@ -12,6 +12,7 @@ use App\Models\FormPenilaian;
 use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
+use App\Models\LaporanKemajuan;
 
 
 use Illuminate\Http\Request;
@@ -246,15 +247,15 @@ public function indexReviewUsulan()
     }
 
     // Fetch the usulans that have been reviewed by the current reviewer
-    $usulans = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)->where('urutan_penilaian', 1)
         // ->where('status_penilaian', 'sudah dinilai')
         ->with('usulan') // Eager load 'usulan' relationship
         ->get();
     
     // Fetch all related UsulanPerbaikan (for revisions)
-    $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $usulans->pluck('usulan_id'))->get();
+    $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getpenilaianreview->pluck('usulan_id'))->get();
 
-    return view('penilaian_reviewers.review_usulan', compact('usulans', 'usulanPerbaikans'));
+    return view('penilaian_reviewers.review_usulan', compact('getpenilaianreview', 'usulanPerbaikans'));
 }
 
 
@@ -265,18 +266,21 @@ public function indexReviewUsulan()
  */
 public function indexReviewLaporanKemajuan()
 {
-    $reviewer = Reviewer::where('user_id', auth()->id())->first();
-
-    if (!$reviewer) {
-        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
-    }
-
-    $laporanKemajuan = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-        ->where('status_penilaian', 'Laporan Kemajuan')
-        ->with('usulan')
-        ->paginate(10);
-
-    return view('penilaian_reviewers.review_laporan_kemajuan', compact('laporanKemajuan'));
+  // Get the reviewer for the authenticated user
+  $reviewer = Reviewer::where('user_id', auth()->id())->first();
+  // Check if the reviewer exists
+  if (!$reviewer) {
+      return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+  }
+  // Fetch the usulans that have been reviewed by the current reviewer
+  $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)->where('urutan_penilaian', 2)
+      // ->where('status_penilaian', 'sudah dinilai')
+      ->with('usulan') // Eager load 'usulan' relationship
+      ->get();
+  // Fetch all related UsulanPerbaikan (for revisions)
+  $laporanKemajuans = LaporanKemajuan::whereIn('usulan_id', $getpenilaianreview->pluck('usulan_id'))->get();
+  
+    return view('penilaian_reviewers.review_laporan_kemajuan', compact('getpenilaianreview','laporanKemajuans'));
 }
 
 /**

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('dokumen_usulan')->nullable();
             $table->unsignedBigInteger('penilaian_id'); // Relasi ke tabel penilaian
-            $table->enum('status', ['revisi','didanai', 'tidak didanai']); // Status usulan perbaikan
+            $table->enum('status', ['revisi','sudah diperbaiki','didanai', 'tidak didanai']); // Status usulan perbaikan
             $table->unsignedBigInteger('usulan_id'); // Relasi ke tabel usulan
             $table->timestamps();
             // Menambahkan foreign key

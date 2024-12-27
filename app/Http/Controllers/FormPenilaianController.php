@@ -213,6 +213,8 @@ else {
     $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
     $penilaianReviewer->update([
         'status_penilaian' => 'sudah dinilai',
+        'proses_penilaian' => 'Usulan',
+        'urutan_penilaian' => 1,
         'total_nilai' => $totalNilai,
     ]);
 
@@ -322,8 +324,7 @@ else {
         $penilaianReviewer->status_penilaian = $request->input('status');
         $penilaianReviewer->save();
     
-        // Redirect kembali ke halaman penilaian-usulan dengan pesan sukses
-        return redirect()->route('penilaian-usulan.index')
+        return redirect()->back()
                          ->with('success', 'Status penilaian berhasil diperbarui.');
     }
     

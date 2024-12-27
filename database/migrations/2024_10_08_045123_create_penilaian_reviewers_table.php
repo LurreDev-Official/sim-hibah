@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('status_penilaian'); // Status penilaian
             $table->unsignedBigInteger('reviewer_id'); // Relasi ke tabel reviewer
             $table->string('total_nilai'); // Status penilaian
+            $table->enum('proses_penilaian', ['Usulan', 'Laporan Kemajuan', 'Laporan Akhir']);
+            $table->integer('urutan_penilaian')->default(1); // Urutan penilaian reviewer
             $table->timestamps();
             // Menambahkan foreign key
             $table->foreign('usulan_id')->references('id')->on('usulans')->onDelete('cascade');
@@ -30,7 +32,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_kriteria')->nullable(); // Relasi ke kriteria penilaian (bisa null)
             $table->unsignedBigInteger('id_indikator')->nullable(); // Relasi ke kriteria penilaian (bisa null)
             $table->text('catatan')->nullable(); // Catatan terkait penilaian
-            $table->string('sub_total')->nullable(); /// Status penilaian
+            $table->string('nilai')->nullable(); /// Status penilaian
             $table->string('status'); // Status penilaian
             $table->timestamps();
             // Menambahkan foreign key

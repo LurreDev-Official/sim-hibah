@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class PenilaianReviewer extends Model
 {
     use HasFactory;
-
     protected $table = 'penilaian_reviewers';
-
     // Kolom yang bisa diisi secara massal (mass-assignable)
     protected $fillable = [
         'usulan_id',
         'status_penilaian',
         'reviewer_id',
-        'total_nilai'
+        'total_nilai',
+        'proses_penilaian',    // Menyimpan jenis proses (Usulan, Laporan Kemajuan, Laporan Akhir)
+        'urutan_penilaian',    // Menyimpan urutan penilaian
     ];
 
     /**
