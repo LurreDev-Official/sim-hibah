@@ -106,7 +106,7 @@
                                                             <div class="modal-footer">
                                                                 <!-- Form to update status of perbaikan -->
                                                                 <form
-                                                                    action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}"
+                                                                    action="{{ route('review-usulan.updateStatus', $usulan->id) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('PUT')

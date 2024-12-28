@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usulan;
+use App\Models\LaporanKemajuan;
+
 use App\Models\FormPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
@@ -41,17 +43,46 @@ class FormPenilaianController extends Controller
     /**
      * Display the form for creating a new Laporan Kemajuan.
      */
-    public function createLaporanKemajuan($usulanId)
-    {
-        // Retrieve the Usulan by ID
-        $usulan = Usulan::findOrFail($usulanId);
+     
+     public function createLaporanKemajuan($id)
+{
+    // Cek jika PenilaianReviewer dengan status 'sudah dinilai' atau 'sudah diperbaiki'
+    $penilaianReviewer = PenilaianReviewer::where('laporankemajuan_id', $id)
+        ->whereIn('status_penilaian', ['sudah dinilai', 'sudah diperbaiki'])
+        ->first();
 
-        // Retrieve relevant IndikatorPenilaian for Laporan Kemajuan
-        $indikatorPenilaians = $this->getFilteredIndikators($usulan);
-
-        // Return the view for Laporan Kemajuan form
-        return view('form_penilaian.create_laporan_kemajuan', compact('usulan', 'indikatorPenilaians'));
+    if ($penilaianReviewer) {
+        $message = $penilaianReviewer->status_penilaian == 'sudah dinilai' ? 
+                    'Penilaian untuk laporan kemajuan ini sudah dinilai' :
+                    'Penilaian untuk laporan kemajuan ini sudah diperbaiki';
+                    
+        return redirect()->route('laporan-kemajuan.index')->with('error', $message);
     }
+
+    // Ambil data LaporanKemajuan berdasarkan ID
+    $laporanKemajuan = LaporanKemajuan::findOrFail($id);
+
+    // Retrieve KriteriaPenilaian yang sesuai dengan jenis dan proses 'Laporan Kemajuan'
+    $matchingKriteria = KriteriaPenilaian::where('jenis', $laporanKemajuan->jenis)
+                                          ->where('proses', 'Laporan Kemajuan')
+                                          ->pluck('id');
+
+    // Retrieve IndikatorPenilaian berdasarkan KriteriaPenilaian yang cocok
+    $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+                                             ->whereIn('kriteria_id', $matchingKriteria)
+                                             ->get();
+
+    // Ambil data reviewer yang sedang login dan PenilaianReviewer terkait
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+                                          ->where('laporankemajuan_id', $id)
+                                          ->firstOrFail();
+
+    // Return view dengan data yang diperlukan
+    return view('form_penilaian.create_laporan_kemajuan', compact('laporanKemajuan', 'penilaianReviewer', 'indikatorPenilaians'));
+}
+
+    
 
     /**
      * Display the form for creating a new Laporan Akhir.
@@ -95,59 +126,57 @@ class FormPenilaianController extends Controller
      */
     public function create($usulanId)
     {
-
+        // Memeriksa apakah PenilaianReviewer dengan status 'sudah dinilai' ditemukan
         $penilaianReviewerDinilai = PenilaianReviewer::where('usulan_id', $usulanId)
-        ->where('status_penilaian', 'sudah dinilai')
-        ->first();
+            ->where('status_penilaian', 'sudah dinilai')
+            ->first();
     
-    $penilaianReviewerDiperbaiki = PenilaianReviewer::where('usulan_id', $usulanId)
-        ->where('status_penilaian', 'sudah diperbaiki')
-        ->first();
-    
-    // Memeriksa apakah PenilaianReviewer dengan status 'sudah dinilai' ditemukan
-    if ($penilaianReviewerDinilai) {
-        return redirect()->route('penilaian-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah dinilai');
-    }
-    
-    // Memeriksa apakah PenilaianReviewer dengan status 'sudah diperbaiki' ditemukan
-    if ($penilaianReviewerDiperbaiki) {
-        return redirect()->route('penilaian-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah diperbaiki');
-    }
-    
-else {
-            # code...
+        // Memeriksa apakah PenilaianReviewer dengan status 'sudah diperbaiki' ditemukan
+        $penilaianReviewerDiperbaiki = PenilaianReviewer::where('usulan_id', $usulanId)
+            ->where('status_penilaian', 'sudah diperbaiki')
+            ->first();
         
-        // Retrieve the Usulan by ID
+        // Jika sudah ada penilaian dengan status 'sudah dinilai'
+        if ($penilaianReviewerDinilai) {
+            return redirect()->route('review-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah dinilai');
+        }
+    
+        // Jika sudah ada penilaian dengan status 'sudah diperbaiki'
+        if ($penilaianReviewerDiperbaiki) {
+            return redirect()->route('review-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah diperbaiki');
+        }
+    
+        // Ambil data Usulan berdasarkan ID
         $usulan = Usulan::findOrFail($usulanId);
-        $user = auth()->user(); // Ambil data user yang sedang login
     
-        $reviewer = Reviewer::where('user_id', $user->id)->first();
+        // Ambil data reviewer yang sedang login
+        $user = auth()->user(); 
         
-        $jenis_skema = $usulan->jenis_skema;  
-        // Retrieve all KriteriaPenilaian that match the 'jenis' and 'tipe' from the Usulan
+        // Cari data reviewer berdasarkan user_id
+        $reviewer = Reviewer::where('user_id', $user->id)->first();
+    
+        // Tentukan jenis skema dari usulan
+        $jenis_skema = $usulan->jenis_skema;
+    
+        // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses dari Usulan
         $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
-                                             ->where('proses', 'usulan')
-                                             ->pluck('id');
-                                            //  dd($matchingKriteria);
-        // Retrieve all IndikatorPenilaian based on matching KriteriaPenilaian IDs
+            ->where('proses', 'usulan')
+            ->pluck('id');
+    
+        // Ambil IndikatorPenilaian yang sesuai dengan KriteriaPenilaian yang telah difilter
         $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
-                                                  ->whereIn('kriteria_id', $matchingKriteria)
-                                                  ->get();
-
+            ->whereIn('kriteria_id', $matchingKriteria)
+            ->get();
+    
+        // Cari PenilaianReviewer berdasarkan reviewer dan usulan
         $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-                                                  ->where('usulan_id', $usulanId)
-                                                  ->firstOrFail();
-
-        // Return the view for creating Form Penilaian with Usulan and filtered IndikatorPenilaian data
-        return view('form_penilaian.create', compact('usulan', 'indikatorPenilaians','penilaianReviewer'));
-
-    }
-
+            ->where('usulan_id', $usulanId)
+            ->firstOrFail();
+    
+        // Tampilkan view form penilaian dengan data Usulan, IndikatorPenilaian, dan PenilaianReviewer
+        return view('form_penilaian.create', compact('usulan', 'indikatorPenilaians', 'penilaianReviewer'));
     }
     
-
-    
-
     /**
      * Store a newly created resource in storage.
      */
@@ -236,6 +265,75 @@ else {
 
 
 
+public function storeLaporanKemajuan(Request $request)
+{
+    // Validasi data yang diterima
+    $validator = Validator::make($request->all(), [
+        'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
+        'indikator' => 'required|array', // Pastikan indikator adalah array
+        'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
+        'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
+    ]);
+
+    // Jika validasi gagal, kembalikan ke view dengan pesan error
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator) // Kirim error ke view
+            ->withInput(); // Kirim input yang sudah diisi kembali ke view
+    }
+
+    // Inisialisasi array untuk menghitung total nilai per kriteria
+    $kriteriaTotals = [];
+    $totalNilai = 0;
+
+    // Iterasi setiap indikator untuk menghitung dan menyimpan data
+    foreach ($request->indikator as $indikatorId => $data) {
+        $indikator = IndikatorPenilaian::find($indikatorId);
+
+        if ($indikator) {
+            // Tambahkan jumlah bobot ke total nilai untuk kriteria terkait
+            if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
+                $kriteriaTotals[$indikator->kriteria_id] = 0;
+            }
+            $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
+
+            // Simpan data indikator ke dalam tabel FormPenilaian
+            FormPenilaian::create([
+                'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
+                'id_kriteria' => $indikator->kriteria_id,
+                'id_indikator' => $indikator->id,
+                'catatan' => $data['catatan'] ?? null,
+                'nilai' => $data['nilai'], // Menyimpan nilai per indikator
+                'status' => 'sudah dinilai',
+            ]);
+
+            // Tambahkan nilai indikator ke total nilai keseluruhan
+            $totalNilai += $data['nilai'];
+        }
+    }
+ 
+
+    // Update status dan total nilai di tabel PenilaianReviewer
+    $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
+    $penilaianReviewer->update([
+        'status_penilaian' => 'sudah dinilai',
+     
+        'total_nilai' => $totalNilai,
+    ]);
+
+  // Tambahkan usulan perbaikan jika diperlukan
+  $laporanKemajuan = LaporanKemajuan::findOrFail($penilaianReviewer->laporankemajuan_id);
+  if ($laporanKemajuan) {
+      $laporanKemajuan->update(['status' => 'revision']);
+  }
+  // Redirect ke halaman laporan kemajuan dengan pesan sukses
+  return redirect()->route('laporan-kemajuan.index')->with('success', 'Penilaian Laporan Kemajuan berhasil disimpan!');
+}
+
+
+
+
+
     /**
      * Display the specified resource.
      */
@@ -309,25 +407,9 @@ else {
     }
 
 
-    // FormPenilaianController.php
-    public function updateStatus($id, Request $request)
-    {
-        // Validasi input status
-        $request->validate([
-            'status' => 'required|string|in:Diterima',  // Status hanya bisa 'Diterima'
-        ]);
-    
-        // Cari PenilaianReviewer berdasarkan ID
-        $penilaianReviewer = PenilaianReviewer::findOrFail($id);
-    
-        // Update status_penilaian sesuai dengan input dari form
-        $penilaianReviewer->status_penilaian = $request->input('status');
-        $penilaianReviewer->save();
-    
-        return redirect()->back()
-                         ->with('success', 'Status penilaian berhasil diperbarui.');
-    }
-    
-    
+
+
+
+   
 
 }

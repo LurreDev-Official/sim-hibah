@@ -5,7 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\LaporanKemajuan;
 use App\Models\Usulan;
 use Illuminate\Http\Request;
+use App\Models\Dosen;
+use App\Models\AnggotaDosen;
+use App\Models\AnggotaMahasiswa;
+use App\Models\Reviewer;
+use App\Models\PenilaianReviewer;
+use App\Models\FormPenilaian;
+use App\Models\KriteriaPenilaian;
+use App\Models\IndikatorPenilaian;
+use App\Models\UsulanPerbaikan;
 
+use PDF;
+use Milon\Barcode\DNS1D;
+use Milon\Barcode\DNS2D;
 class LaporanKemajuanController extends Controller
 {
     /**
@@ -14,15 +26,61 @@ class LaporanKemajuanController extends Controller
     public function index(Request $request)
     {
         // Ambil filter 'jenis' dari query string
-        $jenis = $request->input('jenis');
+        
 
-        // Query data berdasarkan jenis jika ada filter
-        $laporanKemajuan = LaporanKemajuan::when($jenis, function ($query, $jenis) {
-            $query->where('jenis', $jenis);
-        })->get();
+        $user = auth()->user(); // Ambil data user yang sedang login
+    
+        // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
+        // Check if the user has the 'Kepala LPPM' role
+    if ($user->hasRole('Kepala LPPM')) {
 
-        // Kembalikan ke view dengan data yang difilter
-        return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis'));
+       
+
+    }
+    
+        // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
+        elseif ($user->hasRole('Dosen')) {
+            // Ambil data dosen terkait user yang login
+            $dosen = Dosen::where('user_id', $user->id)->first();
+           
+            if ($dosen) {
+                // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
+                $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->pluck('usulan_id');
+        
+                // Ambil semua usulan berdasarkan usulan_id yang ditemukan di AnggotaDosen
+                $usulans = Usulan::whereIn('id', $usulanIds)
+                                 ->where('jenis_skema', $jenis)
+                                 ->paginate(10);
+                                 $reviewers = Reviewer::with('user')->get();
+                                 return view('usulan.index', compact('usulans', 'jenis','reviewers'));
+        
+            }
+
+        }
+    
+        // Jika user memiliki role Reviewer, tampilkan usulan berdasarkan usulan_id dan reviewer_id
+        elseif ($user->hasRole('Reviewer')) {
+            // Cari usulan yang terkait dengan reviewer yang login
+            $reviewer = Reviewer::where('user_id', $user->id)->first();
+    
+            // Cek apakah data reviewer ada
+            if ($reviewer) {
+                if ($reviewer) {
+                    $data = PenilaianReviewer::with('usulan')
+                        ->where('reviewer_id', $reviewer->id)
+                        ->paginate(10);
+                    
+                }
+                return view('usulan.index_reviewer', compact('data', 'jenis'));
+            } else {
+                return redirect()->back()->with('error', 'Reviewer ini tidak terdaftar pada usulan yang dipilih.');
+            }
+        }
+    
+        // Jika user tidak memiliki peran yang sesuai
+        return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+
+
     }
 
     /**
@@ -83,7 +141,6 @@ class LaporanKemajuanController extends Controller
     // Create the LaporanKemajuan record in the database
     LaporanKemajuan::create($validated);
 
-    // Redirect to the index page with a success message
    // Redirect to the show page with the jenis parameter
    return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
    ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
@@ -98,15 +155,36 @@ class LaporanKemajuanController extends Controller
     public function show($jenis)
     {
         $user = auth()->user(); // Get the currently authenticated user
-        // Default query for LaporanKemajuan
-        $laporanKemajuanQuery = LaporanKemajuan::when($jenis, function ($query, $jenis) {
+        
+        $laporanKemajuanQuery = LaporanKemajuan::with('usulan','penilaianReviewers.reviewer')->when($jenis, function ($query, $jenis) {
             $query->where('jenis', $jenis);
         });
-    
         // Role-based logic to filter LaporanKemajuan
         if ($user->hasRole('Kepala LPPM')) {
             // Kepala LPPM can see all reports, no additional filtering needed
-            $laporanKemajuan = $laporanKemajuanQuery->get();
+            // Kembalikan ke view dengan data yang difilter
+                $laporanKemajuan = LaporanKemajuan::with('penilaianReviewers.reviewer')->when($jenis, function ($query, $jenis) {
+                    $query->where('jenis', $jenis);
+                })->get();
+    
+            foreach ($laporanKemajuan as $usulan) {
+                // Count the total number of reviewers
+                $totalReviewers = $usulan->penilaianReviewers->count();
+    
+                // Count the number of reviewers who have accepted (status == 'Diterima')
+                $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+    
+                // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
+                $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+            }
+    
+            // Fetch all reviewers (if you need to display them too)
+            $reviewers = Reviewer::with('user')->get();
+    
+            return view('laporan_kemajuan.index', compact('laporanKemajuan','reviewers', 'jenis'));
+
+
+
         } elseif ($user->hasRole('Dosen')) {
             // Get the laporan kemajuan for the logged-in dosen
             $laporanKemajuan = $laporanKemajuanQuery->where('ketua_dosen_id', $user->dosen->id)->get();
@@ -117,7 +195,23 @@ class LaporanKemajuanController extends Controller
                                  ->with('info', 'Belum ada laporan kemajuan. Silakan buat laporan baru.');
             } else {
                 // Option 2: Return the view with the laporan kemajuan data and an info message
-                return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis'))
+
+       
+
+                // Check if all reviewers for each usulan have accepted (status == 'Diterima')
+                foreach ($laporanKemajuan as $usulan) {
+                    // Count the total number of reviewers
+                    $totalReviewers = $usulan->penilaianReviewers->count();
+
+                    // Count the number of reviewers who have accepted (status == 'Diterima')
+                    $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+
+                    // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
+                    $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+                }
+
+
+                return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis','usulan'))
                        ->with('info', 'Belum ada laporan kemajuan. Silakan buat laporan baru.');
             }
         }
@@ -193,6 +287,91 @@ class LaporanKemajuanController extends Controller
     // Delete the laporan kemajuan record
     $laporanKemajuan->delete();
 }
+
+
+public function kirim(Request $request)
+{
+    // Validasi permintaan
+    $request->validate([
+        'laporankemajuan_id' => 'required|integer',
+        'reviewer_id' => 'required|array', // Reviwewer ID harus berupa array
+        'reviewer_id.*' => 'required|integer', // Setiap reviewer_id harus berupa integer
+        'action' => 'required|string|in:kirim,kirim_ulang', // Validasi action
+    ]);
+
+    // Ambil nilai input dari request
+    $laporankemajuan_id = $request->input('laporankemajuan_id');
+    // dd($laporankemajuan_id);
+    $jenis = $request->input('jenis');
+    $reviewerIds = $request->input('reviewer_id');
+    $action = $request->input('action'); // Mendapatkan aksi tombol yang diklik
+
+    // Temukan usulan berdasarkan ID
+    $laporankemajuans = LaporanKemajuan::findOrFail($laporankemajuan_id);
+
+    if ($action === 'kirim') {
+        // Logika untuk "Kirim"
+        if ($laporankemajuans->status === 'submitted') {
+            $laporankemajuans->status = 'review';
+            $laporankemajuans->save();
+
+            // Loop untuk menambahkan reviewer baru
+            $duplicateReviewers = [];
+            foreach ($reviewerIds as $reviewerId) {
+                $existingRecord = PenilaianReviewer::where('laporankemajuan_id', $laporankemajuan_id)
+                                                   ->where('reviewer_id', $reviewerId)
+                                                   ->first();
+
+                if ($existingRecord) {
+                    $duplicateReviewers[] = $reviewerId;
+                } else {
+                    PenilaianReviewer::create([
+                        'laporankemajuan_id' => $laporankemajuan_id,
+                        'status_penilaian' => 'Belum Dinilai',
+                        'proses_penilaian' => 'Laporan Kemajuan',
+                        'urutan_penilaian' => 2,
+                        'reviewer_id' => $reviewerId,
+                        'total_nilai'=>'0'
+                    ]);
+                }
+            }
+
+            // Buat pesan notifikasi jika ada duplikasi
+            if (!empty($duplicateReviewers)) {
+                return redirect()->back()->with('error', 'Beberapa reviewer sudah ditambahkan sebelumnya.');
+            }
+
+            return redirect()->back()->with('success', 'Usulan berhasil dikirim ke reviewer.');
+        } else {
+            return redirect()->back()->with('error', 'Usulan sudah dikirim sebelumnya.');
+        }
+    } elseif ($action === 'kirim_ulang') {
+        // Logika untuk "Kirim Ulang"
+        if ($laporankemajuans->status === 'review') {
+            // Hapus reviewer sebelumnya
+            PenilaianReviewer::where('laporankemajuan_id', $laporankemajuan_id)->delete();
+
+            // Tambahkan reviewer baru
+            foreach ($reviewerIds as $reviewerId) {
+                PenilaianReviewer::create([
+                    'laporankemajuan_id' => $laporankemajuan_id,
+                    'status_penilaian' => 'Belum Dinilai',
+                    'reviewer_id' => $reviewerId,
+                    'total_nilai'=>'0'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Usulan berhasil dikirim ulang ke reviewer.');
+        } else {
+            return redirect()->back()->with('error', 'Usulan belum dalam status review untuk dikirim ulang.');
+        }
+    }
+
+    return redirect()->back()->with('error', 'Aksi tidak dikenali.');
+}
+
+
+
 
 
     

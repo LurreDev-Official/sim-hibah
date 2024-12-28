@@ -240,21 +240,21 @@ public function indexReviewUsulan()
 {
     // Get the reviewer for the authenticated user
     $reviewer = Reviewer::where('user_id', auth()->id())->first();
-
     // Check if the reviewer exists
     if (!$reviewer) {
         return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
     }
-
     // Fetch the usulans that have been reviewed by the current reviewer
-    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)->where('urutan_penilaian', 1)
-        // ->where('status_penilaian', 'sudah dinilai')
+    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    ->where('proses_penilaian', 'Usulan')
+    ->where('urutan_penilaian', 1)
+    ->where(function($query) {
+        // Filter berdasarkan apakah salah satu id (usulan, laporan kemajuan, laporan akhir) tidak null
+        $query->whereNotNull('usulan_id');
+    })
         ->with('usulan') // Eager load 'usulan' relationship
         ->get();
-    
-    // Fetch all related UsulanPerbaikan (for revisions)
     $usulanPerbaikans = UsulanPerbaikan::whereIn('usulan_id', $getpenilaianreview->pluck('usulan_id'))->get();
-
     return view('penilaian_reviewers.review_usulan', compact('getpenilaianreview', 'usulanPerbaikans'));
 }
 
@@ -264,24 +264,39 @@ public function indexReviewUsulan()
  *
  * @return \Illuminate\View\View
  */
-public function indexReviewLaporanKemajuan()
+
+
+ public function indexReviewLaporanKemajuan()
 {
-  // Get the reviewer for the authenticated user
-  $reviewer = Reviewer::where('user_id', auth()->id())->first();
-  // Check if the reviewer exists
-  if (!$reviewer) {
-      return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
-  }
-  // Fetch the usulans that have been reviewed by the current reviewer
-  $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)->where('urutan_penilaian', 2)
-      // ->where('status_penilaian', 'sudah dinilai')
-      ->with('usulan') // Eager load 'usulan' relationship
-      ->get();
-  // Fetch all related UsulanPerbaikan (for revisions)
-  $laporanKemajuans = LaporanKemajuan::whereIn('usulan_id', $getpenilaianreview->pluck('usulan_id'))->get();
-  
-    return view('penilaian_reviewers.review_laporan_kemajuan', compact('getpenilaianreview','laporanKemajuans'));
+    // Get the reviewer for the authenticated user
+    $reviewer = Reviewer::where('user_id', auth()->id())->first();
+    
+    // Check if the reviewer exists
+    if (!$reviewer) {
+        return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
+    }
+
+    // Fetch the penilaian reviewer with conditions
+    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('proses_penilaian', 'Laporan Kemajuan')
+        ->where('urutan_penilaian', 2)
+        ->where(function($query) {
+            $query->whereNotNull('laporankemajuan_id');
+        })
+        ->with('laporankemajuan') // Eager load 'usulan' relationship
+        ->get();
+
+    // Fetch related LaporanKemajuan for each review
+    // This will loop through each 'getpenilaianreview' item and fetch the corresponding 'laporan kemajuan'
+    $laporanKemajuans = $getpenilaianreview->map(function ($penilaian) {
+        return LaporanKemajuan::findOrFail($penilaian->laporankemajuan_id);
+    });
+
+    return view('penilaian_reviewers.review_laporan_kemajuan', compact('getpenilaianreview', 'laporanKemajuans'));
 }
+
+
+
 
 /**
  * Menampilkan daftar laporan akhir untuk direview.
@@ -331,18 +346,65 @@ public function lihatReviewUsulan($usulanId)
 
     // Ambil data penilaian reviewer
    // Ambil data penilaian reviewer dengan kondisi where pada relasi
-$penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-->where('usulan_id', $usulanId)
-->with(['formPenilaians' => function ($query) {
-    $query->with('indikator');
-}])
-->firstOrFail();
+    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    ->where('usulan_id', $usulanId)
 
-
-    // Kirim data ke view
+    ->with(['formPenilaians' => function ($query) {
+        $query->with('indikator');
+    }])
+    ->firstOrFail();
+        // Kirim data ke view
     return view('penilaian_reviewers.update_penilaian', compact('usulan', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));
 }
 
 
+
+public function lihatReviewLaporanKemajuan($usulanId)
+{
+    // Ambil data usulan berdasarkan ID
+    $laporanKemajuan = LaporanKemajuan::findOrFail($usulanId);
+    // Ambil data user yang sedang login
+    $user = auth()->user();
+    // Cari reviewer berdasarkan user login
+    $reviewer = Reviewer::where('user_id', $user->id)->first();
+
+    // Ambil jenis skema dari usulan
+    $jenis_skema = $laporanKemajuan->jenis_skema;
+
+    // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses 'usulan'
+    $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
+                                         ->where('proses', 'Laporan Kemajuan')
+                                         ->pluck('id');
+
+    // Ambil semua IndikatorPenilaian berdasarkan KriteriaPenilaian yang sesuai
+    $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+                                              ->whereIn('kriteria_id', $matchingKriteria)
+                                              ->get();
+   // Ambil data penilaian reviewer dengan kondisi where pada relasi
+    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    ->where('laporankemajuan_id', $laporanKemajuan->id)
+    ->with(['formPenilaians' => function ($query) {
+        $query->with('indikator');
+    }])
+    ->firstOrFail();
+    // Kirim data ke view
+    return view('penilaian_reviewers.update_penilaian_kemajuan', compact('laporanKemajuan', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));
+}
+
+public function updateStatus($id, Request $request)
+{
+    // Validasi input status
+    $request->validate([
+        'status' => 'required|string|in:Diterima',  // Status hanya bisa 'Diterima'
+    ]);
+    // Cari PenilaianReviewer berdasarkan ID
+    $penilaianReviewer = PenilaianReviewer::findOrFail($id);
+    // Update status_penilaian sesuai dengan input dari form
+    $penilaianReviewer->status_penilaian = $request->input('status');
+    $penilaianReviewer->save();
+
+    return redirect()->back()
+                     ->with('success', 'Status penilaian berhasil diperbarui.');
+}
 
 }

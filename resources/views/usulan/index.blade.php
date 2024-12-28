@@ -160,16 +160,20 @@
                                             <td>
                                                 <div class="d-flex justify-content-start gap-3">
                                                     <!-- Button for "Lihat Dokumen Asli" -->
-                                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pdfModal{{ $usulan->id }}">
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#pdfModal{{ $usulan->id }}">
                                                         Lihat Dokumen Asli
                                                     </button>
-                                                
+
                                                     <!-- Button for "Lihat Dokumen Perbaikan" -->
-                                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#perbaikanModal{{ $usulan->id }}">
+                                                    <button type="button" class="btn btn-success btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#perbaikanModal{{ $usulan->id }}">
                                                         Lihat Dokumen Perbaikan
                                                     </button>
                                                 </div>
-                                                
+
 
                                                 <!-- Modal for viewing the corrected document -->
                                                 <div class="modal fade" id="perbaikanModal{{ $usulan->id }}"
@@ -187,21 +191,23 @@
                                                             <div class="modal-body">
                                                                 <!-- Fetch the UsulanPerbaikan related to this Usulan -->
                                                                 @php
-                                                                    $usulanPerbaikan = \App\Models\UsulanPerbaikan::where('usulan_id', $usulan->id)->first();
+                                                                    $usulanPerbaikan = \App\Models\UsulanPerbaikan::where(
+                                                                        'usulan_id',
+                                                                        $usulan->id,
+                                                                    )->first();
                                                                 @endphp
-                                                            
+
                                                                 @if ($usulanPerbaikan && $usulanPerbaikan->dokumen_usulan)
                                                                     <!-- Embed the corrected document or provide a link to download -->
-                                                                    <embed 
-                                                                        src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}" 
-                                                                        type="application/pdf" 
-                                                                        width="100%" 
+                                                                    <embed
+                                                                        src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}"
+                                                                        type="application/pdf" width="100%"
                                                                         height="500px" />
                                                                 @else
                                                                     <p>Dokumen perbaikan tidak tersedia.</p>
                                                                 @endif
                                                             </div>
-                                                            
+
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Tutup</button>
@@ -348,7 +354,7 @@
                                                 <td>
                                                     <div class="col p-2">
                                                         <!-- Button Pilih/Kirim Ke Reviewer -->
-                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted')
+                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review' )
                                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
                                                                 data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
                                                                 <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer

@@ -58,6 +58,22 @@
                             </thead>
                             <tbody class="text-gray-600 fw-bold" id="myTable">
                                 @foreach ($laporanKemajuan as $laporan)
+
+                                @php
+                                    // Ambil data dosen terkait user yang sedang login
+                                    $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
+
+                                    // Ambil data anggota dosen berdasarkan dosen yang login
+                                    $anggotaDosencek = null;
+                                    if ($dosen) {
+                                        $anggotaDosencek = \App\Models\AnggotaDosen::where(
+                                            'dosen_id',
+                                            $dosen->id,
+                                        )->first();
+                                    }
+                                @endphp
+
+
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $laporan->usulan->judul_usulan }}</td>
@@ -68,10 +84,10 @@
                                             @elseif ($laporan->status == 'review')
                                                 <span class="badge bg-primary">In Review</span>
                                                 @php
-                                                    // Ambil reviewer dari PenilaianReviewer berdasarkan usulan_id
+                                                    // Ambil reviewer dari PenilaianReviewer berdasarkan laporankemajuan_id
                                                     $getreviewer = \App\Models\PenilaianReviewer::where(
-                                                        'usulan_id',
-                                                        $laporan->usulan->id,
+                                                        'laporankemajuan_id',
+                                                        $laporan->id,
                                                     )
                                                         ->with('reviewer') // Load relasi reviewer dan user untuk nama
                                                         ->get();
@@ -85,29 +101,288 @@
                                                         <li>Belum ada reviewer yang ditugaskan</li>
                                                     @endforelse
                                                 </ul>
-                                            @elseif ($usulan->status == 'revision')
+                                            @elseif ($laporan->status == 'revision')
                                                 <span class="badge bg-secondary">Needs Revision</span>
-                                            @elseif ($usulan->status == 'waiting approved')
+                                            @elseif ($laporan->status == 'waiting approved')
                                                 <span class="badge bg-secondary text-black">waiting approved</span>
-                                            @elseif ($usulan->status == 'approved')
+                                            @elseif ($laporan->status == 'approved')
                                                 <span class="badge bg-success">Approved</span>
                                             @endif
                                         </td>
                                         <td>
+                                            <!-- Tombol Lihat Dokumen Laporan Kemajuan -->
+                                            <div class="col p-2">
+                                                @if ($laporan->dokumen_laporan_kemajuan)
+                                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#lihatDokumenModal-{{ $laporan->id }}">
+                                                        <i class="fas fa-file-pdf"></i> Lihat Dokumen Laporan Kemajuan
+                                                    </button>
+                                                @else
+                                                    <span class="text-danger">Tidak ada dokumen</span>
+                                                @endif
+                                            </div>
+
+                                            <!-- Modal untuk Melihat Dokumen PDF -->
                                             @if ($laporan->dokumen_laporan_kemajuan)
-                                                <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
-                                                    target="_blank">Download</a>
-                                            @else
-                                                Tidak ada dokumen
+                                                <div class="modal fade" id="lihatDokumenModal-{{ $laporan->id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="lihatDokumenModalLabel-{{ $laporan->id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-fullscreen">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="lihatDokumenModalLabel-{{ $laporan->id }}">Lihat
+                                                                    Dokumen Laporan Kemajuan</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <!-- Iframe untuk Menampilkan PDF -->
+                                                                <iframe
+                                                                    src="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                                                    width="100%" height="500px" frameborder="0"></iframe>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                                                    class="btn btn-success" target="_blank">
+                                                                    <i class="fas fa-download"></i> Download
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endif
                                         </td>
                                         <td class="text-end">
-                                            <!-- Edit Button triggers the modal -->
-                                            <button type="button" class="btn btn-light btn-active-light-primary btn-sm" 
-                                                data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
-                                                Edit
-                                            </button>
+                                            @role('Dosen')
+                                            <td>
+                                                <!-- Tombol Edit -->
+                                                <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
+                                                    data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
+                                                    Edit
+                                                </button>
+
+                                                <!-- Tombol Download Bukti ACC -->
+                                                @if ($usulan->status == 'approved')
+                                                    <div class="col p-2">
+                                                        <a href="{{ route('usulan.cetakBuktiACC', $usulan->id) }}"
+                                                            class="btn btn-success btn-sm" target="_blank">
+                                                            <i class="fas fa-download"></i> Download Bukti ACC
+                                                        </a>
+                                                    </div>
+                                                @endif
+
+                                              
+
+                                                <!-- Tombol Perbaiki Revisi -->
+                                                @if ($usulan->status == 'revision')
+                                                    <div class="d-flex justify-content-end mt-4">
+                                                        <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $usulan->id]) }}"
+                                                            class="btn btn-secondary">
+                                                            <i class="fas fa-edit"></i> Perbaiki Revisi
+                                                        </a>
+                                                    </div>
+                                                @endif
+
+                                                <!-- Tombol Hapus (Untuk Ketua) -->
+                                                @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                                    <div class="col p-2">
+                                                        <button class="btn btn-danger btn-sm"
+                                                            onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})">
+                                                            <i class="fas fa-trash-alt"></i> Hapus
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        @endrole
+
+
+                                        @role('Kepala LPPM')
+                                            <td>
+                                                <!-- Tombol Pilih/Kirim Ke Reviewer -->
+                                                <div class="col p-2">
+                                                    @if ($laporan->status == 'draft' || $laporan->status == 'submitted')
+                                                        <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                                            data-bs-target="#pilihKirimReviewerModal-{{ $laporan->id }}">
+                                                            <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
+                                                        </button>
+                                                    @endif
+                                                </div>
+
+                                                <!-- Modal Pilih/Kirim Ke Reviewer -->
+                                                <div class="modal fade" id="pilihKirimReviewerModal-{{ $laporan->id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="pilihKirimReviewerModalLabel-{{ $laporan->id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="pilihKirimReviewerModalLabel-{{ $laporan->id }}">
+                                                                    Pilih/Kirim Usulan ke Reviewer
+                                                                </h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Silakan pilih reviewer untuk mengirim atau mengirim ulang
+                                                                    usulan ini.</p>
+                                                                <form id="pilihKirimReviewerForm-{{ $laporan->id }}"
+                                                                    action="{{ route('laporan-kemajuan.kirim', ['jenis' => $jenis]) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="laporankemajuan_id"
+                                                                        value="{{ $laporan->id }}">
+                                                                    <input type="hidden" name="jenis"
+                                                                        value="{{ $jenis }}">
+                                                                    <input type="hidden" name="action"
+                                                                        id="action-{{ $laporan->id }}" value="">
+                                                                    <!-- Dropdown Reviewer -->
+                                                                    <div class="mb-3">
+                                                                        <label for="reviewer_id-{{ $laporan->id }}"
+                                                                            class="form-label">Pilih Reviewer</label>
+                                                                        <select name="reviewer_id[]"
+                                                                            id="reviewer_id-{{ $laporan->id }}"
+                                                                            class="form-select" multiple required>
+                                                                            <option value="" disabled selected>Pilih
+                                                                                Reviewer</option>
+                                                                            @foreach ($reviewers as $reviewer)
+                                                                                <option value="{{ $reviewer->id }}">
+                                                                                    {{ $reviewer->user->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <button type="button" class="btn btn-primary"
+                                                                    onclick="submitForm('{{ $laporan->id }}', 'kirim')">Kirim</button>
+                                                                <button type="button" class="btn btn-warning"
+                                                                    onclick="submitForm('{{ $laporan->id }}', 'kirim_ulang')">Kirim
+                                                                    Ulang</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <script>
+                                                    function submitForm(usulanId, action) {
+                                                        document.getElementById('action-' + usulanId).value = action;
+                                                        document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
+                                                    }
+                                                </script>
+
+                                                <!-- Tombol Approve/Reject Usulan -->
+                                                @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved')
+                                                    <div class="col p-2">
+                                                        <button class="btn btn-primary" data-bs-toggle="modal"
+                                                            data-bs-target="#approveRejectModal{{ $laporan->id }}">
+                                                            Approve or Reject
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Modal untuk Approve/Reject Usulan -->
+                                                    <div class="modal fade" id="approveRejectModal{{ $laporan->id }}"
+                                                        tabindex="-1"
+                                                        aria-labelledby="approveRejectModalLabel{{ $laporan->id }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title"
+                                                                        id="approveRejectModalLabel{{ $laporan->id }}">
+                                                                        Approve or Reject Usulan</h5>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <form
+                                                                        action="{{ route('usulan.updateStatus', $laporan->id) }}"
+                                                                        method="POST">
+                                                                        @csrf
+                                                                        @method('PUT')
+                                                                        <div class="form-group">
+                                                                            <label for="status">Select Status:</label>
+                                                                            <select name="status" id="status"
+                                                                                class="form-select" required>
+                                                                                <option value="approved">Approve</option>
+                                                                                <option value="rejected">Reject</option>
+                                                                            </select>
+                                                                        </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit"
+                                                                        class="btn btn-primary">Submit</button>
+                                                                </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <span class="text-danger">Waiting for approval from all reviewers.</span>
+                                                @endif
+
+                                                <!-- Tombol Hapus Usulan -->
+                                                <div class="col p-2">
+                                                    <button class="btn btn-danger btn-sm"
+                                                        onclick="deleteUsulan('{{ $jenis }}', {{ $laporan->id }})">
+                                                        <i class="fas fa-trash-alt"></i> Hapus
+                                                    </button>
+                                                </div>
+
+                                            </td>
+
+                                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                            <script>
+                                                function deleteUsulan(jenis, id) {
+                                                    Swal.fire({
+                                                        title: 'Apakah Anda yakin?',
+                                                        text: "Usulan ini akan dihapus secara permanen!",
+                                                        icon: 'warning',
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: '#3085d6',
+                                                        cancelButtonColor: '#d33',
+                                                        confirmButtonText: 'Ya, hapus!',
+                                                        cancelButtonText: 'Batal'
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            $.ajax({
+                                                                url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus',
+                                                                type: 'DELETE',
+                                                                data: {
+                                                                    "_token": "{{ csrf_token() }}",
+                                                                },
+                                                                success: function(response) {
+                                                                    Swal.fire('Dihapus!', response.success, 'success').then(() => {
+                                                                        location.reload();
+                                                                    });
+                                                                },
+                                                                error: function(xhr) {
+                                                                    let errorMessage = (xhr.status === 404) ?
+                                                                        xhr.responseJSON.error :
+                                                                        'Terjadi kesalahan: ' + xhr.responseJSON.error;
+                                                                    Swal.fire('Error!', errorMessage, 'error');
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            </script>
+                                        @endrole
+
+
+
+
                                         </td>
+
+
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -120,25 +395,32 @@
 @endsection
 
 @foreach ($laporanKemajuan as $laporan)
-    <div class="modal fade" id="editModal{{ $laporan->id }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editModal{{ $laporan->id }}" tabindex="-1" aria-labelledby="editModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="{{ route('laporan-kemajuan.update', $laporan->id) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('laporan-kemajuan.update', $laporan->id) }}"
+                    enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">Update Dokumen Laporan Kemajuan</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <!-- File upload input -->
                         <div class="mb-3">
-                            <label for="dokumen_laporan_kemajuan{{ $laporan->id }}" class="form-label">Dokumen Laporan</label>
-                            <input type="file" class="form-control" id="dokumen_laporan_kemajuan{{ $laporan->id }}" name="dokumen_laporan_kemajuan" accept=".pdf,.doc,.docx">
+                            <label for="dokumen_laporan_kemajuan{{ $laporan->id }}" class="form-label">Dokumen
+                                Laporan</label>
+                            <input type="file" class="form-control"
+                                id="dokumen_laporan_kemajuan{{ $laporan->id }}" name="dokumen_laporan_kemajuan"
+                                accept=".pdf,.doc,.docx">
                             <!-- Show current document if exists -->
                             @if ($laporan->dokumen_laporan_kemajuan)
                                 <div class="mt-2">
-                                    <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}" target="_blank">Lihat Dokumen Lama</a>
+                                    <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                        target="_blank">Lihat Dokumen Lama</a>
                                 </div>
                             @endif
                         </div>

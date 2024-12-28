@@ -127,12 +127,20 @@
                                                                     diteruskan ke reviewer.
                                                                 @elseif (Auth::user()->hasRole('Dosen'))
                                                                     Usulan <strong>{{ $notif->judul_usulan }}</strong>
-                                                                    dengan status <em>{{ $notif->status }}</em> belum
-                                                                    disetujui.
+                                                                    dengan status <em>{{ $notif->status }}</em>  
+
+                                                                    @if ($notif->status ='revision')
+                                                                        <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $notif->jenis_skema, 'id' => $notif->id]) }}"
+                                                                            class="btn btn-secondary btn-sm">
+                                                                            <i class="fas fa-edit"></i> Perbaiki Revisi
+                                                                        </a>
+                                                                    @else
                                                                     <button class="btn btn-info btn-sm"
-                                                                        onclick="showDetailUsulan('{{ $notif->jenis_skema }}', {{ $notif->id }})">
-                                                                        <i class="fas fa-eye"></i> Detail
-                                                                    </button>
+                                                                    onclick="showDetailUsulan('{{ $notif->jenis_skema }}', {{ $notif->id }})">
+                                                                    <i class="fas fa-eye"></i> Detail
+                                                                </button>
+                                                                    @endif
+                                                                   
 
                                                                     </button>
                                                                 @elseif (Auth::user()->hasRole('Reviewer'))

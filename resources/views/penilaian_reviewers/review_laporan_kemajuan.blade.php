@@ -43,90 +43,70 @@
                                 <!--end::Table head-->
                                 <!--begin::Table body-->
                                 <tbody class="text-gray-600 fw-bold">
-                                    @foreach ($getpenilaianreview as $key => $usulan)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $usulan->usulan->judul_usulan }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge badge-light-primary">{{ $usulan->status_penilaian }}</span>
-                                            </td>
-                                            <td>
-                                                {{ $usulan->total_nilai }}
-                                            </td>
-                                            <td>
-                                                @if ($usulan->status_penilaian = 'sudah dinilai')
-                                                    @php
-                                                        $usulanPerbaikan = $laporanKemajuans
-                                                            ->where('usulan_id', $usulan->id)
-                                                            ->first();
-                                                    @endphp
-
-                                                    @if ($usulanPerbaikan && $usulanPerbaikan->dokumen_usulan !== null)
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#perbaikanModal{{ $usulan->usulan_id }}">
-                                                        Lihat Perbaikan
-                                                    </button>
-                                                @else
-                                                    <span class="text-muted">Belum Ada Perbaikan</span>
-                                                @endif
-                                                @endif
-                                            </td>
-
-                                            <!-- Modal for Perbaikan -->
-                                            @php
-                                            $usulanPerbaikan = $laporanKemajuans->firstWhere('usulan_id', $usulan->id);
-                                        @endphp
-                                    
-                                    @if ($usulanPerbaikan)
-                                    <div class="modal fade" id="perbaikanModal{{ $usulan->id }}" tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="perbaikanModalLabel{{ $usulan->id }}">
-                                                        Detail Perbaikan: {{ $usulan->judul_usulan }}
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <!-- Displaying the uploaded file (Perbaikan) -->
-                                                    <iframe src="{{ asset('storage/' . $usulanPerbaikan->dokumen_usulan) }}" width="100%" height="500px" frameborder="0"></iframe>
-                                                </div>
-                            
-                                                <div class="modal-footer">
-                                                    <!-- Form to update status of perbaikan -->
-                                                    <form action="{{ route('perbaikan-penilaian.update', $usulanPerbaikan->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                            
-                                                        <!-- Status Dropdown -->
-                                                        <div class="d-flex align-items-center">
-                                                            <label for="status{{ $usulan->id }}" class="form-label me-2">Status:</label>
-                                                            <select name="status" id="status{{ $usulan->id }}" class="form-select me-3" required>
-                                                                <option value="Diterima" {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
-                                                                    Diterima
-                                                                </option>
-                                                               
-                                                            </select>
-                                                            <button type="submit" class="btn btn-success">Simpan</button>
+                                    @foreach ($getpenilaianreview as $key => $data)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $data->laporankemajuan->usulan->judul_usulan }}</td>
+                                        <td>
+                                            <span class="badge badge-light-primary">{{ $data->status_penilaian }}</span>
+                                        </td>
+                                        <td>{{ $data->total_nilai }}</td>
+                                        <td>
+                                            @if ($data->status_penilaian == 'sudah dinilai')
+                                            <!-- Tombol untuk membuka modal -->
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewLaporanModal">
+                                                Lihat Laporan Kemajuan
+                                            </button>
+                                        
+                                            <!-- Modal untuk melihat Laporan Kemajuan -->
+                                            <div class="modal fade" id="viewLaporanModal" tabindex="-1" aria-labelledby="viewLaporanModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="viewLaporanModalLabel">Laporan Kemajuan</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
-                                                    </form>
+                                                        <div class="modal-body">
+                                                            <embed src="{{ asset('storage/' . $data->laporankemajuan->dokumen_laporan_kemajuan) }}" type="application/pdf" width="100%" height="500px">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <!-- Form to update status of perbaikan -->
+                                                            <form
+                                                                action="{{ route('review-laporan-kemajuan.updateStatus', $data->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <!-- Status Dropdown -->
+                                                                <div class="d-flex align-items-center">
+                                                                    <label for="status{{ $data->id }}"
+                                                                        class="form-label me-2">Status:</label>
+                                                                    <select name="status"
+                                                                        id="status{{ $data->id }}"
+                                                                        class="form-select me-3" required>
+                                                                        <option value="Diterima"
+                                                                            {{ $data->status_penilaian == 'Diterima' ? 'selected' : '' }}>
+                                                                            Diterima
+                                                                        </option>
+
+                                                                    </select>
+                                                                    <button type="submit"
+                                                                        class="btn btn-success">Simpan</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                @endif
+                                        @endif
+                                        
+                                        </td>
 
-
-                                            <td>
-                                                <a href="{{ route('review-usulan.lihat', ['id' => $usulan->id]) }}"
-                                                    class="btn btn-info">
-                                                    Lihat Detail
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                       
+                                        <td>
+                                            <a href="{{ route('review-laporan-kemajuan.lihat', ['id' => $data->id]) }}" class="btn btn-info">Lihat Detail</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                                 <!--end::Table body-->
                             </table>

@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('penilaian_reviewers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('usulan_id'); // Relasi ke tabel proposal
+            $table->unsignedBigInteger('usulan_id')->nullable(); // Relasi ke tabel proposal
+            $table->unsignedBigInteger('laporankemajuan_id')->nullable();// Relasi ke tabel proposal
+            $table->unsignedBigInteger('laporanakhir_id')->nullable();// Relasi ke tabel proposal
             $table->string('status_penilaian'); // Status penilaian
             $table->unsignedBigInteger('reviewer_id'); // Relasi ke tabel reviewer
             $table->string('total_nilai'); // Status penilaian
@@ -22,6 +24,8 @@ return new class extends Migration
             $table->timestamps();
             // Menambahkan foreign key
             $table->foreign('usulan_id')->references('id')->on('usulans')->onDelete('cascade');
+            $table->foreign('laporankemajuan_id')->references('id')->on('laporan_kemajuans')->onDelete('cascade');
+            $table->foreign('laporanakhir_id')->references('id')->on('laporan_akhirs')->onDelete('cascade');
             $table->foreign('reviewer_id')->references('id')->on('reviewers')->onDelete('cascade');
 
         });

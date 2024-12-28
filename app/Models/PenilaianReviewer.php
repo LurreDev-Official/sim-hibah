@@ -12,6 +12,8 @@ class PenilaianReviewer extends Model
     // Kolom yang bisa diisi secara massal (mass-assignable)
     protected $fillable = [
         'usulan_id',
+        'laporankemajuan_id',
+        'laporanakhir_id',
         'status_penilaian',
         'reviewer_id',
         'total_nilai',
@@ -35,6 +37,16 @@ class PenilaianReviewer extends Model
     public function usulan()
     {
         return $this->belongsTo(Usulan::class, 'usulan_id');
+    }
+
+    public function laporankemajuan()
+    {
+        return $this->belongsTo(LaporanKemajuan::class, 'laporankemajuan_id');
+    }
+
+    public function laporanakhir()
+    {
+        return $this->belongsTo(LaporanAkhir::class, 'laporanakhir_id');
     }
 
     /**

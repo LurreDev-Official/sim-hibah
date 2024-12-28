@@ -60,7 +60,6 @@ Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])-
 // Route untuk upload PDF perbaikan revisi
 Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanController::class, 'uploadRevisi'])
     ->name('perbaikan-usulan.upload_revisi');
-
     
     Route::resource('laporan-kemajuan', LaporanKemajuanController::class);
     Route::get('laporan-kemajuan/{jenis}', [LaporanKemajuanController::class, 'show'])->name('laporan-kemajuan.show');
@@ -68,7 +67,7 @@ Route::put('/perbaikan-usulan/{penilaianReviewer}/upload', [UsulanPerbaikanContr
 // Route for deleting laporan kemajuan with only id parameter
 Route::delete('laporan-kemajuan/{id}', [LaporanKemajuanController::class, 'destroy'])->name('laporan-kemajuan.destroy');
 
-    Route::resource('laporan-akhir', LaporanAkhirController::class);
+    Route::resource('review-laporan-akhir', LaporanAkhirController::class);
     Route::get('laporan-akhir/{jenis}', [LaporanAkhirController::class, 'show'])->name('laporan-akhir.show');
     
 });
@@ -81,6 +80,7 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::delete('/kriteria-penilaian/{id}', [KriteriaPenilaianController::class, 'destroy'])->name('kriteria-penilaian.destroy');
     Route::resource('indikator-penilaian', IndikatorPenilaianController::class);
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
+    Route::post('/laporan-kemajuan/{jenis}/kirim', [LaporanKemajuanController::class, 'kirim'])->name('laporan-kemajuan.kirim');
 
 });
 
@@ -120,19 +120,35 @@ Route::group(['middleware' => ['role:Reviewer']], function () {
     // Review Usulan
     Route::get('review-usulan', [PenilaianReviewerController::class, 'indexReviewUsulan'])->name('review-usulan.index');
     Route::post('review-usulan/{id}', [PenilaianReviewerController::class, 'storeReviewUsulan'])->name('review-usulan.store');
+    Route::put('review-usulan/{id}/update', [PenilaianReviewerController::class, 'updateStatus'])->name('review-usulan.updateStatus');
     Route::get('review-usulan-lihat/{id}', [PenilaianReviewerController::class, 'lihatReviewUsulan'])->name('review-usulan.lihat');
 
-    
     // Review Laporan Kemajuan
     Route::get('review-laporan-kemajuan', [PenilaianReviewerController::class, 'indexReviewLaporanKemajuan'])->name('review-laporan-kemajuan.index');
     Route::post('review-laporan-kemajuan/{id}', [PenilaianReviewerController::class, 'storeReviewLaporanKemajuan'])->name('review-laporan-kemajuan.store');
+    Route::put('review-laporan-kemajuan/{id}/update', [PenilaianReviewerController::class, 'updateStatus'])->name('review-laporan-kemajuan.updateStatus');
 
-    
+    Route::get('review-laporan-kemajuan-lihat/{id}', [PenilaianReviewerController::class, 'lihatReviewLaporanKemajuan'])->name('review-laporan-kemajuan.lihat');
+
+    Route::get('review-laporan-akhir', [PenilaianReviewerController::class, 'indexReviewLaporanKemajuan'])->name('review-laporan-akhir.index');
+    Route::post('review-laporan-akhir/{id}', [PenilaianReviewerController::class, 'storeReviewLaporanKemajuan'])->name('review-laporan-akhir.store');
+    Route::get('review-laporan-akhir-lihat/{id}', [PenilaianReviewerController::class, 'lihatReviewLaporanKemajuan'])->name('review-laporan-akhir.lihat');
+
     Route::resource('form-penilaian', FormPenilaianController::class);
-    Route::get('form-penilaian/create/{usulan_id}', [FormPenilaianController::class, 'create'])->name('form-penilaian.input');
+    Route::get('form-penilaian/create/{id}', [FormPenilaianController::class, 'create'])->name('form-penilaian.input');
+    Route::get('form-penilaian/laporan-kemajuan/{id}', [FormPenilaianController::class, 'createLaporanKemajuan'])->name('form-penilaian.laporan-kemajuan');
+    Route::get('form-penilaian/laporan-akhir/{id}', [FormPenilaianController::class, 'createLaporanAkhir'])->name('form-penilaian.laporan-akhir');
+
+
+    // Route untuk form penilaian Laporan Kemajuan
+    Route::post('form-penilaian/laporan-kemajuan/{id}', [FormPenilaianController::class, 'storeLaporanKemajuan'])->name('form-penilaian.laporan-kemajuan.store');
+
+    // Route untuk form penilaian Laporan Akhir
+    Route::post('form-penilaian/laporan-akhir/{id}', [FormPenilaianController::class, 'storeLaporanAkhir'])->name('form-penilaian.laporan-akhir.store');
+
+
+
     Route::get('perbaikan-penilaian/{usulan_id}', [FormPenilaianController::class, 'perbaikan'])->name('perbaikan-penilaian.lihat');
-    // Route untuk menangani update status perbaikan (menggunakan PUT atau PATCH)
-    Route::put('perbaikan-penilaian/{id}/update', [FormPenilaianController::class, 'updateStatus'])->name('perbaikan-penilaian.update');    
     Route::resource('reviewer', ReviewerController::class);
 });
 

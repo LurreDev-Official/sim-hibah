@@ -387,7 +387,7 @@
                         @if (
                             $anggotaDosencek &&
                                 $anggotaDosencek->status_anggota == 'ketua' &&
-                                !in_array($usulan->status, ['submitted', 'review', 'revision', 'approved', 'rejected']))
+                                !in_array($usulan->status, ['submitted', 'review','waiting approved', 'revision', 'approved', 'rejected']))
                           <div class="col-12 py-4 text-center">
                                 <!-- Form untuk mengajukan usulan -->
                                 <form id="submitUsulanForm_{{ $usulan->id }}"

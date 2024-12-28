@@ -94,39 +94,28 @@ class HomeController extends Controller
             if (!$data) {
                 return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
             }
-
-            $notifusulan = \App\Models\PenilaianReviewer::where('reviewer_id', $data->id)
-           
-            ->where('status_penilaian', 'Belum Dinilai')
-            // ->whereHas('usulan', function ($query) {
-            //     $query->where('jenis_skema', 'penelitian');
-            // })
-            ->with('usulan') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
-            ->get();
-
-            if (!$notifusulan) {
+            $notifreview = \App\Models\PenilaianReviewer::where('reviewer_id', $data->id)
+                ->where('status_penilaian', 'Belum Dinilai') // Filter status penilaian
+                ->where(function($query) {
+                    // Filter berdasarkan apakah salah satu id (usulan, laporan kemajuan, laporan akhir) tidak null
+                    $query->whereNotNull('usulan_id')
+                          ->orWhereNotNull('laporankemajuan_id')
+                          ->orWhereNotNull('laporanakhir_id');
+                })
+                ->with('usulan','laporankemajuan','laporanakhir') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
+                ->get();
+        
+            // Jika tidak ada penilaian yang ditemukan, redirect untuk lengkapi profil
+            if ($notifreview->isEmpty()) {
                 return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
             }
 
-            $notifLaporanKemajuan = \App\Models\LaporanKemajuan::whereHas('usulan.reviewers', function ($query) use ($data) {
-                $query->where('reviewer_id', $data->id);
-            })->where('status', 'Pending')->with(['usulan', 'dosen'])->get();
-
-            $notifLaporanAkhir = \App\Models\LaporanAkhir::whereHas('usulan.reviewers', function ($query) use ($data) {
-                $query->where('reviewer_id', $data->id);
-            })->where('status', 'Pending')->with(['usulan', 'dosen'])->get();
-            
-
-            
-
-
+        
             return view('dashboard.reviewer', [
 
-                'notifusulan' => $notifusulan,
-                'notifLaporanKemajuan' => $notifLaporanKemajuan,
-                'notifLaporanAkhir' => $notifLaporanAkhir,
+                'notifreview' => $notifreview,
                 'user' => $user,
-                'countUsulan' => Usulan::where('jenis_skema', 'penelitian')->count(),
+                'countUsulan' => Usulan::count(),
                 'countLaporanKemajuan' => LaporanKemajuan::count(),
                 'countLaporanAkhir' => LaporanAkhir::count(),
             ]);

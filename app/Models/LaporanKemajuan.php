@@ -17,6 +17,11 @@ class LaporanKemajuan extends Model
         'jenis',
     ];
 
+    public function penilaianReviewers()
+    {
+        return $this->hasMany(PenilaianReviewer::class, 'laporankemajuan_id');
+    }
+
     // Relasi ke Dosen
     public function dosen()
     {
