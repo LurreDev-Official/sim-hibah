@@ -68,7 +68,7 @@
                                     // Logika berdasarkan role
                                     if (Auth::user()->hasRole('Kepala LPPM')) {
                                         // Kepala LPPM melihat semua usulan dengan status tertentu
-                                        $notifikasi = \App\Models\Usulan::where('status', 'Submitted')->get();
+                                        $notifikasi = \App\Models\Usulan::all();
                                     } elseif (Auth::user()->hasRole('Dosen')) {
                                         // Ambil dosen terkait user login
                                         $dosen = \App\Models\Dosen::where('user_id', Auth::id())->first();
@@ -85,7 +85,7 @@
                                                     'anggotaDosen' => function ($query) use ($dosen) {
                                                         $query
                                                             ->where('dosen_id', $dosen->id)
-                                                            ->where('status','=', 'belum disetujui');
+                                                            ->where('status', '=', 'belum disetujui');
                                                     },
                                                 ])
                                                 ->get();
@@ -110,50 +110,49 @@
                                 @endphp
 
                                 @if (count($notifikasi) > 0)
-                                    <div class="col-12">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h4 class="card-title">Notifikasi</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <ul class="list-group">
-                                                    @foreach ($notifikasi as $notif)
-                                                        <li
-                                                            class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                @if (Auth::user()->hasRole('Kepala LPPM'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
-                                                                    dengan status <em>{{ $notif->status }}</em> menunggu
-                                                                    diteruskan ke reviewer.
-                                                                @elseif (Auth::user()->hasRole('Dosen'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
-                                                                    dengan status <em>{{ $notif->status }}</em>  
-
-                                                                    @if ($notif->status ='revision')
-                                                                        <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $notif->jenis_skema, 'id' => $notif->id]) }}"
-                                                                            class="btn btn-secondary btn-sm">
-                                                                            <i class="fas fa-edit"></i> Perbaiki Revisi
-                                                                        </a>
-                                                                    @else
-                                                                    <button class="btn btn-info btn-sm"
-                                                                    onclick="showDetailUsulan('{{ $notif->jenis_skema }}', {{ $notif->id }})">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4 class="card-title">Notifikasi Usulan Baru</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-group">
+                                                @foreach ($notifikasi as $notif)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        @if (Auth::user()->hasRole('Kepala LPPM'))
+                                                            @if ($notif->status == 'submitted')
+                                                                <span class="text-info">Usulan <strong>{{ $notif->judul_usulan }}</strong> dengan status <em>{{ $notif->status }}</em> menunggu diteruskan ke reviewer.</span>
+                                                            @elseif ($notif->status == 'waiting approved')
+                                                                <span class="text-warning">Usulan <strong>{{ $notif->judul_usulan }}</strong> dengan status <em>{{ $notif->status }}</em> menunggu persetujuan.</span>
+                                                            @else
+                                                                <span class="text-muted">Tidak ada notifikasi.</span>
+                                                            @endif
+                                                        @elseif ($notif->ketua_dosen_id == Auth::user()->dosen->id)
+                                                           
+                                                            @if ($notif->status == 'draft')
+                                                                <span class="text-danger">Usulan <strong>{{ $notif->judul_usulan }}</strong> dengan status <em>{{ $notif->status }}</em> belum disetujui / di ajukan</span>
+                                                                <button class="btn btn-info btn-sm" onclick="showDetailUsulan('{{ $notif->jenis_skema }}', {{ $notif->id }})">
                                                                     <i class="fas fa-eye"></i> Detail
                                                                 </button>
-                                                                    @endif
-                                                                   
+                                                            @elseif ($notif->status == 'revision')
+                                                            <span class="text-warning">Usulan <strong>{{ $notif->judul_usulan }}</strong> dengan status <em>{{ $notif->status }}</em> menunggu revisi.</span>
+                                                            <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $notif->jenis_skema, 'id' => $notif->id]) }}" class="btn btn-secondary btn-sm">
+                                                                <i class="fas fa-edit"></i> Perbaiki Revisi
+                                                            </a>
+                                                           @else
+                                                            <span class="text-muted">Tidak ada notifikasi.</span>
+                                                            @endif
 
-                                                                    </button>
-                                                                @elseif (Auth::user()->hasRole('Reviewer'))
-                                                                    Usulan <strong>{{ $notif->judul_usulan }}</strong>
-                                                                    menunggu ulasan Anda.
-                                                                @endif
-                                                            </div>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
+                                                        @elseif (Auth::user()->hasRole('Reviewer'))
+                                                            <span class="text-primary">Usulan <strong>{{ $notif->judul_usulan }}</strong> menunggu ulasan Anda.</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
                                         </div>
                                     </div>
+                                </div>
+                                
                                 @else
                                     <div class="col-12">
                                         <div class="card">
@@ -172,18 +171,23 @@
                                 }
                             </script>
 
-
+                          
                         </div>
 
 
                     </div>
+
+                    
                 </div>
 
 
 
 
+                @role('Kepala LPPM')
 
-                <div class="row">
+
+                <div class="row ">
+                    <!-- Proses Penelitian -->
                     <div class="col-12">
                         <h3>Proses Penelitian</h3>
                     </div>
@@ -197,19 +201,6 @@
                                     <span class="badge bg-success">{{ $countUsulan }}</span>
                                 </div>
                                 <p>Jumlah usulan penelitian yang sudah selesai.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Card Perbaikan Usulan --}}
-                    <div class="col-sm-3">
-                        <div class="card card-dashed">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title">Perbaikan Usulan</h5>
-                                    <span class="badge bg-warning">{{ $countPerbaikanUsulan }}</span>
-                                </div>
-                                <p>Jumlah usulan yang perlu diperbaiki.</p>
                             </div>
                         </div>
                     </div>
@@ -240,8 +231,7 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- Card Counter for Community Service Process --}}
+                <!-- Proses Pengabdian -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <h3>Proses Pengabdian</h3>
@@ -256,19 +246,6 @@
                                     <span class="badge bg-success">{{ $countUsulanPengabdian }}</span>
                                 </div>
                                 <p>Jumlah usulan pengabdian yang sudah selesai.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Card Perbaikan Usulan Pengabdian --}}
-                    <div class="col-sm-3">
-                        <div class="card card-dashed">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title">Perbaikan Usulan Pengabdian</h5>
-                                    <span class="badge bg-warning">{{ $countPerbaikanUsulanPengabdian }}</span>
-                                </div>
-                                <p>Jumlah usulan pengabdian yang perlu diperbaiki.</p>
                             </div>
                         </div>
                     </div>
@@ -299,6 +276,222 @@
                         </div>
                     </div>
                 </div>
+                @endrole
+
+                @role('Dosen')
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3>Kuota Pengajuan</h3>
+                    </div>
+                
+                    {{-- Card Kuota Penelitian --}}
+                    <div class="col-sm-6">
+                        <div class="card card-dashed">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Kuota Penelitian</h5>
+                                    <span class="badge bg-primary">{{ $countPenelitian }}</span>
+                                </div>
+                                <p>Jumlah usulan penelitian yang diajukan oleh dosen sebagai ketua.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    {{-- Card Kuota Pengabdian --}}
+                    <div class="col-sm-6">
+                        <div class="card card-dashed">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Kuota Pengabdian</h5>
+                                    <span class="badge bg-primary">{{ $countPengabdian }}</span>
+                                </div>
+                                <p>Jumlah usulan pengabdian yang diajukan oleh dosen sebagai ketua.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3>Kuota Pengajuan sebagai Anggota</h3>
+                    </div>
+                
+                    {{-- Card Menjadi Anggota 2 Judul Usulan Penelitian --}}
+                    <div class="col-sm-6">
+                        <div class="card card-dashed">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Anggota 2 Judul Usulan Penelitian</h5>
+                                    <span class="badge bg-warning">{{ $countAnggota2ProposalPenelitian }}</span>
+                                </div>
+                                <p>Dosen yang menjadi anggota pada 2 judul usulan penelitian.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    {{-- Card Menjadi Anggota 2 Judul Usulan Pengabdian --}}
+                    <div class="col-sm-6">
+                        <div class="card card-dashed">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Anggota 2 Judul Usulan Pengabdian</h5>
+                                    <span class="badge bg-warning">{{ $countAnggota2ProposalPengabdian }}</span>
+                                </div>
+                                <p>Dosen yang menjadi anggota pada 2 judul usulan pengabdian.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <!--begin::List Widget 4-->
+                            <div class="card card-xl-stretch mb-xl-8">
+                                <!--begin::Header-->
+                                <div class="card-header border-0 pt-5">
+                                    <h3 class="card-title align-items-start flex-column">
+                                        <span class="card-label fw-bolder text-dark">Kuota Pengajuan</span>
+                                        <span class="text-muted mt-1 fw-bold fs-7">Kuota dan Jumlah Proposal</span>
+                                    </h3>
+                                    <div class="card-toolbar">
+                                        <!-- Tombol Modal Aturan dengan btn-info -->
+                                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#modalAturan">
+                                            <!-- Icon untuk tombol modal -->
+                                            <span class="svg-icon svg-icon-2 me-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                                    viewBox="0 0 24 24">
+                                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                        <rect x="5" y="5" width="5" height="5" rx="1"
+                                                            fill="#000000"></rect>
+                                                        <rect x="14" y="5" width="5" height="5" rx="1"
+                                                            fill="#000000" opacity="0.3"></rect>
+                                                        <rect x="5" y="14" width="5" height="5" rx="1"
+                                                            fill="#000000" opacity="0.3"></rect>
+                                                        <rect x="14" y="14" width="5" height="5" rx="1"
+                                                            fill="#000000" opacity="0.3"></rect>
+                                                    </g>
+                                                </svg>
+                                            </span>
+                                            Aturan Penelitian
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--end::Header-->
+
+                                <!--begin::Body-->
+                                <div class="card-body pt-5">
+                                    <!-- Kuota Pengajuan -->
+                                    <div class="d-flex align-items-sm-center mb-7">
+                                        <!--begin::Symbol-->
+                                        <div class="symbol symbol-50px me-5">
+                                            <span class="symbol-label">
+                                                <img src="assets/media/svg/brand-logos/plurk.svg"
+                                                    class="h-50 align-self-center" alt="Icon Kuota">
+                                            </span>
+                                        </div>
+                                        <!--end::Symbol-->
+                                        <!--begin::Section-->
+                                        <div class="d-flex align-items-center flex-row-fluid flex-wrap">
+                                            <div class="flex-grow-1 me-2">
+                                                <a href="#"
+                                                    class="text-gray-800 text-hover-primary fs-6 fw-bolder">Kuota Proposal</a>
+                                                <span class="text-muted fw-bold d-block fs-7">Kuota Proposal:
+                                                    {{ $dosenData->kuota_proposal }}</span>
+                                            </div>
+                                            <span class="badge badge-light fw-bolder my-2">Jumlah Proposal:
+                                                {{ $dosenData->jumlah_proposal }}</span>
+                                        </div>
+                                        <!--end::Section-->
+                                    </div>
+                                    <!--end::Item-->
+                                </div>
+                                <!--end::Body-->
+                            </div>
+                            <!--end::List Widget 4-->
+                        </div>
+
+                        <!-- Modal Aturan -->
+                        <div class="modal fade" id="modalAturan" tabindex="-1" aria-labelledby="modalAturanLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalAturanLabel">Ketentuan Umum Penelitian Mono Tahun
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>1. Biodata Dosen (NIDN):</h6>
+                                        <ul>
+                                            <li>Menjadi ketua 1 judul usulan proposal</li>
+                                            <li>Menjadi anggota 2 judul usulan proposal (Riset dan PKM)</li>
+                                        </ul>
+
+                                        <h6>2. Jumlah Anggota Pengusul (7 orang):</h6>
+                                        <ul>
+                                            <li>5 Orang dosen se prodi unhasy</li>
+                                            <li>1 Orang dosen luar prodi unhasy</li>
+                                            <li>1 Orang dosen mitra unhasy</li>
+                                        </ul>
+
+                                        <h6>3. Biodata Mahasiswa (NIM):</h6>
+                                        <ul>
+                                            <li>1 Orang Mahasiswa Semester 5 &gt;</li>
+                                            <li>2 Orang Mahasiswa Semester &lt;3</li>
+                                        </ul>
+
+                                        <h6>4. Jumlah Anggota Mahasiswa (3 orang):</h6>
+                                        <ul>
+                                            <li>5 Orang dosen se prodi unhasy</li>
+                                        </ul>
+
+                                        <h6>5. Skoring SINTA 200&gt; Menjadi ketua pengusul (pengembangan kedepan tahun 2026):
+                                        </h6>
+
+                                        <h6>6. Luaran Wajib, sesuai Peraturan Rektor:</h6>
+                                        <h7>Penelitian</h7>
+                                        <ul>
+                                            <li>• Laporan akhir penelitian</li>
+                                            <li>• Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4</li>
+                                            <li>• Artikel ilmiah di prosiding SAINSTEKNOPAK</li>
+                                        </ul>
+
+                                        <h7>Pengabdian</h7>
+                                        <ul>
+                                            <li>• Laporan akhir pengabdian kepada masyarakat</li>
+                                            <li>• Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4</li>
+                                            <li>• Artikel ilmiah di prosiding SAINSTEKNOPAK</li>
+                                        </ul>
+
+                                        <h6>Luaran tambahan:</h6>
+                                        <ul>
+                                            <li>• Buku</li>
+                                            <li>• HKI</li>
+                                            <li>• Prototipe, Model, Produk, dll.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                @endrole
+
+
+
+
+
 
             </div>
         </div>

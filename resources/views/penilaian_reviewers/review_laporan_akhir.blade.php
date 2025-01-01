@@ -46,7 +46,8 @@
                                     @foreach ($getpenilaianreview as $key => $data)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $data->laporankemajuan->usulan->judul_usulan }}</td>
+                                        <td>{{ $data->laporanakhir->usulan->judul_usulan }}</td>
+                                        {{-- <td>{{ $data->laporanakhir->dokumen_laporan_akhir }}</td> --}}
                                         <td>
                                             <span class="badge badge-light-primary">{{ $data->status_penilaian }}</span>
                                         </td>
@@ -55,24 +56,24 @@
                                             @if ($data->status_penilaian == 'sudah diperbaiki')
                                             <!-- Tombol untuk membuka modal -->
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewLaporanModal">
-                                                Lihat Laporan Kemajuan
+                                                Lihat Laporan Akhir
                                             </button>
                                         
-                                            <!-- Modal untuk melihat Laporan Kemajuan -->
+                                            <!-- Modal untuk melihat Laporan Akhir -->
                                             <div class="modal fade" id="viewLaporanModal" tabindex="-1" aria-labelledby="viewLaporanModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="viewLaporanModalLabel">Laporan Kemajuan</h5>
+                                                            <h5 class="modal-title" id="viewLaporanModalLabel">Laporan Akhir</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <embed src="{{ asset('storage/' . $data->laporankemajuan->dokumen_laporan_kemajuan) }}" type="application/pdf" width="100%" height="500px">
+                                                            <embed src="{{ asset('storage/' . $data->laporanakhir->dokumen_laporan_akhir) }}" type="application/pdf" width="100%" height="500px">
                                                         </div>
                                                         <div class="modal-footer">
                                                             <!-- Form to update status of perbaikan -->
                                                             <form
-                                                                action="{{ route('review-laporan-kemajuan.updateStatus', $data->id) }}"
+                                                                action="{{ route('review-laporan-akhir.updateStatus', $data->id) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 @method('PUT')
@@ -104,7 +105,7 @@
                                         </td>
                                        
                                         <td>
-                                            <a href="{{ route('review-laporan-kemajuan.lihat', ['id' => $data->laporankemajuan->id]) }}" class="btn btn-info">Lihat Detail</a>
+                                            <a href="{{ route('review-laporan-akhir.lihat', ['id' => $data->laporanakhir->id]) }}" class="btn btn-info">Lihat Detail</a>
                                         </td>
                                     </tr>
                                 @endforeach

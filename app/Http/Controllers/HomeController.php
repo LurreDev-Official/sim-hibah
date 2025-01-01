@@ -9,7 +9,10 @@ use App\Models\LaporanKemajuan;
 use App\Models\LaporanAkhir;
 use App\Models\Reviewer;
 use App\Models\Dosen;
+use App\Models\AnggotaDosen;
+use Carbon\Carbon;
 
+// Ambil tahun saat ini
 class HomeController extends Controller
 {
     /**
@@ -29,6 +32,9 @@ class HomeController extends Controller
      */
     public function index()
     {
+        
+    // Panggil fungsi untuk update semua dosen terkait proposal
+    // $result = $this->updateJumlahProposalForAllDosen();
         // Ambil user yang sedang login
         $user = Auth::user();
 
@@ -44,11 +50,13 @@ class HomeController extends Controller
     $countPerbaikanUsulanPengabdian = Usulan::where('status', 'perbaikan')->count();
     $countLaporanKemajuanPengabdian = LaporanKemajuan::count();
     $countLaporanAkhirPengabdian = LaporanAkhir::count();
+    $dosenData = Dosen::all();
+  
 
     return view('dashboard.index', compact(
         'user' ,
+        'dosenData',
         'countUsulan',
-        'countPerbaikanUsulan',
         'countLaporanKemajuan',
         'countLaporanAkhir',
         'countUsulanPengabdian',
@@ -58,43 +66,61 @@ class HomeController extends Controller
     ));
         } elseif ($user->hasRole('Dosen')) {
             // Cek apakah data dosen sudah ada untuk user_id tertentu
-                $dosen = Dosen::where('user_id', $user->id)->first();
+                $dosenData = Dosen::where('user_id', $user->id)->first();
                 
                 // Jika data dosen tidak ada, arahkan ke form edit profil dosen
-    if (!$dosen) {
-        return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
-    }
-
+                if (!$dosenData) {
+                    return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
+                }
+                $currentYear = Carbon::now()->year;
                 // Jika data dosen sudah ada, tampilkan halaman dashboard
-                $countUsulan = Usulan::where('jenis_skema', 'penelitian')->count();
-                $countPerbaikanUsulan = Usulan::where('jenis_skema', 'penelitian')->where('status', 'perbaikan')->count();
-                $countLaporanKemajuan = LaporanKemajuan::count();
-                $countLaporanAkhir = LaporanAkhir::count();
-            
-                // Hitung data untuk Pengabdian
-                $countUsulanPengabdian = Usulan::where('jenis_skema', 'pengabdian')->count();
-                $countPerbaikanUsulanPengabdian = Usulan::where('status', 'perbaikan')->count();
-                $countLaporanKemajuanPengabdian = LaporanKemajuan::count();
-                $countLaporanAkhirPengabdian = LaporanAkhir::count();
-            
+                $countPenelitian = Usulan::where('ketua_dosen_id', $dosenData->id)
+                    ->where('tahun_pelaksanaan', '=', $currentYear) // Misalnya tahun 2023
+
+                    ->where('jenis_skema', 'penelitian')
+                    ->count();
+                $countPengabdian = Usulan::where('ketua_dosen_id', $dosenData->id)
+                    ->where('jenis_skema', 'pengabdian')
+                    ->where('tahun_pelaksanaan', '=', $currentYear) // Misalnya tahun 2023
+
+                    ->count();
+
+                   
+
+
+                    $usulanPenelitian = Usulan::where('jenis_skema', 'penelitian')
+                    ->whereYear('tahun_pelaksanaan', '=', $currentYear) // Misalnya tahun 2023
+                    ->get();
+                    $countAnggota2ProposalPenelitian = AnggotaDosen::whereIn('usulan_id', $usulanPenelitian->pluck('id'))
+                    ->where('status_anggota', 'anggota') // Hanya anggota dengan status 'anggota'
+                    ->where('dosen_id', Auth::user()->id) // Hanya untuk dosen yang sedang login
+                    ->get();      
+                    
+                    $usulanPengabdian = Usulan::where('jenis_skema', 'pengabdian')
+                    ->whereYear('tahun_pelaksanaan', '=', $currentYear) // Misalnya tahun 2023
+                    ->get();
+                    $countAnggota2ProposalPengabdian = AnggotaDosen::whereIn('usulan_id', $usulanPengabdian->pluck('id'))
+                    ->where('status_anggota', 'anggota') // Hanya anggota dengan status 'anggota'
+                    ->where('dosen_id', Auth::user()->id) // Hanya untuk dosen yang sedang login
+                    ->get();
+
+                  
                 return view('dashboard.index', compact(
                     'user' ,
-                    'countUsulan',
-                    'countPerbaikanUsulan',
-                    'countLaporanKemajuan',
-                    'countLaporanAkhir',
-                    'countUsulanPengabdian',
-                    'countPerbaikanUsulanPengabdian',
-                    'countLaporanKemajuanPengabdian',
-                    'countLaporanAkhirPengabdian'
+                    'dosenData',
+                    'countPenelitian',
+                    'countPengabdian',
+                    'countAnggota2ProposalPenelitian',
+                    'countAnggota2ProposalPengabdian'
+                  
                 ));
         } elseif ($user->hasRole('Reviewer')) {
             
-            $data = Reviewer::where('user_id', $user->id)->first();
-            if (!$data) {
+            $getreviewer = Reviewer::where('user_id', $user->id)->first();
+            if (!$getreviewer) {
                 return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
             }
-            $notifreview = \App\Models\PenilaianReviewer::where('reviewer_id', $data->id)
+            $notifreview = \App\Models\PenilaianReviewer::where('reviewer_id', $getreviewer->id)
                 ->where('status_penilaian', 'Belum Dinilai') // Filter status penilaian
                 ->where(function($query) {
                     // Filter berdasarkan apakah salah satu id (usulan, laporan kemajuan, laporan akhir) tidak null
@@ -104,12 +130,6 @@ class HomeController extends Controller
                 })
                 ->with('usulan','laporankemajuan','laporanakhir') // Pastikan relasi 'usulan' didefinisikan di PenilaianReviewer
                 ->get();
-        
-            // Jika tidak ada penilaian yang ditemukan, redirect untuk lengkapi profil
-            if ($notifreview->isEmpty()) {
-                return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
-            }
-
         
             return view('dashboard.reviewer', [
 
@@ -126,4 +146,79 @@ class HomeController extends Controller
             'user' => $user,
         ]);
     }
+
+
+    public function verifikasiQR($scannedData)
+{
+    // Dekripsi data dari QR Code
+    try {
+        $decryptedData = Crypt::decryptString($scannedData);
+        $dataArray = json_decode($decryptedData, true);
+        
+        // Akses ID dan timestamp dari data yang dipindai
+        $idUsulan = $dataArray['id'];
+        $timestamp = $dataArray['timestamp'];
+
+        // Verifikasi ID dan timestamp sesuai dengan data yang valid
+        $laporanKemajuan = LaporanKemajuan::find($idUsulan);
+        if ($laporanKemajuan) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data valid',
+                'data' => $dataArray
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+    } catch (\Exception $e) {
+        // Menangani kesalahan dekripsi atau JSON
+        return response()->json([
+            'status' => 'error',
+            'message' => 'QR Code tidak valid atau data rusak'
+        ]);
+    }
+}
+ 
+
+
+public function updateJumlahProposalForAllDosen()
+{
+    // Ambil semua dosen dari tabel dosens
+    $dosens = Dosen::all();
+
+    // Looping melalui semua dosen
+    foreach ($dosens as $dosen) {
+        // Hitung jumlah usulan sebagai ketua untuk tahun ini
+        $usulanKetua = Usulan::where('ketua_dosen_id', $dosen->id)
+            ->whereYear('tahun_pelaksanaan', Carbon::now()->year)
+            ->count();
+
+        // Hitung jumlah usulan sebagai anggota untuk tahun ini
+        $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
+            ->whereIn('status_anggota', ['anggota'])
+            ->whereHas('proposal', function($query) {
+                $query->whereYear('tahun_pelaksanaan', Carbon::now()->year);
+            })
+            ->count();
+
+        // Hitung total usulan (ketua + anggota)
+        $totalUsulan = $usulanKetua + $usulanAnggota;
+        // dd($totalUsulan);
+
+        // Update jumlah_proposal dosen
+      
+        // Cari dosen berdasarkan dosen_id
+            $dosen = Dosen::find($dosen->id);
+            $dosen->jumlah_proposal = $totalUsulan;
+            $dosen->save();
+
+    }
+
+    return response()->json(['success' => 'Jumlah proposal untuk semua dosen telah diperbarui.']);
+}
+
+
 }

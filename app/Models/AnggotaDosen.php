@@ -38,4 +38,8 @@ class AnggotaDosen extends Model
     {
         return $this->belongsTo(Dosen::class, 'dosen_id');
     }
+    public function usulan()
+    {
+        return $this->belongsTo(Usulan::class, 'usulan_id');
+    }
 }

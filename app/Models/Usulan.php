@@ -86,4 +86,10 @@ class Usulan extends Model
     return $this->hasMany(UsulanPerbaikan::class);
 }
 
+public function laporanKemajuan()
+{
+    return $this->hasOne(LaporanKemajuan::class, 'usulan_id');
+}
+
+
 }

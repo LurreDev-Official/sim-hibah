@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Usulan;
 use App\Models\LaporanKemajuan;
+use App\Models\LaporanAkhir;
 
 use App\Models\FormPenilaian;
 use App\Models\IndikatorPenilaian;
@@ -87,16 +88,42 @@ class FormPenilaianController extends Controller
     /**
      * Display the form for creating a new Laporan Akhir.
      */
-    public function createLaporanAkhir($usulanId)
+    public function createLaporanAkhir($id)
     {
-        // Retrieve the Usulan by ID
-        $usulan = Usulan::findOrFail($usulanId);
+        // Cek jika PenilaianReviewer dengan status 'sudah dinilai' atau 'sudah diperbaiki'
+    $penilaianReviewer = PenilaianReviewer::where('laporanakhir_id', $id)
+    ->whereIn('status_penilaian', ['sudah dinilai', 'sudah diperbaiki'])
+    ->first();
 
-        // Retrieve relevant IndikatorPenilaian for Laporan Akhir
-        $indikatorPenilaians = $this->getFilteredIndikators($usulan);
+if ($penilaianReviewer) {
+    $message = $penilaianReviewer->status_penilaian == 'sudah dinilai' ? 
+                'Penilaian untuk laporan Akhir ini sudah dinilai' :
+                'Penilaian untuk laporan Akhir ini sudah diperbaiki';
+                
+    return redirect()->route('laporan-kemajuan.index')->with('error', $message);
+}
 
-        // Return the view for Laporan Akhir form
-        return view('form_penilaian.create_laporan_akhir', compact('usulan', 'indikatorPenilaians'));
+// Ambil data LaporanAkhir berdasarkan ID
+$laporanAkhir = LaporanAkhir::findOrFail($id);
+
+// Retrieve KriteriaPenilaian yang sesuai dengan jenis dan proses 'Laporan Akhir'
+$matchingKriteria = KriteriaPenilaian::where('jenis', $laporanAkhir->jenis)
+                                      ->where('proses', 'Laporan Akhir')
+                                      ->pluck('id');
+
+// Retrieve IndikatorPenilaian berdasarkan KriteriaPenilaian yang cocok
+$indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+                                         ->whereIn('kriteria_id', $matchingKriteria)
+                                         ->get();
+
+// Ambil data reviewer yang sedang login dan PenilaianReviewer terkait
+$reviewer = Reviewer::where('user_id', auth()->id())->first();
+$penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+                                      ->where('laporanakhir_id', $id)
+                                      ->firstOrFail();
+
+// Return view dengan data yang diperlukan
+return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'penilaianReviewer', 'indikatorPenilaians'));
     }
 
     /**
@@ -327,10 +354,74 @@ public function storeLaporanKemajuan(Request $request)
       $laporanKemajuan->update(['status' => 'revision']);
   }
   // Redirect ke halaman laporan kemajuan dengan pesan sukses
-  return redirect()->route('laporan-kemajuan.index')->with('success', 'Penilaian Laporan Kemajuan berhasil disimpan!');
+  return redirect('review-laporan-kemajuan')->with('success', 'Penilaian Laporan Kemajuan berhasil disimpan!');
 }
 
+public function storeLaporanAkhir(Request $request)
+{
+    // Validasi data yang diterima
+    $validator = Validator::make($request->all(), [
+        'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
+        'indikator' => 'required|array', // Pastikan indikator adalah array
+        'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
+        'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
+    ]);
 
+    // Jika validasi gagal, kembalikan ke view dengan pesan error
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator) // Kirim error ke view
+            ->withInput(); // Kirim input yang sudah diisi kembali ke view
+    }
+
+    // Inisialisasi array untuk menghitung total nilai per kriteria
+    $kriteriaTotals = [];
+    $totalNilai = 0;
+
+    // Iterasi setiap indikator untuk menghitung dan menyimpan data
+    foreach ($request->indikator as $indikatorId => $data) {
+        $indikator = IndikatorPenilaian::find($indikatorId);
+
+        if ($indikator) {
+            // Tambahkan jumlah bobot ke total nilai untuk kriteria terkait
+            if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
+                $kriteriaTotals[$indikator->kriteria_id] = 0;
+            }
+            $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
+
+            // Simpan data indikator ke dalam tabel FormPenilaian
+            FormPenilaian::create([
+                'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
+                'id_kriteria' => $indikator->kriteria_id,
+                'id_indikator' => $indikator->id,
+                'catatan' => $data['catatan'] ?? null,
+                'nilai' => $data['nilai'], // Menyimpan nilai per indikator
+                'status' => 'sudah dinilai',
+            ]);
+
+            // Tambahkan nilai indikator ke total nilai keseluruhan
+            $totalNilai += $data['nilai'];
+        }
+    }
+ 
+
+    // Update status dan total nilai di tabel PenilaianReviewer
+    $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
+    $penilaianReviewer->update([
+        'status_penilaian' => 'sudah dinilai',
+     
+        'total_nilai' => $totalNilai,
+    ]);
+
+  // Tambahkan usulan perbaikan jika diperlukan
+  $laporanAkhir = LaporanAkhir::findOrFail($penilaianReviewer->laporanakhir_id);
+  if ($laporanAkhir) {
+      $laporanAkhir->update(['status' => 'revision']);
+  }
+
+    // Redirect ke halaman laporan akhir dengan pesan sukses
+    return redirect('review-laporan-akhir')->with('success', 'Penilaian Laporan Akhir berhasil disimpan!');
+}
 
 
 

@@ -7,7 +7,7 @@
         <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
             <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                 <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">
-                    Laporan Kemajuan
+                    Laporan Akhir
                     <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
                     <small class="text-muted fs-7 fw-bold my-1 ms-1">Tambah Data</small>
                 </h1>
@@ -34,7 +34,7 @@
                 <div class="card-header border-0 pt-6">
                     <div class="card-toolbar">
                         <div class="d-flex justify-content-end">
-                            <a class="btn btn-primary" href="{{ route('laporan-kemajuan.show', ['jenis' => $jenis]) }}">Kembali</a>
+                            <a class="btn btn-primary" href="{{ route('laporan-akhir.show', ['jenis' => $jenis]) }}">Kembali</a>
 
                         </div>
                     </div>
@@ -42,7 +42,7 @@
 
                 <div class="card-body pt-0">
                     <!-- Bootstrap 5 Form -->
-                    <form action="{{ route('laporan-kemajuan.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('laporan-akhir.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <!-- Usulan Dropdown -->
@@ -58,11 +58,11 @@
                                 </div>
                             </div>
 
-                            <!-- Dokumen Laporan Kemajuan -->
+                            <!-- Dokumen Laporan Akhir -->
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
-                                    <label for="dokumen_laporan_kemajuan"><strong>Dokumen Laporan Kemajuan:</strong></label>
-                                    <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" />
+                                    <label for="dokumen_laporan_akhir"><strong>Dokumen Laporan Akhir:</strong></label>
+                                    <input type="file" name="dokumen_laporan_akhir" id="dokumen_laporan_akhir" class="form-control" />
                                 </div>
                             </div>
 

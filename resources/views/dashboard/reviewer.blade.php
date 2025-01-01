@@ -108,7 +108,7 @@
                                                                                 class="badge badge-light-primary">{{ $penilaian->status_penilaian }}</span>
                                                                         </td>
                                                                         <td>
-                                                                            <a href="{{ route('form-penilaian.input', ['usulan_id' => $penilaian->usulan->id]) }}"
+                                                                            <a href="{{ route('form-penilaian.input', ['id' => $penilaian->usulan->id]) }}"
                                                                                 class="btn btn-sm btn-primary">Review</a>
                                                                         </td>
                                                                     </tr>
@@ -195,7 +195,7 @@
                                                                                 class="badge badge-light-primary">{{ $penilaian->laporanakhir->status }}</span>
                                                                         </td>
                                                                         <td>
-                                                                            <a href="{{ route('laporan-akhir.review', ['laporan_id' => $penilaian->laporanakhir->id]) }}"
+                                                                            <a href="{{ route('form-penilaian.laporan-akhir', $penilaian->laporanakhir_id) }}"
                                                                                 class="btn btn-sm btn-primary">Review</a>
                                                                         </td>
                                                                     </tr>

@@ -52,7 +52,7 @@
         <p>Telp: (0274) 1234567 | Email: lppm@unhasy.ac.id</p>
     </div>
 
-    <h1>Bukti ACC Usulan Proposal</h1>
+    <h1>Bukti ACC Usulan Proposal di danai</h1>
     
     <table>
         <tr>

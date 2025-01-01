@@ -17,6 +17,11 @@ class LaporanAkhir extends Model
         'status',
     ];
 
+    public function penilaianReviewers()
+    {
+        return $this->hasMany(PenilaianReviewer::class, 'laporanakhir_id');
+    }
+
     // Relasi ke Dosen
     public function dosen()
     {

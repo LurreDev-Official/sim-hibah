@@ -502,7 +502,7 @@
 
                             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                             <script>
-                                function deleteUsulan(jenis, id) {
+                                function deleteUsulan(jenis, id, rowId) {
                                     // Menggunakan SweetAlert2 untuk dialog konfirmasi
                                     Swal.fire({
                                         title: 'Apakah Anda yakin?',
@@ -517,8 +517,7 @@
                                         if (result.isConfirmed) {
                                             // Jika konfirmasi di-klik
                                             $.ajax({
-                                                url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus',
-                                                id, // URL endpoint dengan jenis dan ID usulan
+                                                url: '{{ url('usulan') }}/' + jenis + '/' + id,  // Pastikan URL-nya sesuai dengan route di controller
                                                 type: 'DELETE', // HTTP method DELETE
                                                 data: {
                                                     "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
@@ -530,8 +529,8 @@
                                                         response.success,
                                                         'success'
                                                     ).then(() => {
-                                                        location
-                                                            .reload(); // Reload halaman setelah penghapusan berhasil
+                                                        // Hapus elemen usulan dari DOM (misalnya baris tabel yang berisi usulan)
+                                                        $('#' + rowId).remove(); // Hapus baris dengan id 'rowId'
                                                     });
                                                 },
                                                 error: function(xhr) {
@@ -539,7 +538,7 @@
                                                         // Jika usulan tidak ditemukan
                                                         Swal.fire(
                                                             'Error!',
-                                                            xhr.responseJSON.error,
+                                                            'Usulan tidak ditemukan.',
                                                             'error'
                                                         );
                                                     } else {
@@ -556,6 +555,7 @@
                                     });
                                 }
                             </script>
+                            
                         @endrole
 
 

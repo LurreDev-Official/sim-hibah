@@ -14,10 +14,12 @@ use App\Models\FormPenilaian;
 use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
-
+use Illuminate\Support\Facades\Storage;
 use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
+
+use Illuminate\Support\Facades\Crypt;
 class LaporanKemajuanController extends Controller
 {
     /**
@@ -33,8 +35,6 @@ class LaporanKemajuanController extends Controller
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
         // Check if the user has the 'Kepala LPPM' role
     if ($user->hasRole('Kepala LPPM')) {
-
-       
 
     }
     
@@ -121,6 +121,15 @@ class LaporanKemajuanController extends Controller
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
 
+     // Check if usulan_id already exists in LaporanKemajuan
+     $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])->first();
+
+     if ($existingLaporanKemajuan) {
+         // If there's already a LaporanKemajuan for the given usulan_id
+         return back()->with('error', 'Laporan Kemajuan untuk usulan ini sudah ada.');
+     }else{
+
+        
     // Save file with the original name
     if ($request->hasFile('dokumen_laporan_kemajuan')) {
         $file = $request->file('dokumen_laporan_kemajuan');
@@ -144,7 +153,7 @@ class LaporanKemajuanController extends Controller
    // Redirect to the show page with the jenis parameter
    return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
    ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
-  
+}
 }
 
 
@@ -156,9 +165,6 @@ class LaporanKemajuanController extends Controller
     {
         $user = auth()->user(); // Get the currently authenticated user
         
-        $laporanKemajuanQuery = LaporanKemajuan::with('usulan','penilaianReviewers.reviewer')->when($jenis, function ($query, $jenis) {
-            $query->where('jenis', $jenis);
-        });
         // Role-based logic to filter LaporanKemajuan
         if ($user->hasRole('Kepala LPPM')) {
             // Kepala LPPM can see all reports, no additional filtering needed
@@ -186,35 +192,44 @@ class LaporanKemajuanController extends Controller
 
 
         } elseif ($user->hasRole('Dosen')) {
-            // Get the laporan kemajuan for the logged-in dosen
-            $laporanKemajuan = $laporanKemajuanQuery->where('ketua_dosen_id', $user->dosen->id)->get();
-            // Check if there are no reports
-            if ($laporanKemajuan->isEmpty()) {
-                // Option 1: Redirect to the create page with the jenis parameter
-                return redirect()->route('laporan-kemajuan.create', ['jenis' => $jenis])
-                                 ->with('info', 'Belum ada laporan kemajuan. Silakan buat laporan baru.');
-            } else {
-                // Option 2: Return the view with the laporan kemajuan data and an info message
-
-       
-
-                // Check if all reviewers for each usulan have accepted (status == 'Diterima')
-                foreach ($laporanKemajuan as $usulan) {
-                    // Count the total number of reviewers
-                    $totalReviewers = $usulan->penilaianReviewers->count();
-
-                    // Count the number of reviewers who have accepted (status == 'Diterima')
-                    $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
-
-                    // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
-                    $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+            // Ambil data usulan berdasarkan ketua dosen dan jenis skema
+            $getUsulan = Usulan::where('ketua_dosen_id', $user->dosen->id)
+                ->where('jenis_skema', $jenis)
+                ->get(); // Menggunakan get() karena bisa ada lebih dari satu usulan
+        
+            // Cek apakah ada laporan kemajuan untuk usulan tersebut
+            foreach ($getUsulan as $usulan) {
+                $existingLaporan = LaporanKemajuan::where('usulan_id', $usulan->id)->first();
+        
+                // Jika laporan kemajuan tidak ditemukan, arahkan ke halaman pembuatan laporan baru
+                if (!$existingLaporan) {
+                    return redirect()->route('laporan-kemajuan.create', ['jenis' => $jenis])
+                        ->with('info', 'Belum ada laporan kemajuan untuk usulan ini. Silakan buat laporan baru.');
                 }
-
-
-                return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis','usulan'))
-                       ->with('info', 'Belum ada laporan kemajuan. Silakan buat laporan baru.');
             }
+        
+            // Ambil laporan kemajuan setelah pengecekan
+            $laporanKemajuan = LaporanKemajuan::with('usulan', 'penilaianReviewers.reviewer')
+                ->whereIn('usulan_id', $getUsulan->pluck('id')) // Mengambil laporan kemajuan berdasarkan usulan_id yang ditemukan
+                ->get();
+        
+            // Check if all reviewers for each usulan have accepted (status == 'Diterima')
+            foreach ($laporanKemajuan as $laporan) {
+                // Hitung jumlah reviewer
+                $totalReviewers = $laporan->penilaianReviewers->count();
+        
+                // Hitung jumlah reviewer yang diterima (status == 'Diterima')
+                $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+        
+                // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
+                $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+            }
+        
+            // Kembalikan tampilan dengan data laporan kemajuan
+            return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis'))
+                ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
         }
+        
          elseif ($user->hasRole('Reviewer')) {
             // Reviewer can see only reports associated with the proposals they are reviewing
             $laporanKemajuan = $laporanKemajuanQuery->whereHas('usulan.penilaianReviewers', function ($query) use ($user) {
@@ -372,9 +387,126 @@ public function kirim(Request $request)
 
 
 
+public function perbaikiRevisi($jenis, $id)
+{
+    // Fetch related penilaianReviewer and indikatorPenilaians
+    $penilaianReviewer = PenilaianReviewer::where('laporankemajuan_id', $id)->firstOrFail();
+    $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+        ->whereIn('kriteria_id', KriteriaPenilaian::where('jenis', $jenis)->where('proses', 'Laporan Kemajuan')->pluck('id'))
+        ->get();
+
+    // Fetch the related LaporanKemajuan (if exists)
+    $laporanKemajuan = LaporanKemajuan::where('id', $id)
+        ->first(); // Fetch the existing LaporanKemajuan record
+    // Return the perbaiki revisi view with the additional laporanKemajuan variable
+    return view('laporan_kemajuan.perbaiki_revisi', compact('penilaianReviewer', 'indikatorPenilaians', 'laporanKemajuan'));
+}
 
 
+
+public function simpanPerbaikan(Request $request, $id)
+{
+    // Validate input
+    $request->validate([
+        'file_perbaikan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
+    ]);
     
+    // Fetch the related PenilaianReviewer
+    $penilaianReviewer = PenilaianReviewer::where('laporankemajuan_id', $id)->firstOrFail();
     
+    // Handle file upload
+    $file = $request->file('file_perbaikan');
+    
+    // Get the original file name
+    $originalFileName = $file->getClientOriginalName(); 
+    
+    // Define the storage path and store the file with its original name
+    $filePath = $file->storeAs('laporan_perbaikans', $originalFileName, 'public'); // Store with original name
+    
+    $laporanKemajuan = LaporanKemajuan::findOrFail($id);
+    
+    // Delete the old file if it exists
+    if ($laporanKemajuan->dokumen_laporan_kemajuan) {
+        Storage::disk('public')->delete($laporanKemajuan->dokumen_laporan_kemajuan);
+    }
+    
+    // Update the LaporanKemajuan record with the new file path
+    $laporanKemajuan->dokumen_laporan_kemajuan = $filePath;
+    $laporanKemajuan->status = 'waiting approved';
+    $laporanKemajuan->save();
+
+    if ($laporanKemajuan) {
+        $penilaianReviewer->status_penilaian = 'sudah diperbaiki';
+        $penilaianReviewer->save();
+    }
+  $jenis = $laporanKemajuan->jenis;
+    // Redirect back with a success message
+  return redirect()->route('laporan-kemajuan.show', ['jenis' => $jenis])->with('success', 'Berhasil di simpan');
+}
+
+
+
+public function updateStatus($id, Request $request)
+{
+    // Find the Usulan by ID
+    $laporanKemajuan = LaporanKemajuan::findOrFail($id);
+
+    // Validate the request data
+    $validated = $request->validate([
+        'status' => 'required|in:approved,rejected', // Only allow 'approved' or 'rejected' status
+    ]);
+
+    // Update the status of the Usulan
+    $laporanKemajuan->status = $validated['status'];
+    $laporanKemajuan->save(); // Save the updated status
+    return redirect()->back()->with('success', 'Berhasil di simpan.');
+}
+ 
+
+
+public function cetakBuktiACC($id)
+{
+    // Ambil data usulan dengan relasi terkait
+    $laporanKemajuan = LaporanKemajuan::with(['usulan.ketuaDosen', 'usulan.anggotaDosen.dosen.user', 'usulan.anggotaMahasiswa'])
+                    ->findOrFail($id);
+
+    // Ambil timestamp Unix
+    $timestamp = time(); // Mendapatkan timestamp Unix saat ini
+
+    // Generate Barcode 2D (QR Code) menggunakan milon/barcode
+    // Menggabungkan ID usulan dan timestamp ke dalam QR Code
+    $dataToEncode = [
+        'id' => $laporanKemajuan->id,
+        'timestamp' => $timestamp,
+    ];
+    
+    // Encode data menjadi JSON string
+    $jsonData = json_encode($dataToEncode);
+
+    // Encrypt JSON data before encoding it to QR Code
+    $encryptedData = Crypt::encryptString(json_encode($dataToEncode));
+
+// Generate QR Code containing encrypted data
+     $barcode2D = \DNS2D::getBarcodePNG($encryptedData, 'QRCODE');
+
+  
+    // Simpan Barcode 2D ke file sementara di storage
+    $barcode2DPath = 'public/images/ttd_usulan_2D_' . $laporanKemajuan->id . '.png';
+    \Storage::put($barcode2DPath, base64_decode($barcode2D)); // Decode base64 sebelum disimpan
+
+    // Dapatkan URL untuk QR Code yang disimpan
+    $barcode2DUrl = \Storage::url($barcode2DPath); // Mendapatkan URL yang dapat diakses publik
+
+    // Mengonversi QR Code ke Base64
+    $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/' . $barcode2DPath)));
+
+    // Generate PDF
+    $pdf = \PDF::loadView('laporan_kemajuan.bukti_acc', [
+        'laporanKemajuan' => $laporanKemajuan,
+        'barcodeBase64' => $barcodeBase64, // Kirim Base64 barcode ke view
+    ]);
+    // Kembalikan file PDF untuk diunduh
+    return $pdf->download('bukti_acc_' . $laporanKemajuan->id . '.pdf');
+}
 
 }

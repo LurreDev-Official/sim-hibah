@@ -159,16 +159,18 @@
                                         <td class="text-end">
                                             @role('Dosen')
                                             <td>
+                                                @if ($laporan->status == 'submitted')
                                                 <!-- Tombol Edit -->
                                                 <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
                                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
                                                     Edit
                                                 </button>
+                                                @endif
 
                                                 <!-- Tombol Download Bukti ACC -->
-                                                @if ($usulan->status == 'approved')
+                                                @if ($laporan->status == 'approved')
                                                     <div class="col p-2">
-                                                        <a href="{{ route('usulan.cetakBuktiACC', $usulan->id) }}"
+                                                        <a href="{{ route('laporan-kemajuan.cetakBuktiACC', $laporan->id) }}"
                                                             class="btn btn-success btn-sm" target="_blank">
                                                             <i class="fas fa-download"></i> Download Bukti ACC
                                                         </a>
@@ -178,9 +180,9 @@
                                               
 
                                                 <!-- Tombol Perbaiki Revisi -->
-                                                @if ($usulan->status == 'revision')
+                                                @if ($laporan->status == 'revision')
                                                     <div class="d-flex justify-content-end mt-4">
-                                                        <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $usulan->id]) }}"
+                                                        <a href="{{ route('laporan-kemajuan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $laporan->id]) }}"
                                                             class="btn btn-secondary">
                                                             <i class="fas fa-edit"></i> Perbaiki Revisi
                                                         </a>
@@ -188,10 +190,10 @@
                                                 @endif
 
                                                 <!-- Tombol Hapus (Untuk Ketua) -->
-                                                @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                                @if ($anggotaDosencek->status_anggota == 'ketua' && $laporan->status == 'draft')
                                                     <div class="col p-2">
                                                         <button class="btn btn-danger btn-sm"
-                                                            onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})">
+                                                            onclick="deleteUsulan('{{ $jenis }}', {{ $laporan->id }})">
                                                             <i class="fas fa-trash-alt"></i> Hapus
                                                         </button>
                                                     </div>
@@ -296,13 +298,13 @@
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title"
                                                                         id="approveRejectModalLabel{{ $laporan->id }}">
-                                                                        Approve or Reject Usulan</h5>
+                                                                        Approve or Reject </h5>
                                                                     <button type="button" class="btn-close"
                                                                         data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form
-                                                                        action="{{ route('usulan.updateStatus', $laporan->id) }}"
+                                                                        action="{{ route('laporan-kemajuan.updateStatus', $laporan->id) }}"
                                                                         method="POST">
                                                                         @csrf
                                                                         @method('PUT')
@@ -326,16 +328,8 @@
                                                         </div>
                                                     </div>
                                                 @else
-                                                    <span class="text-danger">Waiting for approval from all reviewers.</span>
+                                                tidak ada aksi
                                                 @endif
-
-                                                <!-- Tombol Hapus Usulan -->
-                                                <div class="col p-2">
-                                                    <button class="btn btn-danger btn-sm"
-                                                        onclick="deleteUsulan('{{ $jenis }}', {{ $laporan->id }})">
-                                                        <i class="fas fa-trash-alt"></i> Hapus
-                                                    </button>
-                                                </div>
 
                                             </td>
 

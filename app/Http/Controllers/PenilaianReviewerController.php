@@ -13,6 +13,7 @@ use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
 use App\Models\LaporanKemajuan;
+use App\Models\LaporanAkhir;
 
 
 use Illuminate\Http\Request;
@@ -305,18 +306,30 @@ public function indexReviewUsulan()
  */
 public function indexReviewLaporanAkhir()
 {
+    // Get the reviewer for the authenticated user
     $reviewer = Reviewer::where('user_id', auth()->id())->first();
-
+    
+    // Check if the reviewer exists
     if (!$reviewer) {
         return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
     }
 
-    $laporanAkhir = PenilaianReviewer::where('reviewer_id', $reviewer->id)
-        ->where('status_penilaian', 'Laporan Akhir')
-        ->with('usulan')
-        ->paginate(10);
+    // Fetch the penilaian reviewer with conditions
+    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+        ->where('proses_penilaian', 'Laporan Akhir')
+        ->where('urutan_penilaian', 3)
+        ->where(function($query) {
+            $query->whereNotNull('laporanakhir_id');
+        })
+        ->with('laporanakhir') // Eager load 'usulan' relationship
+        ->get();
 
-    return view('penilaian_reviewers.review_laporan_akhir', compact('laporanAkhir'));
+    // This will loop through each 'getpenilaianreview' item and fetch the corresponding 'laporan kemajuan'
+    $laporanAkhirs = $getpenilaianreview->map(function ($penilaian) {
+        return LaporanAkhir::findOrFail($penilaian->laporanakhir_id);
+    });
+
+    return view('penilaian_reviewers.review_laporan_akhir', compact('getpenilaianreview', 'laporanAkhirs'));
 }
 
 
@@ -359,10 +372,10 @@ public function lihatReviewUsulan($usulanId)
 
 
 
-public function lihatReviewLaporanKemajuan($usulanId)
+public function lihatReviewLaporanKemajuan($id)
 {
     // Ambil data usulan berdasarkan ID
-    $laporanKemajuan = LaporanKemajuan::findOrFail($usulanId);
+    $laporanKemajuan = LaporanKemajuan::findOrFail($id);
     // Ambil data user yang sedang login
     $user = auth()->user();
     // Cari reviewer berdasarkan user login
@@ -390,6 +403,40 @@ public function lihatReviewLaporanKemajuan($usulanId)
     // Kirim data ke view
     return view('penilaian_reviewers.update_penilaian_kemajuan', compact('laporanKemajuan', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));
 }
+
+
+public function lihatReviewLaporanAkhir($id)
+{
+    // Ambil data usulan berdasarkan ID
+    $laporanAkhir = LaporanAkhir::findOrFail($id);
+    // Ambil data user yang sedang login
+    $user = auth()->user();
+    // Cari reviewer berdasarkan user login
+    $reviewer = Reviewer::where('user_id', $user->id)->first();
+
+    // Ambil jenis skema dari usulan
+    $jenis_skema = $laporanAkhir->jenis_skema;
+
+    // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses 'usulan'
+    $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
+                                         ->where('proses', 'Laporan Akhir')
+                                         ->pluck('id');
+
+    // Ambil semua IndikatorPenilaian berdasarkan KriteriaPenilaian yang sesuai
+    $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')
+                                              ->whereIn('kriteria_id', $matchingKriteria)
+                                              ->get();
+   // Ambil data penilaian reviewer dengan kondisi where pada relasi
+    $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    ->where('laporanakhir_id', $laporanAkhir->id)
+    ->with(['formPenilaians' => function ($query) {
+        $query->with('indikator');
+    }])
+    ->firstOrFail();
+    // Kirim data ke view
+    return view('penilaian_reviewers.update_penilaian_akhir', compact('laporanAkhir', 'indikatorPenilaians', 'penilaianReviewer', 'reviewer'));
+}
+
 
 public function updateStatus($id, Request $request)
 {
