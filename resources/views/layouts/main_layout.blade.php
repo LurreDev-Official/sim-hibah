@@ -411,6 +411,21 @@
             });
         </script>
     @endif
+
+
+    @if (Session::has('info'))
+        <script>
+            Swal.fire({
+                text: `{{ Session::get('info') }}`,
+                icon: "info",
+                buttonsStyling: false,
+                confirmButtonText: "Ok",
+                customClass: {
+                    confirmButton: "btn btn-primary"
+                }
+            });
+        </script>
+    @endif
     @if (Session::has('error'))
         <script>
             Swal.fire({
