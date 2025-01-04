@@ -34,7 +34,7 @@ class HomeController extends Controller
     {
         
     // Panggil fungsi untuk update semua dosen terkait proposal
-    // $result = $this->updateJumlahProposalForAllDosen();
+    $result = $this->updateJumlahProposalForAllDosen();
         // Ambil user yang sedang login
         $user = Auth::user();
 
@@ -104,7 +104,9 @@ class HomeController extends Controller
                     ->where('dosen_id', Auth::user()->id) // Hanya untuk dosen yang sedang login
                     ->get();
 
-                  
+
+                   
+
                 return view('dashboard.index', compact(
                     'user' ,
                     'dosenData',
@@ -185,39 +187,58 @@ class HomeController extends Controller
 
 
 public function updateJumlahProposalForAllDosen()
-{
-    // Ambil semua dosen dari tabel dosens
-    $dosens = Dosen::all();
+{ 
 
-    // Looping melalui semua dosen
-    foreach ($dosens as $dosen) {
-        // Hitung jumlah usulan sebagai ketua untuk tahun ini
-        $usulanKetua = Usulan::where('ketua_dosen_id', $dosen->id)
-            ->whereYear('tahun_pelaksanaan', Carbon::now()->year)
-            ->count();
+    // Mendapatkan data Dosen yang sedang login
+$dosenData = Auth::user()->dosen;
 
-        // Hitung jumlah usulan sebagai anggota untuk tahun ini
-        $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
-            ->whereIn('status_anggota', ['anggota'])
-            ->whereHas('proposal', function($query) {
-                $query->whereYear('tahun_pelaksanaan', Carbon::now()->year);
-            })
-            ->count();
+// Tahun pelaksanaan saat ini
+$currentYear = now()->year;
 
-        // Hitung total usulan (ketua + anggota)
-        $totalUsulan = $usulanKetua + $usulanAnggota;
-        // dd($totalUsulan);
+// Menghitung jumlah proposal Penelitian sebagai Ketua
+$countPenelitian = Usulan::where('ketua_dosen_id', $dosenData->id)
+    ->where('tahun_pelaksanaan', '=', $currentYear)
+    ->where('jenis_skema', 'penelitian')
+    ->count();
 
-        // Update jumlah_proposal dosen
-      
-        // Cari dosen berdasarkan dosen_id
-            $dosen = Dosen::find($dosen->id);
-            $dosen->jumlah_proposal = $totalUsulan;
-            $dosen->save();
+// Menghitung jumlah proposal Pengabdian sebagai Ketua
+$countPengabdian = Usulan::where('ketua_dosen_id', $dosenData->id)
+    ->where('tahun_pelaksanaan', '=', $currentYear)
+    ->where('jenis_skema', 'pengabdian')
+    ->count();
 
-    }
+// Mendapatkan usulan penelitian tahun ini
+$usulanPenelitian = Usulan::where('jenis_skema', 'penelitian')
+    ->whereYear('tahun_pelaksanaan', '=', $currentYear)
+    ->get();
 
-    return response()->json(['success' => 'Jumlah proposal untuk semua dosen telah diperbarui.']);
+// Menghitung jumlah proposal penelitian sebagai Anggota
+$countAnggota2ProposalPenelitian = AnggotaDosen::whereIn('usulan_id', $usulanPenelitian->pluck('id'))
+    ->where('status_anggota', 'anggota')
+    ->where('dosen_id', $dosenData->id)
+    ->count(); // Gunakan count() untuk mendapatkan jumlah elemen
+
+// Mendapatkan usulan pengabdian tahun ini
+$usulanPengabdian = Usulan::where('jenis_skema', 'pengabdian')
+    ->whereYear('tahun_pelaksanaan', '=', $currentYear)
+    ->get();
+
+// Menghitung jumlah proposal pengabdian sebagai Anggota
+$countAnggota2ProposalPengabdian = AnggotaDosen::whereIn('usulan_id', $usulanPengabdian->pluck('id'))
+    ->where('status_anggota', 'anggota')
+    ->where('dosen_id', $dosenData->id)
+    ->count(); // Gunakan count() untuk mendapatkan jumlah elemen
+
+// Total semua count
+$totalProposal = $countPenelitian + $countPengabdian + $countAnggota2ProposalPenelitian + $countAnggota2ProposalPengabdian;
+
+// Update jumlah_proposal di Model Dosen
+$dosenData->update([
+    'jumlah_proposal' => $totalProposal,
+    'kuota_proposal' => 6-$totalProposal
+]);
+
+
 }
 
 

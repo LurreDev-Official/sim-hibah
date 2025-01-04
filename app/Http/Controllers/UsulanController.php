@@ -205,7 +205,7 @@ class UsulanController extends Controller
         //     'rejected',     // Dokumen ditolak oleh pembimbing atau pihak berwenang
         // ]);
          // Retrieve all usulans where jenis_skema matches the $jenis (penelitian or pengabdian)
-         $usulans = Usulan::where('jenis_skema', $jenis)->paginate(10);
+         $usulans = Usulan::where('jenis_skema', $jenis)->get();
          $reviewers = Reviewer::with('user')->get();
 
          return view('usulan.index', compact('usulans', 'jenis','reviewers')) ->with('success', 'Usulan berhasil ditambah!');

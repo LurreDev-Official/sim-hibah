@@ -4,16 +4,17 @@
 
 <head>
     <base href="">
-    <title>SIM HIBAH UNHASY</title>
-    <meta name="description" content="Sistem Informasi Manajemen Hibah Universitas Hasyim Asy'ari">
-    <meta name="keywords" content="SIM HIBAH UNHASY, Hibah, Universitas Hasyim Asy'ari" />
+    <title>Sistem Informasi Hibah UNHASY</title>
+    <meta name="description" content="Sistem Informasi Manajemen Hibah Universitas Hasyim Asy'ari (UNHASY), platform terbaik untuk pengelolaan hibah akademik dan penelitian.">
+    <meta name="keywords" content="Sistem Informasi Hibah UNHASY, Hibah UNHASY, Universitas Hasyim Asy'ari, Pengelolaan Hibah" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content="SIM HIBAH UNHASY" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sistem Informasi Hibah UNHASY" />
+    <meta property="og:description" content="Platform manajemen hibah Universitas Hasyim Asy'ari untuk mendukung pengelolaan hibah akademik secara efisien dan transparan." />
     <meta property="og:url" content="https://unhasy.ac.id" />
-    <meta property="og:site_name" content="UNHASY" />
+    <meta property="og:site_name" content="Sistem Informasi Hibah UNHASY" />
     <link rel="canonical" href="https://unhasy.ac.id" />
     <link rel="shortcut icon" href="{{ asset('assets/media/logos/unhasy-favicon.ico') }}" />
     <!--begin::Fonts-->
@@ -28,6 +29,7 @@
     <!--end::Global Stylesheets Bundle-->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 </head>
+
 
 <!--end::Head-->
 <!--begin::Body-->
@@ -115,7 +117,7 @@
                                     <div class="menu menu-lg-rounded menu-column menu-lg-row menu-state-bg menu-title-gray-700 menu-state-title-primary menu-state-icon-primary menu-state-bullet-primary menu-arrow-gray-400 fw-bold my-5 my-lg-0 align-items-stretch" id="#kt_header_menu" data-kt-menu="true">
                                         <div class="menu-item me-lg-1">
                                             <a class="menu-link active py-3" target="_blank" href="{{ url('') }}">
-                                                <span class="menu-title">Menu Mobile</span>
+                                                <span class="menu-title">Home</span>
                                             </a>
                                         </div>
                                         
@@ -143,7 +145,7 @@
                                     <!--begin::User-->
                                     <!-- Ganti dengan akses statis, tanpa pengecekan level pengguna -->
                                     <!--begin::Notifikasi-->
-                                    <div class="d-flex align-items-center ms-1 ms-lg-3">
+                                    {{-- <div class="d-flex align-items-center ms-1 ms-lg-3">
                                         <!--begin::Menu- wrapper-->
                                         <div class="btn btn-icon btn-active-light-primary position-relative w-30px h-30px w-md-40px h-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end" data-kt-menu-flip="bottom">
                                             <!--begin::Svg Icon | path: icons/duotune/general/gen022.svg-->
@@ -253,7 +255,7 @@
                                             <!--end::Tab content-->
                                         </div>
                                         <!--end::Menu-->
-                                    </div>
+                                    </div> --}}
                                     <!--end::Notifikasi-->
                                 </div>
 

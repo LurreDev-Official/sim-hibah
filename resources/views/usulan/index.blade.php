@@ -88,7 +88,7 @@
 
                         <!--begin::Table-->
                         <div class="table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-usulan">
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
@@ -109,7 +109,7 @@
                                 <!--end::Table head-->
 
                                 <!--begin::Table body-->
-                                <tbody id="myTable">
+                                <tbody>
                                     @forelse($usulans as $usulan)
                                         <tr>
                                             <td>{{ $usulan->id }}</td>
@@ -575,12 +575,6 @@
                 <!--end::Card body-->
 
                 <!--begin::Pagination-->
-                <div class="py-5">
-                    <ul class="pagination">
-                        {{ $usulans->links() }}
-                    </ul>
-                </div>
-                <!--end::Pagination-->
             </div>
             <!--end::Card-->
         </div>
@@ -589,24 +583,11 @@
     <!--end::Post-->
     </div>
 @endsection
-
+@section('js')
+<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
 <script>
-    document.getElementById('myInput').addEventListener('keyup', function() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById('myInput');
-        filter = input.value.toUpperCase();
-        table = document.getElementById('myTable');
-        tr = table.getElementsByTagName('tr');
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName('td')[0]; // Search by Judul Usulan
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = '';
-                } else {
-                    tr[i].style.display = 'none';
-                }
-            }
-        }
+    var xin_table = $('#table-usulan').DataTable({
+        searchable: true,
     });
 </script>
+@endsection

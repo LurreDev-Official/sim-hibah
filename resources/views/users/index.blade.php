@@ -61,7 +61,7 @@
                     <div class="card-body pt-0">
                         <!--begin::Table-->
                         <div class="table-responsive">
-                            <table class="table align-middle table-row-dashed fs-6 gy-5">
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-users">
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
@@ -149,14 +149,7 @@
                     </div>
 
 
-                    <div class="py-5">
-                        <!--begin::Pages-->
-                        <ul class="pagination">
-                            {{ $data->links() }}
-                        </ul>
-                        <!--end::Pages-->
-                    </div>
-                    <!--end::Card body-->
+                    
                 </div>
             </div>
         </div>
@@ -168,4 +161,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+@endsection
+@section('js')
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-users').DataTable({
+            searchable: true,
+        });
+    </script>
 @endsection

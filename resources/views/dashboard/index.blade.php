@@ -521,8 +521,4 @@
             </div>
         </div>
     </div>
-    </div>
-    </div>
-    <!--end::Post-->
-    </div>
 @endsection

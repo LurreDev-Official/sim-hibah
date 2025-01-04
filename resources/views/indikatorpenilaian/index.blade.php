@@ -44,7 +44,7 @@
                 <!-- Card Body -->
                 <div class="card-body pt-0">
                     <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-indikator">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                     <th>No</th>
@@ -53,7 +53,7 @@
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 fw-bold" id="myTable">
+                            <tbody class="text-gray-600 fw-bold">
                                 @foreach ($indikatorPenilaians as $key => $indikator)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
@@ -124,11 +124,7 @@
                 </div>
                 <!-- End Card Body -->
 
-                <div class="py-5">
-                    <ul class="pagination">
-                        {{ $indikatorPenilaians->links() }}
-                    </ul>
-                </div>
+                
             </div>
             <!-- End Card -->
         </div>
@@ -209,14 +205,17 @@
         });
     }
 
-    // Pencarian tabel
-    document.getElementById('searchInput').addEventListener('keyup', function() {
-        let value = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#myTable tr');
-        rows.forEach(row => {
-            let match = row.innerText.toLowerCase().includes(value);
-            row.style.display = match ? '' : 'none';
-        });
-    });
+    
 </script>
+
+
+@endsection
+
+@section('js')
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-indikator').DataTable({
+            searchable: true,
+        });
+    </script>
 @endsection

@@ -1,8 +1,6 @@
 @extends('layouts.main_layout')
 
-@section('css')
-    <link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
-@endsection
+ 
 
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -45,7 +43,7 @@
                     </div>
 
                     <div class="card-body pt-0">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporanke">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                     <th>ID</th>
@@ -56,7 +54,7 @@
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 fw-bold" id="myTable">
+                            <tbody class="text-gray-600 fw-bold">
                                 @foreach ($laporanKemajuan as $laporan)
 
                                 @php
@@ -434,7 +432,7 @@
 @section('js')
     <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <script>
-        var xin_table = $('#table-laporan').DataTable({
+        var xin_table = $('#table-laporanke').DataTable({
             searchable: true,
         });
     </script>
