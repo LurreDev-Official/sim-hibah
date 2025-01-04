@@ -139,20 +139,16 @@ class UsulanController extends Controller
      */
     public function store(Request $request, $jenis)
     {
-        // Panggil validasi usulan baru
-    $validation = $this->validasiUsulanBaru($jenis);
-    if ($validation->getData()->status == 'error') {
-        // Jika validasi gagal, kembalikan error response
-        return response()->json(['error' => $validation->getData()->message], 400);
-    }
+        $validation = $this->validasiUsulanBaru($jenis);
 
-
-
-    $dosen = Dosen::where('user_id', Auth::user()->id)->first();
-    if ($dosen->sinta_score >= 200) {
-        // Menggunakan back dengan pesan error
-        return back()->with('error', 'Skoring SINTA Anda kurang dari 200, tidak bisa menjadi ketua pengusul.');
-    }else {
+        if ($validation instanceof \Illuminate\Http\RedirectResponse) {
+            return $validation; // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
+        }
+    
+        $dosen = Dosen::where('user_id', Auth::user()->id)->first();
+        if ($dosen->sinta_score >= 200) {
+            return back()->with('error', 'Skoring SINTA Anda kurang dari 200, tidak bisa menjadi ketua pengusul.');
+        } else {
 
     
         // Validate the incoming request data
@@ -619,47 +615,30 @@ public function cetakBuktiACC($id)
 }
 
 
-public function validasiUsulanBaru()
+public function validasiUsulanBaru($jenis)
 {
-    // Ambil dosen yang sedang login
     $user_id = auth()->user()->id;
     $dosen = Dosen::where('user_id', $user_id)->first();
-    // 1. Validasi Ketua: Dosen hanya boleh menjadi ketua untuk 1 usulan
+
     $usulanKetua = Usulan::where('ketua_dosen_id', $dosen->id)
-        ->where('tahun_pelaksanaan', Carbon::now()->year) // Pastikan tahun saat ini
-        ->where('jenis_skema', $jenis) // Menambahkan validasi berdasarkan jenis skema
+        ->where('tahun_pelaksanaan', Carbon::now()->year)
+        ->where('jenis_skema', $jenis)
         ->count();
 
     if ($usulanKetua >= 1) {
-        // Menggunakan back dengan pesan error
         return back()->with('error', 'Anda sudah menjadi ketua di 1 usulan proposal pada tahun ini.');
     }
 
-    // 2. Validasi Anggota: Dosen hanya boleh menjadi anggota untuk 2 usulan (Riset atau PKM)
     $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
-        ->whereIn('status_anggota', ['anggota']) // Hanya yang berstatus anggota
+        ->where('status_anggota', 'anggota')
         ->whereHas('proposal', function($query) {
-            $query->whereYear('tahun_pelaksanaan', Carbon::now()->year); // Pastikan tahun saat ini
+            $query->whereYear('tahun_pelaksanaan', Carbon::now()->year);
         })
         ->count();
 
     if ($usulanAnggota >= 2) {
-        // Menggunakan back dengan pesan error
         return back()->with('error', 'Anda sudah menjadi anggota di 2 usulan proposal pada tahun ini.');
     }
-
-    // 3. Validasi Skoring SINTA: Ketua harus memiliki skoring SINTA minimal 200
-    if ($dosen->sinta_score >= 200) {
-        // Menggunakan back dengan pesan error
-        return back()->with('error', 'Skoring SINTA Anda kurang dari 200, tidak bisa menjadi ketua pengusul.');
-    }
-
-    if ($dosen->sinta_score < 200) {
-        return response()->json(['status' => 'error', 'message' => 'Skoring SINTA Anda kurang dari 200, tidak bisa menjadi ketua pengusul.']);
-    }
-
-    // Jika semua validasi lolos
-    return response()->json(['status' => 'success', 'message' => 'Usulan dapat diajukan.']);
 }
 
 

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
+use App\Models\LaporanKemajuan;
 
 use Illuminate\Support\Facades\Crypt;
 class LaporanAkhirController extends Controller
@@ -48,14 +49,14 @@ class LaporanAkhirController extends Controller
         // Check if the user has the 'Dosen' role
         if ($user->hasRole('Dosen')) {
             // Filter Usulan based on ketua_dosen_id and optionally the 'jenis' if provided
-            $usulans = Usulan::where('ketua_dosen_id', $user->dosen->id)
+            $laporakemajuans = LaporanKemajuan::where('ketua_dosen_id', $user->dosen->id)
             ->when($jenis, function($query, $jenis) {
-                return $query->where('jenis_skema', $jenis);  // Filtering by jenis
+                return $query->where('jenis', $jenis);  // Filtering by jenis
             })
             ->where('status', 'approved') // Adding the status filter after the initial condition
             ->get();
         
-            return view('laporan_akhir.create', compact('usulans', 'jenis'));
+            return view('laporan_akhir.create', compact('laporakemajuans', 'jenis'));
         } else {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membuat laporan.');
         }
@@ -72,11 +73,6 @@ class LaporanAkhirController extends Controller
         'dokumen_laporan_akhir' => 'required|file|mimes:pdf,doc,docx|max:2048',
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
-
-
-
-
-    // Check if usulan_id already exists in LaporanKemajuan
     $existingLaporanKemajuan = LaporanAkhir::where('usulan_id', $validated['usulan_id'])->first();
 
     if ($existingLaporanKemajuan) {

@@ -382,7 +382,7 @@ public function lihatReviewLaporanKemajuan($id)
     $reviewer = Reviewer::where('user_id', $user->id)->first();
 
     // Ambil jenis skema dari usulan
-    $jenis_skema = $laporanKemajuan->jenis_skema;
+    $jenis_skema = $laporanKemajuan->jenis;
 
     // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses 'usulan'
     $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
@@ -415,7 +415,7 @@ public function lihatReviewLaporanAkhir($id)
     $reviewer = Reviewer::where('user_id', $user->id)->first();
 
     // Ambil jenis skema dari usulan
-    $jenis_skema = $laporanAkhir->jenis_skema;
+    $jenis_skema = $laporanAkhir->jenis;
 
     // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses 'usulan'
     $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)

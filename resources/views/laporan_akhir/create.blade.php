@@ -48,11 +48,11 @@
                             <!-- Usulan Dropdown -->
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
-                                    <label for="usulan_id"><strong>Usulan:</strong></label>
+                                    <label for="usulan_id"><strong>Laporan Kemajuan Sebelumnya:</strong></label>
                                     <select name="usulan_id" id="usulan_id" class="form-select">
                                         <option value="">Pilih Usulan</option>
-                                        @foreach ($usulans as $usulan)
-                                        <option value="{{ $usulan->id }}">{{ $usulan->judul_usulan }}</option>
+                                        @foreach ($laporakemajuans as $laporankemajuan)
+                                        <option value="{{ $laporankemajuan->usulan_id }}">{{ $laporankemajuan->usulan->judul_usulan }}</option>
                                         @endforeach
                                     </select>
                                 </div>
