@@ -23,12 +23,10 @@
                 <div class="card">
                     <!--begin::Card header-->
                     <div class="card-header border-0 pt-6">
-                        <!--begin::Card title-->
                         <div class="card-title">
                             <div class="d-flex align-items-center position-relative my-1">
                                 <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2"
                                             rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
                                         <path
@@ -40,7 +38,6 @@
                                     placeholder="Cari Kriteria" />
                             </div>
                         </div>
-                        <!--end::Card title-->
                         <div class="card-toolbar">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#createModal">
@@ -52,7 +49,7 @@
 
                     <!--begin::Card body-->
                     <div class="card-body pt-0">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kriteriaTable">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-kriteria">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                     <th>No</th>
@@ -149,62 +146,16 @@
         <!--end::Post-->
     </div>
 
-    <!-- Create Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tambah Kriteria Penilaian</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ route('kriteria-penilaian.store') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Kriteria</label>
-                            <input type="text" class="form-control" name="nama" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="jenis" class="form-label">Jenis</label>
-                            <select name="jenis" class="form-select" required>
-                                <option value="penelitian">Penelitian</option>
-                                <option value="pengabdian">Pengabdian</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="proses" class="form-label">Proses</label>
-                            <select name="proses" class="form-select" required>
-                                <option value="Usulan">Usulan</option>
-                                <option value="Laporan Kemajuan">Laporan Kemajuan</option>
-                                <option value="Laporan Akhir">Laporan Akhir</option>
-                            </select>
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
-
-@section('js')
-    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#kriteriaTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json"
-                },
-                "searching": true,
-                "paging": true,
-                "info": true
-            });
-
-            // Live search for input filter
-            $('#searchInput').on('keyup', function() {
-                $('#kriteriaTable').DataTable().search(this.value).draw();
+            $('#table-kriteria').DataTable({
+                responsive: true,
+                processing: true,
+                paging: true,
+                searching: true,
+                columnDefs: [
+                    { targets: 4, orderable: false } // Disable ordering for Actions column
+                ]
             });
         });
 
@@ -231,9 +182,7 @@
                                 'Berhasil!',
                                 'Data telah dihapus.',
                                 'success'
-                            ).then(() => {
-                                location.reload();
-                            });
+                            ).then(() => location.reload());
                         },
                         error: function() {
                             Swal.fire(
@@ -246,5 +195,14 @@
                 }
             });
         }
+    </script>
+@endsection
+
+@section('js')
+<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-kriteria').DataTable({
+            searchable: true,
+        });
     </script>
 @endsection

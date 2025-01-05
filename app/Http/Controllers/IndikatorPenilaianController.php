@@ -11,7 +11,7 @@ class IndikatorPenilaianController extends Controller
     public function index()
     {
         $kriteriaPenilaians = KriteriaPenilaian::all();
-        $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')->paginate(10);
+        $indikatorPenilaians = IndikatorPenilaian::with('kriteriaPenilaian')->get();
         return view('indikatorpenilaian.index', compact('indikatorPenilaians','kriteriaPenilaians'));
     }
 

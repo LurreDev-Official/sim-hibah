@@ -44,7 +44,9 @@
 
             <!-- Menu Kelola Users untuk Role "Kepala LPPM" -->
             @role('Kepala LPPM')
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
+                <!-- Menu Kelola Users -->
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->routeIs('users.index') || request()->routeIs('kriteria-penilaian.index') || request()->routeIs('indikator-penilaian.index') ? 'show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
@@ -64,28 +66,26 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ route('users.index') }}">
+                            <a class="menu-link {{ request()->routeIs('users.index') ? 'active' : '' }}"
+                                href="{{ route('users.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="list"></i>
                                 </span>
                                 <span class="menu-title">Daftar Users</span>
                             </a>
                         </div>
-                    </div>
-                    <div class="menu-sub menu-sub-accordion">
-                        <!-- Menu item for Kriteria Penilaian -->
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ route('kriteria-penilaian.index') }}">
+                            <a class="menu-link {{ request()->routeIs('kriteria-penilaian.index') ? 'active' : '' }}"
+                                href="{{ route('kriteria-penilaian.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
                                 <span class="menu-title">Kriteria Penilaian</span>
                             </a>
                         </div>
-
-                        <!-- Menu item for Indikator Penilaian -->
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ route('indikator-penilaian.index') }}">
+                            <a class="menu-link {{ request()->routeIs('indikator-penilaian.index') ? 'active' : '' }}"
+                                href="{{ route('indikator-penilaian.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -93,12 +93,11 @@
                             </a>
                         </div>
                     </div>
-
-
                 </div>
 
                 <!-- Menu Penelitian -->
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('usulan/penelitian') || request()->is('laporan-kemajuan/penelitian') || request()->is('laporan-akhir/penelitian') ? 'show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
@@ -110,7 +109,8 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('usulan/penelitian') }}">
+                            <a class="menu-link {{ request()->is('usulan/penelitian') ? 'active' : '' }}"
+                                href="{{ url('usulan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="file-text"></i>
                                 </span>
@@ -118,7 +118,8 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-kemajuan/penelitian') }}">
+                            <a class="menu-link {{ request()->is('laporan-kemajuan/penelitian') ? 'active' : '' }}"
+                                href="{{ url('laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -126,7 +127,51 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-akhir/penelitian') }}">
+                            <a class="menu-link {{ request()->is('laporan-akhir/penelitian') ? 'active' : '' }}"
+                                href="{{ url('laporan-akhir/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Laporan Akhir</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Pengabdian -->
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('usulan/pengabdian') || request()->is('laporan-kemajuan/pengabdian') || request()->is('laporan-akhir/pengabdian') ? 'show' : '' }}">
+                    <span class="menu-link">
+                        <span class="menu-icon">
+                            <span class="svg-icon svg-icon-2">
+                                <i class="bi bi-people-fill"></i>
+                            </span>
+                        </span>
+                        <span class="menu-title">Pengabdian</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('usulan/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('usulan/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="file-text"></i>
+                                </span>
+                                <span class="menu-title">Usulan</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('laporan-kemajuan/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('laporan-kemajuan/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="bar-chart"></i>
+                                </span>
+                                <span class="menu-title">Laporan Kemajuan</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('laporan-akhir/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('laporan-akhir/pengabdian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
@@ -137,9 +182,12 @@
                 </div>
             @endrole
 
+
             @role('Dosen')
                 <!-- Menu Penelitian -->
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
+                <!-- Menu Penelitian -->
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('usulan/penelitian') || request()->is('laporan-kemajuan/penelitian') || request()->is('laporan-akhir/penelitian') ? 'show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
@@ -151,7 +199,8 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('usulan/penelitian') }}">
+                            <a class="menu-link {{ request()->is('usulan/penelitian') ? 'active' : '' }}"
+                                href="{{ url('usulan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="file-text"></i>
                                 </span>
@@ -159,7 +208,8 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-kemajuan/penelitian') }}">
+                            <a class="menu-link {{ request()->is('laporan-kemajuan/penelitian') ? 'active' : '' }}"
+                                href="{{ url('laporan-kemajuan/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -167,7 +217,52 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('laporan-akhir/penelitian') }}">
+                            <a class="menu-link {{ request()->is('laporan-akhir/penelitian') ? 'active' : '' }}"
+                                href="{{ url('laporan-akhir/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Laporan Akhir</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Pengabdian -->
+                <!-- Menu Pengabdian -->
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('usulan/pengabdian') || request()->is('laporan-kemajuan/pengabdian') || request()->is('laporan-akhir/pengabdian') ? 'show' : '' }}">
+                    <span class="menu-link">
+                        <span class="menu-icon">
+                            <span class="svg-icon svg-icon-2">
+                                <i class="bi bi-people"></i>
+                            </span>
+                        </span>
+                        <span class="menu-title">Pengabdian</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('usulan/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('usulan/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="file-text"></i>
+                                </span>
+                                <span class="menu-title">Usulan</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('laporan-kemajuan/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('laporan-kemajuan/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="bar-chart"></i>
+                                </span>
+                                <span class="menu-title">Laporan Kemajuan</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('laporan-akhir/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('laporan-akhir/pengabdian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
@@ -179,7 +274,9 @@
             @endrole
 
             @role('Reviewer')
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion">
+                <!-- Menu Review -->
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->routeIs('review-usulan.index') || request()->routeIs('review-laporan-kemajuan.index') || request()->is('review-laporan-akhir') ? 'show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
@@ -192,7 +289,8 @@
                     <div class="menu-sub menu-sub-accordion">
                         <!-- Menu Usulan -->
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ route('review-usulan.index') }}">
+                            <a class="menu-link {{ request()->routeIs('review-usulan.index') ? 'active' : '' }}"
+                                href="{{ route('review-usulan.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="file-text"></i>
                                 </span>
@@ -201,7 +299,8 @@
                         </div>
                         <!-- Menu Laporan Kemajuan -->
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ route('review-laporan-kemajuan.index') }}">
+                            <a class="menu-link {{ request()->routeIs('review-laporan-kemajuan.index') ? 'active' : '' }}"
+                                href="{{ route('review-laporan-kemajuan.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart"></i>
                                 </span>
@@ -210,7 +309,8 @@
                         </div>
                         <!-- Menu Laporan Akhir -->
                         <div class="menu-item">
-                            <a class="menu-link" href="{{ url('review-laporan-akhir') }}">
+                            <a class="menu-link {{ request()->is('review-laporan-akhir') ? 'active' : '' }}"
+                                href="{{ url('review-laporan-akhir') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>

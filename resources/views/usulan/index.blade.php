@@ -1,7 +1,5 @@
 @extends('layouts.main_layout')
-@section('css')
-    <link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
-@endsection
+
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
 
@@ -90,13 +88,11 @@
 
                         <!--begin::Table-->
                         <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
-
+                            <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-usulan">
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                         <th class="min-w-125px">No</th>
-                                        <th class="min-w-150px">Dibuat</th>
                                         <th class="min-w-150px">Judul Usulan</th>
                                         <th class="min-w-150px">Tahun Pelaksanaan</th>
                                         <th class="min-w-125px">Status</th>
@@ -113,11 +109,10 @@
                                 <!--end::Table head-->
 
                                 <!--begin::Table body-->
-                                <tbody >
+                                <tbody>
                                     @forelse($usulans as $usulan)
                                         <tr>
                                             <td>{{ $usulan->id }}</td>
-                                            <td>{{ $usulan->created_at }}</td>
                                             <td>{{ $usulan->judul_usulan }}</td>
                                             <td>{{ $usulan->tahun_pelaksanaan }}</td>
                                             <td>
@@ -566,7 +561,7 @@
 
 
                         </tr>
-                        @empty
+                    @empty
                         <tr>
                             <td colspan="12" class="text-center">Tidak ada usulan yang tersedia.</td>
                         </tr>
@@ -580,12 +575,6 @@
                 <!--end::Card body-->
 
                 <!--begin::Pagination-->
-                <div class="py-5">
-                    <ul class="pagination">
-                        {{ $usulans->links() }}
-                    </ul>
-                </div>
-                <!--end::Pagination-->
             </div>
             <!--end::Card-->
         </div>
@@ -594,18 +583,11 @@
     <!--end::Post-->
     </div>
 @endsection
- 
 @section('js')
-    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('#table-usulan').DataTable({
-                responsive: true,
-                searching: true,
-                paging: true,
-                ordering: true,
-                order: [[1, 'desc']], // Default order pada kolom Dibuat
-            });
-        });
-    </script>
+<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+<script>
+    var xin_table = $('#table-usulan').DataTable({
+        searchable: true,
+    });
+</script>
 @endsection
