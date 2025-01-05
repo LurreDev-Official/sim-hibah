@@ -20,7 +20,30 @@
         <div class="post d-flex flex-column-fluid" id="kt_post">
             <div id="kt_content_container" class="container-xxl">
                 <!--begin::Card-->
+                    <div class="card">
+                        <!--begin::Card header-->
+                        <div class="card-header border-0 pt-6">
+                            <div class="card-title text-center">
+                                <h4 class="fw-bold">Data Usulan</h4>
+                            </div>
+                        </div>
+                        <!--end::Card header-->
+                
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <strong>Judul Usulan:</strong> {{ $usulan->judul_usulan }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Jenis Skema:</strong> {{ $usulan->jenis_skema }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Tahun Pelaksanaan:</strong> {{ $usulan->tahun_pelaksanaan }}
+                            </div>
+                        </div>
+                    </div>
+
                 <div class="card">
+
                     <!--begin::Card header-->
                     <div class="card-header border-0 pt-6">
                         <div class="card-title">
@@ -61,7 +84,9 @@
                                         <td>{{ $luaran->judul }}</td>
                                         <td>{{ $luaran->type }}</td>
                                         <td><a href="{{ $luaran->url }}" target="_blank">Link</a></td>
-                                        <td>{{ $luaran->file_loa }}</td>
+                                        <td>
+                                            {{ $luaran->file_loa ? $luaran->file_loa : '-' }}
+                                        </td>
                                         <td class="text-end">
                                             <button class="btn btn-light btn-active-light-primary btn-sm"
                                                 data-bs-toggle="modal"
@@ -135,30 +160,38 @@
                         <h5 class="modal-title">Tambah Luaran</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    
                     <div class="modal-body">
                         <form action="{{ route('luaran.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-
+                            <input type="hidden" name="usulan_id" value="{{ $usulan->id }}">
                             <div class="mb-3">
                                 <label for="judul" class="form-label">Judul</label>
                                 <input type="text" class="form-control" name="judul" required>
                             </div>
-
+                        
                             <div class="mb-3">
                                 <label for="type" class="form-label">Type</label>
-                                <input type="text" class="form-control" name="type" required>
+                                <select class="form-select" name="type" required>
+                                    <option value="" disabled selected>Pilih Tipe</option>
+                                    <option value="artikel">Artikel</option>
+                                    <option value="buku">Buku</option>
+                                    <option value="hki">HKI</option>
+                                    <option value="lain-lain">Lain-lain</option>
+                                </select>
                             </div>
-
+                        
                             <div class="mb-3">
                                 <label for="url" class="form-label">URL</label>
                                 <input type="url" class="form-control" name="url" required>
                             </div>
-
+                        
                             <div class="mb-3">
                                 <label for="file_loa" class="form-label">File LOA</label>
-                                <input type="file" class="form-control" name="file_loa" required>
+                                <input type="file" class="form-control" name="file_loa">
+                                <small class="form-text text-muted">Opsional: Unggah file LOA jika tersedia.</small>
                             </div>
-
+                        
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">Tambah Luaran</button>
                             </div>

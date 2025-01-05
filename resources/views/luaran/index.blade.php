@@ -117,9 +117,9 @@
                                                 @endif
                                             </td> --}}
                                             <td>
-                                                    <!-- Tombol Detail Luaran -->
+                                                    <!-- Tombol create Luaran -->
                                                     <div class="col p-2">
-                                                        <a href="{{ route('luaran.detail', $usulan->id) }}"
+                                                        <a href="{{ route('luaran.create', $usulan->id) }}"
                                                             class="btn btn-info btn-sm">
                                                             <i class="fas fa-info-circle"></i> Detail Luaran
                                                         </a>

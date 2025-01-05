@@ -11,6 +11,8 @@ use App\Models\Dosen;
 use App\Models\AnggotaDosen;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LaporanAkhir;
+use App\Models\LaporanKemajuan;
 
 class LuaranController extends Controller
 {
@@ -26,37 +28,66 @@ class LuaranController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($id)
     {
-        
-        return view('luaran.create', compact('usulans','jenis'));
+        $usulan = Usulan::where('id', $id)->first();
+        $luarans = Luaran::where('usulan_id', $id)->get();
+        $jenis = $usulan->jenis_skema;
+        return view('luaran.create', compact('luarans','usulan', 'jenis'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'url' => 'required|url',
-            'file_loa' => 'required|file|mimes:pdf,doc,docx|max:2048', // Adjust file types and size as needed
-        ]);
+{
+    // Validate the incoming request data
+    $request->validate([
+        'usulan_id' => 'required|exists:usulans,id', // Ensure usulan_id exists in the usulans table
+        'judul' => 'required|string|max:255',
+        'type' => 'required|string|max:255',
+        'url' => 'required|url',
+        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Make file_loa optional
+    ]);
 
-        // Handle file upload
-        $filePath = $request->file('file_loa')->store('files', 'public');
+    try {
+        // Initialize filePath to null
+        $filePath = null;
+
+        // Handle file upload if a file is provided
+        if ($request->hasFile('file_loa')) {
+            $file = $request->file('file_loa');
+            
+            // Generate a unique filename
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            
+            // Store the file in the 'luaran' directory within the 'public' disk
+            $filePath = $file->storeAs('luaran', $filename, 'public');
+        }
+
+        // Retrieve related IDs
+        $laporankemajuan_id = LaporanKemajuan::where('usulan_id', $request->usulan_id)->first()->id;
+        $laporanakhir_id = LaporanAkhir::where('usulan_id', $request->usulan_id)->first()->id;
 
         // Create a new Luaran record
         Luaran::create([
+            'usulan_id' => $request->usulan_id,
+            'laporankemajuan_id' => $laporankemajuan_id,
+            'laporanakhir_id' => $laporanakhir_id,
             'judul' => $request->judul,
             'type' => $request->type,
             'url' => $request->url,
-            'file_loa' => $filePath,
+            'file_loa' => $filePath, // This will be null if no file was uploaded
         ]);
 
-        return redirect()->route('luaran.index')->with('success', 'Luaran created successfully.');
+        // Redirect with success messagew
+        return redirect()->back()->with('success', 'Berhasil di tambahkan');
+
+    } catch (\Exception $e) {
+        // Redirect back with error message
+        return redirect()->back()->with('error', 'An error occurred while creating the Luaran: ' . $e->getMessage());
     }
+}
 
     /**
      * Display the specified resource.
@@ -112,45 +143,51 @@ class LuaranController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Luaran $luaran)
-    {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'url' => 'required|url',
-            'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional file upload
-        ]);
+{
+    $request->validate([
+        'judul' => 'required|string|max:255',
+        'type' => 'required|string|max:255',
+        'url' => 'required|url',
+        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional file upload
+    ]);
 
-        // Update the Luaran record
-        $luaran->judul = $request->judul;
-        $luaran->type = $request->type;
-        $luaran->url = $request->url;
+    // Update the Luaran record
+    $luaran->judul = $request->judul;
+    $luaran->type = $request->type;
+    $luaran->url = $request->url;
 
-        // Handle file upload if a new file is provided
-        if ($request->hasFile('file_loa')) {
-            // Delete the old file if it exists
-            if ($luaran->file_loa) {
-                Storage::disk('public')->delete($luaran->file_loa);
-            }
-            $luaran->file_loa = $request->file('file_loa')->store('files', 'public');
-        }
-
-        $luaran->save(); // Save the updated record
-
-        return redirect()->route('luaran.index')->with('success', 'Luaran updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Luaran $luaran)
-    {
-        // Delete the file if it exists
+    // Handle file upload if a new file is provided
+    if ($request->hasFile('file_loa')) {
+        // Delete the old file if it exists
         if ($luaran->file_loa) {
             Storage::disk('public')->delete($luaran->file_loa);
         }
 
-        $luaran->delete(); // Delete the Luaran record
+        // Store the new file and update the file_loa path
+        $luaran->file_loa = $request->file('file_loa')->store('luaran', 'public'); // Store in 'luaran' directory
+    }
 
-        return redirect()->route('luaran.index')->with('success', 'Luaran deleted successfully.');
+    $luaran->save(); // Save the updated record
+
+    return redirect()->back()->with('success', 'Luaran updated successfully.');
+}
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        // Find the Luaran record by ID
+        $luaran = Luaran::findOrFail($id);
+    
+        // Delete the file if it exists
+        if ($luaran->file_loa) {
+            Storage::disk('public')->delete($luaran->file_loa);
+        }
+    
+        // Delete the Luaran record
+        $luaran->delete();
+    
+        return redirect()->back()->with('success', 'Luaran deleted successfully.');
     }
 }

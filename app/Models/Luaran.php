@@ -10,9 +10,16 @@ class Luaran extends Model
     use HasFactory;
     protected $fillable = [
         'usulan_id',
+        'laporankemajuan_id',
+        'laporanakhir_id',
         'judul',
         'type',
         'url',
         'file_loa',
     ];
+
+    public function usulan()
+    {
+        return $this->hasMany(Usulan::class, 'id', 'usulan_id');
+    }
 }
