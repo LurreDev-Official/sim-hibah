@@ -34,7 +34,7 @@ class HomeController extends Controller
     {
         
     // Panggil fungsi untuk update semua dosen terkait proposal
-    $result = $this->updateJumlahProposalForAllDosen();
+    // $result = $this->updateJumlahProposalForAllDosen();
         // Ambil user yang sedang login
         $user = Auth::user();
 
