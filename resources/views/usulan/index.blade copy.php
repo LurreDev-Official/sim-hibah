@@ -1,7 +1,5 @@
 @extends('layouts.main_layout')
-@section('css')
-    <link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
-@endsection
+
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
 
@@ -90,8 +88,7 @@
 
                         <!--begin::Table-->
                         <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
-
+                            <table class="table align-middle table-row-dashed fs-6 gy-5">
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
@@ -113,7 +110,7 @@
                                 <!--end::Table head-->
 
                                 <!--begin::Table body-->
-                                <tbody >
+                                <tbody id="myTable">
                                     @forelse($usulans as $usulan)
                                         <tr>
                                             <td>{{ $usulan->id }}</td>
@@ -594,18 +591,24 @@
     <!--end::Post-->
     </div>
 @endsection
- 
-@section('js')
-    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('#table-usulan').DataTable({
-                responsive: true,
-                searching: true,
-                paging: true,
-                ordering: true,
-                order: [[1, 'desc']], // Default order pada kolom Dibuat
-            });
-        });
-    </script>
-@endsection
+
+<script>
+    document.getElementById('myInput').addEventListener('keyup', function() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById('myInput');
+        filter = input.value.toUpperCase();
+        table = document.getElementById('myTable');
+        tr = table.getElementsByTagName('tr');
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName('td')[0]; // Search by Judul Usulan
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = '';
+                } else {
+                    tr[i].style.display = 'none';
+                }
+            }
+        }
+    });
+</script>

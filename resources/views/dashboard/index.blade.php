@@ -166,7 +166,6 @@
                                                                         <i class="fas fa-eye"></i> Detail
                                                                     </button>
                                                                 @endif
-                                                            
                                                             @elseif (Auth::user()->hasRole('Reviewer'))
                                                                 <span class="text-primary">Usulan
                                                                     <strong>{{ $notif->judul_usulan }}</strong> menunggu
@@ -368,9 +367,6 @@
                         </div>
                     </div>
 
-
-
-
                     <div class="row">
                         <div class="col-xl-4">
                             <!--begin::List Widget 4-->
@@ -507,22 +503,8 @@
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
                 @endrole
-
-
-
-
-
-
             </div>
         </div>
-    </div>
-    </div>
-    </div>
-    <!--end::Post-->
-    </div>
 @endsection
