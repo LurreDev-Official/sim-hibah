@@ -13,6 +13,7 @@ use App\Http\Controllers\FormPenilaianController;
 use App\Http\Controllers\UsulanPerbaikanController;
 use App\Http\Controllers\LaporanKemajuanController;
 use App\Http\Controllers\LaporanAkhirController;
+use App\Http\Controllers\LuaranController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -78,7 +79,12 @@ Route::get('laporan-kemajuan/{id}/cetak-bukti-acc', [LaporanKemajuanController::
     Route::delete('laporan-akhir/{id}', [LaporanAkhirController::class, 'destroy'])->name('laporan-akhir.destroy');
     Route::put('laporan-akhir/{id}/update-status', [LaporanAkhirController::class, 'updateStatus'])->name('laporan-akhir.updateStatus');
     Route::get('laporan-akhir/{id}/cetak-bukti-acc', [LaporanAkhirController::class, 'cetakBuktiACC'])->name('laporan-akhir.cetakBuktiACC');
-    
+
+
+    //luaran
+    Route::resource('luaran', LuaranController::class);
+    Route::get('luaran/{jenis}', [LuaranController::class, 'show'])->name('luaran.show');
+    Route::get('luaran/create/{jenis?}', [LuaranController::class, 'create'])->name('luaran.create');
 });
 
 // Rute khusus untuk Kepala LPPM
@@ -114,9 +120,6 @@ Route::group(['middleware' => ['role:Dosen']], function () {
     Route::get('detail-laporan-akhir/{jenis}/{id}/perbaiki-revisi', [LaporanAkhirController::class,'perbaikiRevisi'])->name('laporan-akhir.perbaikiRevisi');
     Route::post('detail-laporan-akhir/{id}/perbaiki-revisi', [LaporanAkhirController::class,'simpanPerbaikan'])->name('laporan-akhir.simpanPerbaikan');
 
- 
-
-
     // Rute untuk anggota dosen
     Route::post('/anggota-dosen', [AnggotaDosenController::class, 'store'])->name('anggota-dosen.store');
     Route::put('/anggota-dosen/{anggota_dosen}', [AnggotaDosenController::class, 'update'])->name('anggota-dosen.update');
@@ -127,6 +130,8 @@ Route::group(['middleware' => ['role:Dosen']], function () {
     // Rute untuk anggota mahasiswa
     Route::post('/anggota-mahasiswa/store', [AnggotaMahasiswaController::class, 'store'])->name('anggota-mahasiswa.store');
     Route::delete('/anggota-mahasiswa/{id}', [AnggotaMahasiswaController::class, 'destroy'])->name('anggota-mahasiswa.destroy');
+
+
 });
 
 // Reviewer Routes

@@ -34,7 +34,6 @@ class HomeController extends Controller
     {
         
     // Panggil fungsi untuk update semua dosen terkait proposal
-    // $result = $this->updateJumlahProposalForAllDosen();
         // Ambil user yang sedang login
         $user = Auth::user();
 
@@ -65,6 +64,8 @@ class HomeController extends Controller
         'countLaporanAkhirPengabdian'
     ));
         } elseif ($user->hasRole('Dosen')) {
+    $result = $this->updateJumlahProposalForAllDosen();
+
             // Cek apakah data dosen sudah ada untuk user_id tertentu
                 $dosenData = Dosen::where('user_id', $user->id)->first();
                 

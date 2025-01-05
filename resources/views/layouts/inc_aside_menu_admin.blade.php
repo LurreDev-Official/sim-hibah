@@ -135,6 +135,15 @@
                                 <span class="menu-title">Laporan Akhir</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('luaran/penelitian') ? 'active' : '' }}"
+                                href="{{ url('luaran/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Luaran</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -176,6 +185,61 @@
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
                                 <span class="menu-title">Laporan Akhir</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('luaran/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('luaran/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Luaran</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'show' : '' }}">
+                    <span class="menu-link"
+                        aria-expanded="{{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'true' : 'false' }}">
+                        <span class="menu-icon">
+                            <span class="svg-icon svg-icon-2">
+                                <i class="bi bi-file-earmark-arrow-down"></i> <!-- Example icon for export -->
+                            </span>
+                        </span>
+                        <span class="menu-title">Export</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('export/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
+                                </span>
+                                <span class="menu-title">Export Pengabdian</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('luaran/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('luaran/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">luaran</span>
+                            </a>
+                        </div>
+                        
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('export/penelitian') ? 'active' : '' }}"
+                                href="{{ url('export/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
+                                </span>
+                                <span class="menu-title">Export Penelitian</span>
                             </a>
                         </div>
                     </div>
@@ -225,10 +289,17 @@
                                 <span class="menu-title">Laporan Akhir</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('luaran/penelitian') ? 'active' : '' }}"
+                                href="{{ url('luaran/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Luaran</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Menu Pengabdian -->
                 <!-- Menu Pengabdian -->
                 <div data-kt-menu-trigger="click"
                     class="menu-item menu-accordion {{ request()->is('usulan/pengabdian') || request()->is('laporan-kemajuan/pengabdian') || request()->is('laporan-akhir/pengabdian') ? 'show' : '' }}">
@@ -267,6 +338,50 @@
                                     <i class="align-middle" data-feather="check-square"></i>
                                 </span>
                                 <span class="menu-title">Laporan Akhir</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('luaran/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('luaran/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="check-square"></i>
+                                </span>
+                                <span class="menu-title">Luaran</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'show' : '' }}">
+                    <span class="menu-link"
+                        aria-expanded="{{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'true' : 'false' }}">
+                        <span class="menu-icon">
+                            <span class="svg-icon svg-icon-2">
+                                <i class="bi bi-file-earmark-arrow-down"></i> <!-- Example icon for export -->
+                            </span>
+                        </span>
+                        <span class="menu-title">Export</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('export/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
+                                </span>
+                                <span class="menu-title">Export Pengabdian</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('export/penelitian') ? 'active' : '' }}"
+                                href="{{ url('export/penelitian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
+                                </span>
+                                <span class="menu-title">Export Penelitian</span>
                             </a>
                         </div>
                     </div>

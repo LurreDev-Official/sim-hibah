@@ -240,7 +240,7 @@ public function kirim(Request $request)
                 // Jika laporan kemajuan tidak ditemukan, arahkan ke halaman pembuatan laporan baru
                 if (!$existingLaporan) {
                     return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
-                        ->with('info', 'Belum ada laporan kemajuan untuk usulan ini. Silakan buat laporan baru.');
+                        ->with('info', 'Belum ada laporan Akhir untuk Laporan Kemajuan ini. Silakan buat laporan baru.');
                 }
             }
 

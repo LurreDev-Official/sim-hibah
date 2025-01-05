@@ -152,7 +152,7 @@
                             <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                 <div class="form-group">
                                     <strong>Lama Kegiatan (dalam tahun):</strong>
-                                    <input type="number" name="lama_kegiatan" class="form-control" readonly value="12" value="{{ old('lama_kegiatan') }}">
+                                    <input type="number" name="lama_kegiatan" class="form-control" readonly value="1" value="{{ old('lama_kegiatan') }}">
                                     @error('lama_kegiatan')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
