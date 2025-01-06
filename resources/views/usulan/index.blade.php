@@ -58,6 +58,11 @@
                                     <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}" class="btn btn-primary">Tambah
                                         Usulan</a>
                                 @endrole
+                                <!-- Export Button -->
+                                <a href="{{ route('usulan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                                    <i class="fa fa-download"></i> Export Data
+                                </a>
+
                                 @php
                                     // Ambil data dosen terkait user yang sedang login
                                     $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
@@ -354,7 +359,7 @@
                                                 <td>
                                                     <div class="col p-2">
                                                         <!-- Button Pilih/Kirim Ke Reviewer -->
-                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review' )
+                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review')
                                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
                                                                 data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
                                                                 <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
@@ -517,7 +522,8 @@
                                         if (result.isConfirmed) {
                                             // Jika konfirmasi di-klik
                                             $.ajax({
-                                                url: '{{ url('usulan') }}/' + jenis + '/' + id,  // Pastikan URL-nya sesuai dengan route di controller
+                                                url: '{{ url('usulan') }}/' + jenis + '/' +
+                                                id, // Pastikan URL-nya sesuai dengan route di controller
                                                 type: 'DELETE', // HTTP method DELETE
                                                 data: {
                                                     "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
@@ -555,7 +561,6 @@
                                     });
                                 }
                             </script>
-                            
                         @endrole
 
 
@@ -584,10 +589,10 @@
     </div>
 @endsection
 @section('js')
-<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
-<script>
-    var xin_table = $('#table-usulan').DataTable({
-        searchable: true,
-    });
-</script>
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-usulan').DataTable({
+            searchable: true,
+        });
+    </script>
 @endsection

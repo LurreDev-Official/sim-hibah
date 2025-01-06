@@ -109,8 +109,8 @@ class LuaranController extends Controller
                 $usulans = Usulan::whereIn('id', $usulanIds)
                                  ->where('jenis_skema', $jenis)
                                  ->where('status', 'approved')->get();
-                dd($usulans);
-                                //  return view('luaran.index', compact('usulans', 'jenis'));
+                // dd($usulans);
+                                 return view('luaran.index', compact('usulans', 'jenis'));
             }
         }
     }

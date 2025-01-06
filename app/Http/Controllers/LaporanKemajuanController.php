@@ -14,12 +14,19 @@ use App\Models\FormPenilaian;
 use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
+use App\Models\TemplateDokumen;
+
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
 
 use Illuminate\Support\Facades\Crypt;
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanKemajuanExport;
+
+
 class LaporanKemajuanController extends Controller
 {
     /**
@@ -99,8 +106,9 @@ class LaporanKemajuanController extends Controller
         })
         ->where('status', 'approved') // Adding the status filter after the initial condition
         ->get();
+        $getTemplate = TemplateDokumen::where('proses', 'Laporan Kemajuan')->where('skema', $jenis)->first();
     
-        return view('laporan_kemajuan.create', compact('usulans', 'jenis'));
+        return view('laporan_kemajuan.create', compact('usulans', 'jenis','getTemplate'));
     } else {
         return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membuat laporan.');
     }
@@ -508,5 +516,21 @@ public function cetakBuktiACC($id)
     // Kembalikan file PDF untuk diunduh
     return $pdf->download('bukti_acc_' . $laporanKemajuan->id . '.pdf');
 }
+
+
+public function export($jenis)
+{
+    $user = auth()->user(); // Get the logged-in user
+
+    // Check if the user is authorized to export data
+    if ($user->hasRole('Kepala LPPM') || $user->hasRole('Dosen')) {
+        return Excel::download(new LaporanKemajuanExport($jenis), 'laporan_kemajuan_' . $jenis . '.xlsx');
+    }
+
+    // If the user does not have a valid role
+    return redirect()->route('home')->withErrors('You do not have permission to export data.');
+}
+
+
 
 }

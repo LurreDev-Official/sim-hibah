@@ -14,6 +14,7 @@ use App\Http\Controllers\UsulanPerbaikanController;
 use App\Http\Controllers\LaporanKemajuanController;
 use App\Http\Controllers\LaporanAkhirController;
 use App\Http\Controllers\LuaranController;
+use App\Http\Controllers\TemplateDokumenController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -46,12 +47,16 @@ Auth::routes();
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 // Rute untuk Kepala LPPM dan Dosen (akses bersama)
      Route::group(['middleware' => ['role:Kepala LPPM|Dosen']], function () {
+
+    Route::resource('template-dokumen', TemplateDokumenController::class);
     // Rute terkait usulan
     Route::get('usulan/{jenis}', [UsulanController::class, 'show'])->name('usulan.show');
     Route::delete('usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
 
     Route::put('usulan/{id}/update-status', [UsulanController::class, 'updateStatus'])->name('usulan.updateStatus');
     Route::get('usulan/{id}/cetak-bukti-acc', [UsulanController::class, 'cetakBuktiACC'])->name('usulan.cetakBuktiACC');
+    //export excel usulan
+    Route::get('usulan/{jenis}/export', [UsulanController::class, 'export'])->name('usulan.export');
 
     Route::resource('perbaikan-usulan', UsulanPerbaikanController::class);
 
@@ -71,6 +76,7 @@ Route::delete('laporan-kemajuan/{id}', [LaporanKemajuanController::class, 'destr
 Route::put('laporan-kemajuan/{id}/update-status', [LaporanKemajuanController::class, 'updateStatus'])->name('laporan-kemajuan.updateStatus');
 Route::get('laporan-kemajuan/{id}/cetak-bukti-acc', [LaporanKemajuanController::class, 'cetakBuktiACC'])->name('laporan-kemajuan.cetakBuktiACC');
 
+Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class, 'export'])->name('laporan-kemajuan.export');
 
     Route::resource('review-laporan-akhir', LaporanAkhirController::class);
     Route::resource('laporan-akhir', LaporanAkhirController::class);
@@ -85,6 +91,9 @@ Route::get('laporan-kemajuan/{id}/cetak-bukti-acc', [LaporanKemajuanController::
     Route::resource('luaran', LuaranController::class);
     Route::get('luaran/{jenis}', [LuaranController::class, 'show'])->name('luaran.show');
     Route::get('luaran/create/{jenis?}', [LuaranController::class, 'create'])->name('luaran.create');
+    Route::delete('luaran/{id}', [LuaranController::class, 'destroy'])->name('luaran.destroy');
+
+
 });
 
 // Rute khusus untuk Kepala LPPM
@@ -97,6 +106,9 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
     Route::post('/laporan-kemajuan/{jenis}/kirim', [LaporanKemajuanController::class, 'kirim'])->name('laporan-kemajuan.kirim');
     Route::post('/laporan-akhir/{jenis}/kirim', [LaporanAkhirController::class, 'kirim'])->name('laporan-akhir.kirim');
+
+
+    Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
 
 });
 

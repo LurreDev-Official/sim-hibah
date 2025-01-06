@@ -34,7 +34,7 @@
                 <div class="card-header border-0 pt-6">
                     <div class="card-toolbar">
                         <div class="d-flex justify-content-end">
-                            <a class="btn btn-primary" href="{{ route('laporan-akhir.show', ['jenis' => $jenis]) }}">Kembali</a>
+                            <a class="btn btn-primary" href="{{ url('/') }}">Kembali</a>
 
                         </div>
                     </div>
@@ -42,6 +42,21 @@
 
                 <div class="card-body pt-0">
                     <!-- Bootstrap 5 Form -->
+                    <div class="card-body pt-0">
+                        @if ($getTemplate == null)
+                        <div class="alert alert-danger">
+                            <strong>Whoops!</strong> Template Laporan Akhir penelitian belum tersedia.<br><br>
+                        </div>
+                    @else
+                        <div class="alert alert-info">
+                            <h3 class="text-center">Template Laporan Akhir Penelitian</h3>
+                            <strong>Info!</strong> Silahkan download template Laporan Akhir penelitian <a
+                                href="{{ asset('storage/' . $getTemplate->file) }}" class="btn btn-success btn-sm"
+                                download>disini</a>.
+                        </div>
+                    @endif
+                    <hr>
+
                     <form action="{{ route('laporan-akhir.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row">

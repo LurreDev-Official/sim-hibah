@@ -92,6 +92,16 @@
                                 <span class="menu-title">Indikator Penilaian</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->routeIs('template-dokumen.index') ? 'active' : '' }}"
+                                href="{{ route('template-dokumen.index') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="file-text"></i>
+                                </span>
+                                <span class="menu-title">Daftar Template Dokumen</span>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
 
@@ -367,15 +377,6 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
-                                href="{{ url('export/pengabdian') }}">
-                                <span class="menu-bullet">
-                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
-                                </span>
-                                <span class="menu-title">Export Pengabdian</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
                             <a class="menu-link {{ request()->is('export/penelitian') ? 'active' : '' }}"
                                 href="{{ url('export/penelitian') }}">
                                 <span class="menu-bullet">
@@ -384,6 +385,16 @@
                                 <span class="menu-title">Export Penelitian</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('export/pengabdian') }}">
+                                <span class="menu-bullet">
+                                    <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
+                                </span>
+                                <span class="menu-title">Export Pengabdian</span>
+                            </a>
+                        </div>
+                       
                     </div>
                 </div>
             @endrole

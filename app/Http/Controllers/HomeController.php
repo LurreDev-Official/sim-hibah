@@ -64,7 +64,6 @@ class HomeController extends Controller
         'countLaporanAkhirPengabdian'
     ));
         } elseif ($user->hasRole('Dosen')) {
-    $result = $this->updateJumlahProposalForAllDosen();
 
             // Cek apakah data dosen sudah ada untuk user_id tertentu
                 $dosenData = Dosen::where('user_id', $user->id)->first();
@@ -73,6 +72,8 @@ class HomeController extends Controller
                 if (!$dosenData) {
                     return redirect()->route('profile.edit', ['id' => $user->id])->with('message', 'Harap lengkapi profil dosen Anda.');
                 }
+    $result = $this->updateJumlahProposalForAllDosen();
+
                 $currentYear = Carbon::now()->year;
                 // Jika data dosen sudah ada, tampilkan halaman dashboard
                 $countPenelitian = Usulan::where('ketua_dosen_id', $dosenData->id)

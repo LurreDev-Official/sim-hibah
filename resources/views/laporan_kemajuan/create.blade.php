@@ -41,6 +41,20 @@
                 </div>
 
                 <div class="card-body pt-0">
+                    @if ($getTemplate == null)
+                    <div class="alert alert-danger">
+                        <strong>Whoops!</strong> Template Laporan Kemajuan penelitian belum tersedia.<br><br>
+                    </div>
+                @else
+                    <div class="alert alert-info">
+                        <h3 class="text-center">Template Laporan Kemajuan Penelitian</h3>
+                        <strong>Info!</strong> Silahkan download template Laporan Kemajuan penelitian <a
+                            href="{{ asset('storage/' . $getTemplate->file) }}" class="btn btn-success btn-sm"
+                            download>disini</a>.
+                    </div>
+                @endif
+                <hr>
+
                     <!-- Bootstrap 5 Form -->
                     <form action="{{ route('laporan-kemajuan.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf

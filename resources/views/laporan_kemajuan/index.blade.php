@@ -45,6 +45,9 @@
                     </div>
 
                     <div class="card-body pt-0">
+                        <a href="{{ route('laporan-kemajuan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                            <i class="fa fa-download"></i> Export Data
+                        </a>
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">

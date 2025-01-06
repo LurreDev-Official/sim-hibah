@@ -20,7 +20,9 @@ use Illuminate\Support\Facades\Auth;
 use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
-
+use App\Models\TemplateDokumen;
+use App\Exports\UsulanExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UsulanController extends Controller
 {
@@ -131,7 +133,10 @@ class UsulanController extends Controller
         $dosens = Dosen::where('id', '!=',$ketua_dosen_id)
         ->where('status', 'anggota') // Sesuaikan 'anggota' dengan status yang diinginkan
         ->get();
-        return view('usulan.create', compact('dosens','jenis'));
+
+        //get template
+        $getTemplate = TemplateDokumen::where('proses', 'Usulan')->where('skema', $jenis)->first();
+        return view('usulan.create', compact('dosens','jenis','getTemplate'));
     }
 
     /**
@@ -268,6 +273,13 @@ class UsulanController extends Controller
         return redirect()->back() 
             ->with('success', 'Usulan berhasil diperbarui!');
     }
+
+    public function export($jenis)
+    {
+        // Return the export file as an Excel download
+        return Excel::download(new UsulanExport($jenis), 'usulan_' . $jenis . '.xlsx');
+    }
+
 
     /**
      * Remove the specified resource from storage.

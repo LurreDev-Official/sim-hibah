@@ -20,6 +20,7 @@ use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
 use App\Models\LaporanKemajuan;
+use App\Models\TemplateDokumen;
 
 use Illuminate\Support\Facades\Crypt;
 class LaporanAkhirController extends Controller
@@ -55,8 +56,8 @@ class LaporanAkhirController extends Controller
             })
             ->where('status', 'approved') // Adding the status filter after the initial condition
             ->get();
-        
-            return view('laporan_akhir.create', compact('laporakemajuans', 'jenis'));
+            $getTemplate = TemplateDokumen::where('proses', 'Laporan Akhir')->where('skema', $jenis)->first();
+            return view('laporan_akhir.create', compact('laporakemajuans', 'jenis','getTemplate'));
         } else {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membuat laporan.');
         }
@@ -469,6 +470,78 @@ public function cetakBuktiACC($id)
     // Kembalikan file PDF untuk diunduh
     return $pdf->download('bukti_acc_' . $laporanAkhir->id . '.pdf');
 }
+
+
+public function report(Request $request, $jenis)
+    {
+        $user = Auth::user(); // Ambil data user yang sedang login
+
+        // Ambil filter rentang tanggal dari request
+        $startDate = $request->input('start_date'); // Tanggal mulai
+        $endDate = $request->input('end_date'); // Tanggal akhir
+
+        // Mengubah format tanggal jika ada filter
+        $startDate = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
+        $endDate = $endDate ? Carbon::parse($endDate)->endOfDay() : null;
+
+        // Jika user adalah Kepala LPPM, ambil semua laporan akhir yang disetujui (approved)
+        if ($user->hasRole('Kepala LPPM')) {
+            $laporanAkhir = LaporanAkhir::where('status', 'approved') // Hanya laporan dengan status approved
+                ->when($jenis, function ($query, $jenis) {
+                    $query->where('jenis', $jenis);
+                })
+                ->when($startDate, function ($query) use ($startDate) {
+                    $query->where('created_at', '>=', $startDate);
+                })
+                ->when($endDate, function ($query) use ($endDate) {
+                    $query->where('created_at', '<=', $endDate);
+                })
+                ->get();
+
+            // Return data ke view
+            return view('laporan_akhir.report', compact('laporanAkhir', 'jenis', 'startDate', 'endDate'));
+
+        } elseif ($user->hasRole('Dosen')) {
+            // Untuk Dosen, ambil usulan yang terkait dengan ketua dosen dan jenis skema
+            $usulans = Usulan::where('ketua_dosen_id', $user->dosen->id)
+                ->where('jenis_skema', $jenis)
+                ->get();
+
+            $laporanAkhir = collect(); // Menampung laporan akhir yang ditemukan untuk dosen terkait
+            
+            foreach ($usulans as $usulan) {
+                // Cari laporan akhir yang terkait dengan usulan
+                $existingLaporan = LaporanAkhir::where('usulan_id', $usulan->id)
+                    ->where('status', 'approved') // Hanya laporan dengan status approved
+                    ->when($startDate, function ($query) use ($startDate) {
+                        $query->where('created_at', '>=', $startDate);
+                    })
+                    ->when($endDate, function ($query) use ($endDate) {
+                        $query->where('created_at', '<=', $endDate);
+                    })
+                    ->first();
+                
+                if ($existingLaporan) {
+                    // Jika ditemukan laporan akhir yang approved, tambahkan ke koleksi
+                    $laporanAkhir->push($existingLaporan);
+                }
+            }
+
+            // Jika tidak ada laporan akhir ditemukan
+            if ($laporanAkhir->isEmpty()) {
+                return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
+                    ->with('info', 'Belum ada Laporan Akhir yang disetujui untuk usulan ini. Silakan buat laporan baru.');
+            }
+
+            // Return data ke view untuk Dosen
+            return view('laporan_akhir.report', compact('laporanAkhir', 'jenis', 'startDate', 'endDate'));
+        }
+
+        // Jika user tidak memiliki role yang diizinkan
+        return redirect()->route('home')->with('error', 'Akses ditolak');
+    }
+
+
 
 
 }
