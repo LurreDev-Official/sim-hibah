@@ -527,12 +527,6 @@ public function report(Request $request, $jenis)
                 }
             }
 
-            // Jika tidak ada laporan akhir ditemukan
-            if ($laporanAkhir->isEmpty()) {
-                return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
-                    ->with('info', 'Belum ada Laporan Akhir yang disetujui untuk usulan ini. Silakan buat laporan baru.');
-            }
-
             // Return data ke view untuk Dosen
             return view('laporan_akhir.report', compact('laporanAkhir', 'jenis', 'startDate', 'endDate'));
         }

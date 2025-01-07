@@ -85,6 +85,7 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::delete('laporan-akhir/{id}', [LaporanAkhirController::class, 'destroy'])->name('laporan-akhir.destroy');
     Route::put('laporan-akhir/{id}/update-status', [LaporanAkhirController::class, 'updateStatus'])->name('laporan-akhir.updateStatus');
     Route::get('laporan-akhir/{id}/cetak-bukti-acc', [LaporanAkhirController::class, 'cetakBuktiACC'])->name('laporan-akhir.cetakBuktiACC');
+    Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
 
 
     //luaran
@@ -92,6 +93,8 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::get('luaran/{jenis}', [LuaranController::class, 'show'])->name('luaran.show');
     Route::get('luaran/create/{jenis?}', [LuaranController::class, 'create'])->name('luaran.create');
     Route::delete('luaran/{id}', [LuaranController::class, 'destroy'])->name('luaran.destroy');
+
+
 
 
 });
@@ -108,7 +111,6 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::post('/laporan-akhir/{jenis}/kirim', [LaporanAkhirController::class, 'kirim'])->name('laporan-akhir.kirim');
 
 
-    Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
 
 });
 

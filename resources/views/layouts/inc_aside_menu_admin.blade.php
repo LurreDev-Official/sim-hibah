@@ -377,21 +377,21 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->is('export/penelitian') ? 'active' : '' }}"
-                                href="{{ url('export/penelitian') }}">
+                            <a class="menu-link {{ request()->is('report/penelitian') ? 'active' : '' }}"
+                                href="{{ url('report/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
                                 </span>
-                                <span class="menu-title">Export Penelitian</span>
+                                <span class="menu-title">Report Penelitian</span>
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
-                                href="{{ url('export/pengabdian') }}">
+                            <a class="menu-link {{ request()->is('report/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('report/pengabdian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
                                 </span>
-                                <span class="menu-title">Export Pengabdian</span>
+                                <span class="menu-title">Report Pengabdian</span>
                             </a>
                         </div>
                        
