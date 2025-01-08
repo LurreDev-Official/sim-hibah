@@ -53,9 +53,6 @@
                         <div class="card-toolbar">
                             <!--begin::Toolbar-->
                             <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
-                                <!--begin::Add -->
-
-
                             </div>
                         </div>
                         <!--end::Card toolbar-->

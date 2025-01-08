@@ -536,6 +536,4 @@ public function report(Request $request, $jenis)
     }
 
 
-
-
 }
