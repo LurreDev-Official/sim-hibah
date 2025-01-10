@@ -25,23 +25,28 @@
                 <div class="card">
                     <div class="card-header border-0 pt-6">
                         <div class="card-title">
-                            <div class="d-flex align-items-center position-relative my-1">
-                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2"
-                                            rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
-                                        <path
-                                            d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 11 17ZM17 7.53333"
-                                            fill="black" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="myInput" class="form-control form-control-solid w-250px ps-15"
-                                    placeholder="Search Laporan" name="search" />
-                            </div>
+                            <form method="POST" action="{{ route('report.filter') }}" class="d-flex align-items-center">
+                                @csrf
+                                <select name="startYear" class="form-control form-control-solid me-3">
+                                    <option value="">Tahun Awal</option>
+                                    @for ($year = 2025; $year <= 2030; $year++)
+                                        <option value="{{ $year }}" {{ old('startYear') == $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endfor
+                                </select>
+                                <select name="endYear" class="form-control form-control-solid me-3">
+                                    <option value="">Tahun Akhir</option>
+                                    @for ($year = 2025; $year <= 2030; $year++)
+                                        <option value="{{ $year }}" {{ old('endYear') == $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endfor
+                                </select>
+                                <button type="submit" name="action" value="filter" class="btn btn-primary me-2">Filter</button>
+                                <button type="submit" name="action" value="export" class="btn btn-success">Export Excel</button>
+                            </form>
                         </div>
-
-
                     </div>
 
                     <div class="card-body pt-0">
@@ -52,9 +57,8 @@
                                     <th>Created</th>
                                     <th>Judul Laporan</th>
                                     <th>Jenis</th>
-                                    <th>Status</th>
                                     <th>Dokumen</th>
-                                    <th class="text-end">Actions</th>
+                                    <th>Luara</th>
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-bold" id="myTable">
@@ -64,6 +68,8 @@
                                         <td>{{ $laporan->created_at }}</td>
                                         <td>{{ $laporan->usulan->judul_usulan }}</td>
                                         <td>{{ $laporan->jenis }}</td>
+                                        <td>{{ $laporan->status }}</td>
+                                        <td><a href="{{ $laporan->dokumen_url }}">Download</a></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -78,8 +84,8 @@
 @section('js')
     <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <script>
-        var xin_table = $('#table-laporan').DataTable({
-            searchable: true,
+        $(document).ready(function() {
+            $('#table-laporan').DataTable();
         });
     </script>
 @endsection

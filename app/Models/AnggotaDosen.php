@@ -16,8 +16,9 @@ class AnggotaDosen extends Model
     protected $fillable = [
         'usulan_id',
         'dosen_id',
+        'jenis_skema',
         'status_anggota',
-        'status'
+        'status',
 
     ];
 

@@ -210,10 +210,10 @@
                 </div>
 
 
-                <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'show' : '' }}">
+                {{-- <div data-kt-menu-trigger="click"
+                    class="menu-item menu-accordion {{ request()->is('repost/pengabdian') || request()->is('repost/penelitian') ? 'show' : '' }}">
                     <span class="menu-link"
-                        aria-expanded="{{ request()->is('export/pengabdian') || request()->is('export/penelitian') ? 'true' : 'false' }}">
+                        aria-expanded="{{ request()->is('repost/pengabdian') || request()->is('repost/penelitian') ? 'true' : 'false' }}">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
                                 <i class="bi bi-file-earmark-arrow-down"></i> <!-- Example icon for export -->
@@ -224,8 +224,8 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->is('export/pengabdian') ? 'active' : '' }}"
-                                href="{{ url('export/pengabdian') }}">
+                            <a class="menu-link {{ request()->is('repost/pengabdian') ? 'active' : '' }}"
+                                href="{{ url('repost/pengabdian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
                                 </span>
@@ -234,8 +234,8 @@
                         </div>
                         
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->is('export/penelitian') ? 'active' : '' }}"
-                                href="{{ url('export/penelitian') }}">
+                            <a class="menu-link {{ request()->is('repost/penelitian') ? 'active' : '' }}"
+                                href="{{ url('repost/penelitian') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="download"></i> <!-- Example icon -->
                                 </span>
@@ -243,7 +243,7 @@
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             @endrole
 
 
@@ -353,7 +353,7 @@
                     </div>
                 </div>
 
-                <div data-kt-menu-trigger="click"
+                {{-- <div data-kt-menu-trigger="click"
                     class="menu-item menu-accordion {{ request()->is('report/pengabdian') || request()->is('report/penelitian') ? 'show' : '' }}">
                     <span class="menu-link"
                         aria-expanded="{{ request()->is('report/pengabdian') || request()->is('report/penelitian') ? 'true' : 'false' }}">
@@ -386,7 +386,7 @@
                         </div>
                        
                     </div>
-                </div>
+                </div> --}}
             @endrole
 
             @role('Reviewer')

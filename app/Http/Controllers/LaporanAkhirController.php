@@ -22,6 +22,8 @@ use Milon\Barcode\DNS2D;
 use App\Models\LaporanKemajuan;
 use App\Models\TemplateDokumen;
 
+use App\Exports\ReportExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 class LaporanAkhirController extends Controller
 {
@@ -536,4 +538,29 @@ public function report(Request $request, $jenis)
     }
 
 
+    public function filterOrExport(Request $request)
+    {
+        $startYear = $request->input('startYear');
+        $endYear = $request->input('endYear');
+        $action = $request->input('action'); // 'filter' or 'export'
+
+        // Validasi input
+        $request->validate([
+            'startYear' => 'required|numeric|min:2025|max:2030',
+            'endYear' => 'required|numeric|min:2025|max:2030|gte:startYear',
+        ]);
+
+        // Ambil data berdasarkan filter tahun
+        $laporanAkhir = LaporanAkhir::whereYear('created_at', '>=', $startYear)
+            ->whereYear('created_at', '<=', $endYear)
+            ->get();
+
+        if ($action === 'filter') {
+            // Kembalikan data ke view untuk ditampilkan
+            return view('report.index', compact('laporanAkhir'));
+        } elseif ($action === 'export') {
+            // Ekspor data ke Excel
+            return Excel::download(new ReportExport($laporanAkhir), "laporan_{$startYear}_{$endYear}.xlsx");
+        }
+    }
 }

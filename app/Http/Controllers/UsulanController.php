@@ -76,9 +76,7 @@ class UsulanController extends Controller
                                  ->paginate(10);
                                  $reviewers = Reviewer::with('user')->get();
                                  return view('usulan.index', compact('usulans', 'jenis','reviewers'));
-        
             }
-
         }
     
         // Jika user memiliki role Reviewer, tampilkan usulan berdasarkan usulan_id dan reviewer_id
@@ -99,7 +97,6 @@ class UsulanController extends Controller
                 return redirect()->back()->with('error', 'Reviewer ini tidak terdaftar pada usulan yang dipilih.');
             }
         }
-    
         // Jika user tidak memiliki peran yang sesuai
         return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini.');
     }
@@ -648,8 +645,8 @@ public function validasiUsulanBaru($jenis)
         })
         ->count();
 
-    if ($usulanAnggota >= 2) {
-        return back()->with('error', 'Anda sudah menjadi anggota di 2 usulan proposal pada tahun ini.');
+    if ($usulanAnggota >= 1) {
+        return back()->with('error', 'Anda sudah menjadi anggota di 1 usulan proposal pada skema '.$jenis);
     }
 }
 

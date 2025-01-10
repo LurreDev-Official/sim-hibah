@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('usulan_id'); // Relasi ke proposal
             $table->unsignedBigInteger('dosen_id'); // Relasi ke dosen
+            $table->enum('jenis_skema', ['penelitian', 'pengabdian']); // Status anggota dosen
             $table->enum('status_anggota', ['ketua', 'anggota']); // Status anggota dosen
             $table->enum('status', ['terima', 'tolak','belum disetujui']); // Status anggota dosen
             $table->timestamps();

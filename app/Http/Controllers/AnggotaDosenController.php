@@ -33,12 +33,25 @@ class AnggotaDosenController extends Controller
         $request->validate([
             'usulan_id' => 'required|exists:usulans,id', // Usahakan sesuai dengan field yang diperlukan
             'dosen_id' => 'required|exists:dosens,id',  // Pastikan tabel dan field dosen sesuai
+            'jenis' => 'required|in:penelitian,pengabdian', // Jenis anggota harus ketua atau anggota
                        
         ]);
+
+        
+        // Cek apakah dosen sudah terdaftar sebagai anggota
+                                $count = AnggotaDosen::where('usulan_id', $request->usulan_id)
+                                ->where('dosen_id', $request->dosen_id)
+                                ->where('jenis_skema', $request->jenis)
+                                ->count();
+
+                                if ($count >= 1) {
+                                    return redirect()->back()->with('error', 'Dosen hanya memiliki 1 kuota sebagai anggota.');
+                                }
 
         // Simpan data ke dalam database
         AnggotaDosen::create([
             'usulan_id' => $request->usulan_id,
+            'jenis_skema' => $request->jenis,
             'dosen_id' => $request->dosen_id,
             'status_anggota' => 'anggota',
             'status' => 'belum disetujui',

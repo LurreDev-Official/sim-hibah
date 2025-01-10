@@ -86,7 +86,7 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::put('laporan-akhir/{id}/update-status', [LaporanAkhirController::class, 'updateStatus'])->name('laporan-akhir.updateStatus');
     Route::get('laporan-akhir/{id}/cetak-bukti-acc', [LaporanAkhirController::class, 'cetakBuktiACC'])->name('laporan-akhir.cetakBuktiACC');
     Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
-
+    Route::post('/report/filter', [LaporanAkhirController::class, 'filterOrExport'])->name('report.filter');
 
     //luaran
     Route::resource('luaran', LuaranController::class);
@@ -109,9 +109,6 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
     Route::post('/laporan-kemajuan/{jenis}/kirim', [LaporanKemajuanController::class, 'kirim'])->name('laporan-kemajuan.kirim');
     Route::post('/laporan-akhir/{jenis}/kirim', [LaporanAkhirController::class, 'kirim'])->name('laporan-akhir.kirim');
-
-
-
 });
 
 // Rute khusus untuk Dosen

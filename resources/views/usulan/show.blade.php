@@ -69,7 +69,7 @@
                             // Ambil data anggota dosen berdasarkan dosen yang login
                             $anggotaDosencek = null;
                             if ($dosen) {
-                                $anggotaDosencek = \App\Models\AnggotaDosen::where('dosen_id', $dosen->id)->first();
+                                $anggotaDosencek = \App\Models\AnggotaDosen::where('dosen_id', $dosen->id)->where('usulan_id',$usulan->id)->first();
                             }
                         @endphp
 
@@ -124,7 +124,6 @@
                                                     @method('PATCH')
                                                     <button type="submit" class="btn btn-success btn-sm">Setuju</button>
                                                 </form>
-
                                                 <form
                                                     action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
                                                     method="POST" style="display:inline;">
@@ -155,10 +154,7 @@
                                         <input type="hidden" name="usulan_id" value="{{ $usulan->id }}">
 
                                         <div class="modal-body">
-                                            <!-- Input Nama Dosen -->
-                                            <!-- Include jQuery -->
-
-
+                                            <input type="text" name="jenis" value="{{ $jenis }}" hidden>
                                             <!-- Dropdown Select2 (di dalam modal tambah dosen) -->
                                             <div class="row mb-4">
                                                 <label class="col-lg-4 fw-bold">Pilih Dosen:</label>
