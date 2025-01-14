@@ -63,7 +63,8 @@ class UsulanExport implements FromCollection, WithHeadings, WithMapping
             $usulan->judul_usulan,
             $usulan->jenis_skema,
             $usulan->tahun_pelaksanaan,
-            $usulan->ketuaDosen->name ?? 'N/A', // Assuming 'name' is a field in Dosen
+            $usulan->ketuaDosen->name ?? 'N/A', // Assuming 'name' is a field in  dan NIDN
+            
             $usulan->dokumen_usulan,
             $usulan->status,
             $usulan->rumpun_ilmu,

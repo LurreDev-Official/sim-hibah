@@ -42,9 +42,9 @@
                 </div>
             </div>
 
-            <!-- Menu Kelola Users untuk Role "Kepala LPPM" -->
-            @role('Kepala LPPM')
-                <!-- Menu Kelola Users -->
+
+            <!-- Menu Kelola Users untuk role admin-->
+            @role('Admin')
                 <div data-kt-menu-trigger="click"
                     class="menu-item menu-accordion {{ request()->routeIs('users.index') || request()->routeIs('kriteria-penilaian.index') || request()->routeIs('indikator-penilaian.index') ? 'show' : '' }}">
                     <span class="menu-link">
@@ -81,7 +81,7 @@
                                     <i class="align-middle" data-feather="list"></i>
                                 </span>
                                 <span class="menu-title
-                                ">Sinta Score</span>
+                        ">Sinta Score</span>
                             </a>
                         </div>
 
@@ -112,9 +112,50 @@
                                 <span class="menu-title">Daftar Template Dokumen</span>
                             </a>
                         </div>
-
+                        {{-- <div class="menu-item">
+                    <a class="menu-link {{ request()->routeIs('setting-lembar-pengesahan.index') ? 'active' : '' }}"
+                        href="{{ route('setting-lembar-pengesahan.index') }}">
+                        <span class="menu-bullet">
+                            <i class="align-middle" data-feather="file-text"></i>
+                        </span>
+                        <span class="menu-title ">Setting Lembar Pengesahan</span>
+                    </a>
+                </div> --}}
                     </div>
                 </div>
+            @endrole
+            <!-- Menu Kelola Users untuk Role "Kepala LPPM" -->
+            @role('Kepala LPPM')
+                <!-- Menu Kelola periodes -->
+                <div data-kt-menu-trigger="click" 
+                class="menu-item menu-accordion {{ request()->routeIs('periodes.index') || request()->routeIs('periodes.create') ? 'show' : '' }}">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <span class="svg-icon svg-icon-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 15H4C2.9 15 2 14.1 2 13V7C2 6.4 2.4 6 3 6H21C21.6 6 22 6.4 22 7V13C22 14.1 21.1 15 20 15ZM13 12H11C10.5 12 10 12.4 10 13V16C10 16.5 10.4 17 11 17H13C13.6 17 14 16.6 14 16V13C14 12.4 13.6 12 13 12Z" fill="black" />
+                            </svg>
+                        </span>
+                    </span>
+                    <span class="menu-title">Kelola Periode</span>
+                    <span class="menu-arrow"></span>
+                </span>
+            
+                <!-- Submenu -->
+                <div class="menu-sub menu-sub-accordion {{ request()->routeIs('periodes.index') || request()->routeIs('periodes.create') ? 'show' : '' }}">
+                    <div class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('periodes.index') ? 'active' : '' }}" href="{{ route('periodes.index') }}">
+                            <span class="menu-icon">
+                                <i class="fas fa-list"></i>
+                            </span>
+                            <span class="menu-title">Daftar Periode</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+
+
 
                 <!-- Menu Penelitian -->
                 <div data-kt-menu-trigger="click"

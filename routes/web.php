@@ -16,6 +16,7 @@ use App\Http\Controllers\LaporanAkhirController;
 use App\Http\Controllers\LuaranController;
 use App\Http\Controllers\TemplateDokumenController;
 use App\Http\Controllers\SintaScoreController;
+use App\Http\Controllers\PeriodeController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -47,7 +48,7 @@ Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 // Rute untuk Kepala LPPM dan Dosen (akses bersama)
-     Route::group(['middleware' => ['role:Kepala LPPM|Dosen']], function () {
+     Route::group(['middleware' => ['role:Kepala LPPM|Dosen|Admin']], function () {
 
     Route::resource('template-dokumen', TemplateDokumenController::class);
     // Rute terkait usulan
@@ -97,14 +98,10 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
 
 
     Route::get('/sinta-score/{nidn}', [SintaScoreController::class, 'getSintaScore'])->name('sinta.score');
-
-
-
-
 });
 
 // Rute khusus untuk Kepala LPPM
-Route::group(['middleware' => ['role:Kepala LPPM']], function () {
+Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     Route::put('users/update', [UserController::class, 'update'])->name('users.update');
     Route::resource('users', UserController::class);
     Route::resource('kriteria-penilaian', KriteriaPenilaianController::class);
@@ -118,6 +115,10 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::get('sinta-score', [SintaScoreController::class, 'index'])->name('sinta-score.index');
     Route::post('sinta-scores/import', [SintaScoreController::class, 'import'])->name('sinta-scores.import');
     Route::get('sinta-scores/export', [SintaScoreController::class, 'export'])->name('sinta-scores.export');
+
+    Route::resource('periodes', PeriodeController::class);
+    Route::get('periodes/{id}/delete', [PeriodeController::class, 'delete'])->name('periodes.delete');
+    // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');
 });
 
 // Rute khusus untuk Dosen

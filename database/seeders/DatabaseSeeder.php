@@ -44,22 +44,22 @@ foreach ($permissions as $permission) {
         $kepalaLPPMRole = Role::firstOrCreate(['name' => 'Kepala LPPM']);
         $kepalaLPPMRole->givePermissionTo([
             'dashboard',
-        
+        ]);
+        $adminlppmRole = Role::firstOrCreate(['name' => 'Admin']);
+        $adminlppmRole->givePermissionTo([
+            'dashboard',
         ]);
         // Dosen Role: Restricted permissions
         $dosenRole = Role::firstOrCreate(['name' => 'Dosen']);
         $dosenRole->givePermissionTo( [
             'dashboard'
-    ]); 
-    
-    // Memberikan akses dashboard ke Dosen
-        
+        ]); 
         // Reviewer Role: Dapat menambahkan permission lain jika diperlukan
         $reviewerRole = Role::firstOrCreate(['name' => 'Reviewer']);
         $reviewerRole->givePermissionTo( [
             'dashboard'
-    ]); // Memberikan akses dashboard ke Reviewer
-        
+        ]); 
+        // Memberikan akses dashboard ke Reviewer
         // Create users and assign roles
         $kepalaLPPM = User::firstOrCreate([
             'name' => 'Kepala LPPM User',
@@ -67,7 +67,14 @@ foreach ($permissions as $permission) {
             'password' => bcrypt('kepalalppm@unhasy.ac.id'),
         ]);
         $kepalaLPPM->assignRole('Kepala LPPM');
-        
+
+        $adminlppmRole = User::firstOrCreate([
+            'name' => 'Admin LPPM',
+            'email' => 'adminlppm@unhasy.ac.id',
+            'password' => bcrypt('adminlppm@unhasy.ac.id'),
+        ]);
+        $adminlppmRole->assignRole('Admin');
+
         $dosen = User::firstOrCreate([
             'name' => 'Dosen User',
             'email' => 'dosen@unhasy.ac.id',
@@ -87,16 +94,8 @@ foreach ($permissions as $permission) {
             // Berikan peran 'Reviewer' untuk setiap user
             $reviewer->assignRole('Reviewer');
         }
-
         $this->call([
             KriteriaPenilaianSeeder::class,
         ]);
-
-       
-
-
     }
-
-
-    
 }

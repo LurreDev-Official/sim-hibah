@@ -104,7 +104,10 @@ document.addEventListener('DOMContentLoaded', function () {
             "S1 Komunikasi dan Penyiaran Islam",
             "S1 Pendidikan Agama Islam",
             "S1 Pendidikan Bahasa Arab",
-            "S1 Pendidikan Guru MI"
+            "S1 Pendidikan Guru MI",
+            "S2 Pendidikan Pedidikan Bahasa Arab",
+            "S2 Pendidikan Agama Islam",
+            "S2 Hukum Keluarga",
         ],
         "Fakultas Teknik": [
             "S1 Teknik Mesin",
@@ -128,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             "S1 Pendidikan Bahasa Inggris",
             "S1 Pendidikan IPA",
             "S1 Pendidikan Matematika"
+            "S2 Pendidikan Bahasa dan Sastra Indonesia",
         ]
     };
 

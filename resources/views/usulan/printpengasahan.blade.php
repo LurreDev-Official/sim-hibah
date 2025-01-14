@@ -76,6 +76,44 @@
             margin-top: 20px;
         }
     </style>
+
+    @php
+    
+    $listdekan =
+    [
+        [
+            'nama' => 'Dr. Jasminto, M.Pd.I., M.Ag',
+            'nidn' => '2112038101',
+            'fakultas' => 'Fakultas Agama Islam',
+        ],
+        [
+            'nama' => 'Dr. Resdianto Permata Raharjo, M.Pd',
+            'nidn' => '0701109201',
+            'fakultas' => 'Fakultas Ilmu Pendidikan',
+        ],
+        [
+            'nama' => 'Dr. Ir. Nur Kholis, S.T., M.T.',
+            'nidn' => '0021057204',
+            'fakultas' => 'Fakultas Teknik',
+        ],
+        [
+            'nama' => 'Aries Dwi Indriyanti, S.Kom., M.Kom',
+            'nidn' => '0012048006',
+            'fakultas' => 'Fakultas Teknologi Informasi',
+        ],
+        [
+            'nama' => 'Dr. Tony Seno Aji, S.E., M.E',
+            'nidn' => '0024097803',
+            'fakultas' => 'Fakultas Ekonomi'
+        ],
+    ];
+
+    $kepalaLPPM = [
+        'nama' => 'Prof. Dr. Udjang Pairin M. Basir, M.Pd',
+        'nidn' => '0010065707',
+    ];
+
+    @endphp
 </head>
 <body>
     <div class="container">
@@ -222,17 +260,7 @@
                     </tr>
                     <tr>
                         <td>&nbsp;</td>
-                        <td>Sumber Biaya</td>
-                        <td class="text-center">&nbsp;</td>
-                        <td colspan="1">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ul style="list-style-type: none; padding-left: 0;">
-                                <li>Unhasy</li>
-                            </ul>
-                        </td>
+                        <td>Sumber Biaya Unhasy</td>
                         <td class="text-center">:</td>
                         <td colspan="1">Rp. 45.000.000</td>
                     </tr>
@@ -241,12 +269,14 @@
                             <p>&nbsp;</p>
                             <p>Dekan</p>
                             <p>&nbsp;</p>
+                            <p>&nbsp;</p>
                             <p>Nama, ST M.T</p>
                             <p>NIDN. 07050</p>
                         </td>
                         <td colspan="2" class="text-center">
                             <p>Jombang, 08 Oktober 2024</p>
                             <p>Ketua Peneliti,</p>
+                            <p>&nbsp;</p>
                             <p>&nbsp;</p>
                             <p>Nama, ST., MT</p>
                             <p>NIDN. 07050</p>
@@ -257,7 +287,8 @@
                             <p>Menyetujui,</p>
                             <p>Kepala LPPM Unhasy</p>
                             <p>&nbsp;</p>
-                            <p>(Prof. Dr. Udjang Pairin M. Basir, M.Pd)</p>
+                            <p>&nbsp;</p>
+                            <p>Prof. Dr. Udjang Pairin M. Basir, M.Pd</p>
                             <p>NIDN. 07050</p>
                         </td>
                     </tr>

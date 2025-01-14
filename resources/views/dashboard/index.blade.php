@@ -94,7 +94,7 @@
                                     $notifikasi = [];
 
                                     // Logika berdasarkan role
-                                    if (Auth::user()->hasRole('Kepala LPPM')) {
+                                    if (Auth::user()->hasRole('Kepala LPPM')|| Auth::user()->hasRole('Admin')) {
                                         // Kepala LPPM melihat semua usulan dengan status tertentu
                                         $notifikasi = \App\Models\Usulan::all();
                                     } elseif (Auth::user()->hasRole('Dosen')) {
@@ -152,6 +152,8 @@
                                                                     <h5 class="mb-1">
                                                                         @if (Auth::user()->hasRole('Kepala LPPM'))
                                                                             Notifikasi Kepala LPPM
+                                                                        @elseif (Auth::user()->hasRole('Admin'))
+                                                                            Notifikasi Admin
                                                                         @elseif (Auth::user()->hasRole('Dosen'))
                                                                             Notifikasi Dosen
                                                                         @elseif (Auth::user()->hasRole('Reviewer'))

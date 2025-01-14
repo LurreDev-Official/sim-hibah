@@ -113,7 +113,7 @@
                                                 $dosen = App\Models\Dosen::where('nidn', $sintaScore->nidn)->first();
                                             @endphp
                                             @if ($dosen)
-                                                <br>{{ $dosen->nama }}
+                                                <br>{{ $dosen->user->name }}
                                             @endif
                                         </td>
                                         <td>{{ $sintaScore->sintascorev3 }}</td>
