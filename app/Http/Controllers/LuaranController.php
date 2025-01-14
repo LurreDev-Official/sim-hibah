@@ -29,12 +29,50 @@ class LuaranController extends Controller
      * Show the form for creating a new resource.
      */
     public function create($id)
-    {
-        $usulan = Usulan::where('id', $id)->first();
-        $luarans = Luaran::where('usulan_id', $id)->get();
-        $jenis = $usulan->jenis_skema;
-        return view('luaran.create', compact('luarans','usulan', 'jenis'));
+{
+    $usulan = Usulan::findOrFail($id); // More efficient than where()->first()
+    $luarans = Luaran::where('usulan_id', $id)->pluck('jenis_luaran')->toArray(); // Get existing jenis_luaran directly
+    
+    $jenisLuarans = [
+        'Laporan akhir penelitian',
+        'Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4',
+        'Artikel ilmiah di prosiding SAINSTEKNOPAK'
+    ];
+    
+    // Filter the jenisLuarans that do not exist in the database
+    $missingLuarans = array_diff($jenisLuarans, $luarans);
+
+    // Check and insert only the missing types
+    foreach ($missingLuarans as $jenisLuaran) {
+        // Check if a Luaran with this type and usulan_id already exists
+        $existingLuaran = Luaran::where('usulan_id', $usulan->id)
+                                ->where('type', $jenisLuaran)
+                                ->first();
+
+        // If it doesn't exist, create a new Luaran
+        if (!$existingLuaran) {
+            Luaran::create([
+                'laporankemajuan_id'=> 0,
+                'laporanakhir_id'=> 0,
+                'usulan_id' => $usulan->id,
+                'jenis_luaran' => 'wajib',  // Default value
+                'judul' => 0,  // Default value
+                'type' => $jenisLuaran,   // Default value
+                'url' => 0,    // Default value
+                'file_loa' => 0, // Default value
+            ]);
+        }
     }
+
+    // Retrieve the most recent 'luaran' data
+    $luarans = Luaran::where('usulan_id', $id)->get();
+    
+    $jenis = $usulan->jenis_skema;
+    return view('luaran.create', compact('luarans', 'usulan', 'jenis'));
+}
+
+    
+
 
     /**
      * Store a newly created resource in storage.
@@ -68,12 +106,12 @@ class LuaranController extends Controller
         // Retrieve related IDs
         $laporankemajuan_id = LaporanKemajuan::where('usulan_id', $request->usulan_id)->first()->id;
         $laporanakhir_id = LaporanAkhir::where('usulan_id', $request->usulan_id)->first()->id;
-
         // Create a new Luaran record
         Luaran::create([
             'usulan_id' => $request->usulan_id,
             'laporankemajuan_id' => $laporankemajuan_id,
             'laporanakhir_id' => $laporanakhir_id,
+            'jenis_luaran' => 'tambahan',  // Default value
             'judul' => $request->judul,
             'type' => $request->type,
             'url' => $request->url,

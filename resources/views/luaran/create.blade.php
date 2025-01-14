@@ -71,7 +71,8 @@
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                     <th>No</th>
                                     <th>Judul</th>
-                                    <th>Type</th>
+                                    <th>jenis</th>
+                                    <th>Luaran</th>
                                     <th>URL</th>
                                     <th>File LOA</th>
                                     <th class="text-end">Actions</th>
@@ -81,12 +82,30 @@
                                 @foreach ($luarans as $luaran)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $luaran->judul }}</td>
-                                        <td>{{ $luaran->type }}</td>
-                                        <td><a href="{{ $luaran->url }}" target="_blank">Link</a></td>
-                                        <td>
-                                            {{ $luaran->file_loa ? $luaran->file_loa : '-' }}
+                                        <td> 
+                                            @if($luaran->judul && $luaran->judul !== '0')
+                                                {{ $luaran->judul }}
+                                        @else
+                                            Belum diisi
+                                        @endif
                                         </td>
+                                        <td>{{ $luaran->type }}</td>
+                                        <td>{{ $luaran->jenis_luaran }}</td>
+                                        <td>
+                                            @if($luaran->url && $luaran->url !== '0')
+                                                <a href="{{ $luaran->url }}" target="_blank">Link</a>
+                                            @else
+                                                Belum diisi
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($luaran->file_loa && $luaran->file_loa !== '0')
+                                                {{ $luaran->file_loa }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        
                                         <td class="text-end">
                                             <button class="btn btn-light btn-active-light-primary btn-sm"
                                                 data-bs-toggle="modal"
@@ -117,6 +136,7 @@
                                                             <input type=" text" class="form-control" name="judul" value="{{ $luaran->judul }}" required>
                                                         </div>
 
+                                                    
                                                         <div class="mb-3">
                                                             <label for="type" class="form-label">Type</label>
                                                             <input type="text" class="form-control" name="type" value="{{ $luaran->type }}" required>

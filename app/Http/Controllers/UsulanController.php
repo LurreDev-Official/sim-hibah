@@ -620,7 +620,9 @@ public function cetakBuktiACC($id)
     ]);
 
     // Kembalikan file PDF untuk diunduh
-    return $pdf->download('bukti_acc_' . $usulan->id . '.pdf');
+    // return $pdf->download('bukti_acc_' . $usulan->id . '.pdf');
+
+    return view('usulan.printpengasahan', compact('usulan', 'barcodeBase64'));
 }
 
 

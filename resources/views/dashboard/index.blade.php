@@ -328,8 +328,11 @@
                                     <div class="modal-body">
                                         <h6>1. Biodata Dosen (NIDN):</h6>
                                         <ul>
-                                            <li>Menjadi ketua 1 judul usulan proposal</li>
-                                            <li>Menjadi anggota 1 judul usulan proposal (Riset dan PKM)</li>
+                                            dalam 1 jenis_skema
+                                            <li>boleh menjadi ketua 1x judul usulan proposal</li>
+                                            <li>boleh anggota 1x judul usulan </li>
+                                            dan jika dibawah score 200
+                                            <li>boleh menjadi ketua 2x judul usulan proposal</li>
                                         </ul>
 
                                         <h6>2. Jumlah Anggota Pengusul (7 orang):</h6>

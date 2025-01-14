@@ -13,6 +13,7 @@ class Luaran extends Model
         'laporankemajuan_id',
         'laporanakhir_id',
         'judul',
+        'jenis_luaran', // Tambahkan ini jika kolom enum diperlukan
         'type',
         'url',
         'file_loa',

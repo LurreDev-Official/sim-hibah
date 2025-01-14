@@ -36,7 +36,7 @@
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">NIDN</label>
                                     <div class="col-lg-8 fv-row">
-                                        <input id="nidn" type="number" class="form-control form-control-lg form-control-solid @error('nidn') is-invalid @enderror" name="nidn" value="{{ old('nidn', $dosen->nidn) }}" required>
+                                        <input id="nidn" type="number" class="form-control form-control-lg form-control-solid @error('nidn') is-invalid @enderror" name="nidn" value="{{ old('nidn', $dosen->nidn) }}" required placeholder="0715118702">
                                         @error('nidn')
                                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                         @enderror
@@ -177,12 +177,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label fw-bold fs-6">Score Sinta</label>
                                     <div class="col-lg-8 fv-row">
-                                        <input id="score_sinta" type="number" step="0.01" class="form-control form-control-lg form-control-solid @error('score_sinta') is-invalid @enderror" name="score_sinta" value="{{ old('score_sinta', $dosen->score_sinta) }}" required>
+                                        <input id="score_sinta" type="number" step="0.01" class="form-control form-control-lg form-control-solid @error('score_sinta') is-invalid @enderror" name="score_sinta" value="{{ old('score_sinta', $dosen->score_sinta) }}" required readonly>
                                         @error('score_sinta')
                                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                         @enderror
                                     </div>
                                 </div>
+                                
 
                                 <!-- Submit Button -->
                                 <div class="d-flex justify-content-end pt-7">
@@ -201,3 +202,50 @@ document.addEventListener('DOMContentLoaded', function () {
 @endsection
 
 @stack('scripts')
+
+<script>
+    if (data.score_sinta !== null) {
+        scoreSintaInput.value = data.score_sinta;
+        toastr.success('Data ditemukan: Score Sinta adalah ' + data.score_sinta);
+    } else {
+        scoreSintaInput.value = ''; // Clear if no score found
+        toastr.error('Data tidak ditemukan untuk NIDN: ' + nidn);
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const nidnInput = document.getElementById('nidn');
+    const scoreSintaInput = document.getElementById('score_sinta');
+
+    nidnInput.addEventListener('input', function() {
+        const nidn = this.value;
+
+        if (nidn) {
+            fetch(`/sinta-score/${nidn}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.score_sinta !== null) {
+                        scoreSintaInput.value = data.score_sinta;
+                        toastr.success('Data ditemukan: Score Sinta adalah ' + data.score_sinta);
+                    } else {
+                        scoreSintaInput.value = ''; // Clear if no score found
+                        toastr.error('Data tidak ditemukan untuk NIDN: ' + nidn);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching score Sinta:', error);
+                    toastr.error('Terjadi kesalahan saat mengambil data.');
+                });
+        } else {
+            scoreSintaInput.value = ''; // Clear input if NIDN is empty
+        }
+    });
+});
+
+</script>
+

@@ -15,6 +15,7 @@ class Dosen extends Model
     // Tentukan kolom yang dapat diisi secara massal (mass assignment)
     protected $fillable = [
         'user_id',
+        'sintaid',
         'nidn',
         'status',
         'kuota_proposal',

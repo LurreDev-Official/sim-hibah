@@ -55,11 +55,21 @@
                             <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
                                 <!--begin::Add usulan-->
                                 @role('Dosen')
-                                    <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}" class="btn btn-primary">Tambah
-                                        Usulan</a>
+                                    @php
+                                        $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
+                                        $scoreSinta = $dosen->score_sinta;
+                                    @endphp
+                                    @if ($scoreSinta > 200)
+                                        <!-- Tombol aktif jika skor Sinta lebih dari 200 -->
+                                        <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}"
+                                            class="btn btn-primary mr-3">Tambah Usulan</a>
+                                    @else
+                                        <!-- Tombol dinonaktifkan jika skor Sinta kurang dari atau sama dengan 200 -->
+                                        <button class="btn btn-primary mr-3" disabled>Tambah Usulan</button>
+                                    @endif
                                 @endrole
                                 <!-- Export Button -->
-                                <a href="{{ route('usulan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                                <a href="{{ route('usulan.export', ['jenis' => $jenis]) }}" class="btn btn-success">
                                     <i class="fa fa-download"></i> Export Data
                                 </a>
 
@@ -523,7 +533,7 @@
                                             // Jika konfirmasi di-klik
                                             $.ajax({
                                                 url: '{{ url('usulan') }}/' + jenis + '/' +
-                                                id, // Pastikan URL-nya sesuai dengan route di controller
+                                                    id, // Pastikan URL-nya sesuai dengan route di controller
                                                 type: 'DELETE', // HTTP method DELETE
                                                 data: {
                                                     "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan

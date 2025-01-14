@@ -15,6 +15,7 @@ use App\Http\Controllers\LaporanKemajuanController;
 use App\Http\Controllers\LaporanAkhirController;
 use App\Http\Controllers\LuaranController;
 use App\Http\Controllers\TemplateDokumenController;
+use App\Http\Controllers\SintaScoreController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -95,6 +96,9 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::delete('luaran/{id}', [LuaranController::class, 'destroy'])->name('luaran.destroy');
 
 
+    Route::get('/sinta-score/{nidn}', [SintaScoreController::class, 'getSintaScore'])->name('sinta.score');
+
+
 
 
 });
@@ -109,6 +113,11 @@ Route::group(['middleware' => ['role:Kepala LPPM']], function () {
     Route::post('/usulan/{jenis}/kirim', [UsulanController::class, 'kirim'])->name('usulan.kirim');
     Route::post('/laporan-kemajuan/{jenis}/kirim', [LaporanKemajuanController::class, 'kirim'])->name('laporan-kemajuan.kirim');
     Route::post('/laporan-akhir/{jenis}/kirim', [LaporanAkhirController::class, 'kirim'])->name('laporan-akhir.kirim');
+
+    //sinta-score
+    Route::get('sinta-score', [SintaScoreController::class, 'index'])->name('sinta-score.index');
+    Route::post('sinta-scores/import', [SintaScoreController::class, 'import'])->name('sinta-scores.import');
+    Route::get('sinta-scores/export', [SintaScoreController::class, 'export'])->name('sinta-scores.export');
 });
 
 // Rute khusus untuk Dosen

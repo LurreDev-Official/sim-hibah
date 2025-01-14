@@ -27,7 +27,7 @@ class ProfileController extends Controller
                 ['user_id' => $user->id], // Kondisi pencarian
                 [
                     'nidn' => 0, // Default value jika tidak ditemukan
-                    'kuota_proposal' => 6,
+                    'kuota_proposal' => 4,
                     'jumlah_proposal' => 0,
                     'fakultas' => '-',
                     'prodi' => '-',
