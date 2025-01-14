@@ -118,6 +118,9 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
 
     Route::resource('periodes', PeriodeController::class);
     Route::get('periodes/{id}/delete', [PeriodeController::class, 'delete'])->name('periodes.delete');
+    //plot
+    Route::get('plot', [UsulanController::class, 'plot'])->name('plot.index');
+    Route::get('/filter-dosens-by-year', [UsulanController::class, 'filterByYear'])->name('filter.dosens.by.year');
     // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');
 });
 

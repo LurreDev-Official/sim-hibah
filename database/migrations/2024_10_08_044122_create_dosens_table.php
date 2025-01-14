@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id'); // Relasi ke tabel users
             $table->string('nidn');
-            $table->integer('kuota_proposal');
+            $table->integer('kuota_proposal')->default(4);
             $table->integer('jumlah_proposal');
             $table->string('fakultas');
             $table->string('prodi');

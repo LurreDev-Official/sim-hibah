@@ -68,6 +68,7 @@ foreach ($permissions as $permission) {
         ]);
         $kepalaLPPM->assignRole('Kepala LPPM');
 
+
         $adminlppmRole = User::firstOrCreate([
             'name' => 'Admin LPPM',
             'email' => 'adminlppm@unhasy.ac.id',

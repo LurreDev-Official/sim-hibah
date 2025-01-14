@@ -25,6 +25,62 @@
             <div id="kt_content_container" class="container-xxl">
                 <!--begin::Card-->
                 <div class="card">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="filter-year">Filter by Year:</label>
+                        <select id="filter-year" class="form-control">
+                            <option value="">Select Year</option>
+                            @for ($year = 2025; $year <= 2030; $year++)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endfor
+                        </select>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-dosens">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Dosen</th>
+                                    <th>Jumlah Proposal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($dosens as $index => $dosen)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $dosen->user->name }}</td>
+                                        <td>{{ $dosen->jumlah_proposal }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    $(document).ready(function() {
+                        $('#filter-year').change(function() {
+                            var year = $(this).val();
+                            $.ajax({
+                                url: '{{ route("filter.dosens.by.year") }}',
+                                method: 'GET',
+                                data: { year: year },
+                                success: function(response) {
+                                    var tbody = $('#table-dosens tbody');
+                                    tbody.empty();
+                                    $.each(response.dosens, function(index, dosen) {
+                                        tbody.append('<tr><td>' + (index + 1) + '</td><td>' + dosen.user.name + '</td><td>' + dosen.jumlah_proposal + '</td></tr>');
+                                    });
+                                }
+                            });
+                        });
+                    });
+                </script>
+
+
+                <br>
+                <div class="card">
                     <!--begin::Card header-->
                     <div class="card-header border-0 pt-6">
                         <!--begin::Card title-->
@@ -606,3 +662,6 @@
         });
     </script>
 @endsection
+
+
+

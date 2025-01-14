@@ -36,7 +36,7 @@ class UsulanController extends Controller
     public function index()
     {
         $user = auth()->user(); // Ambil data user yang sedang login
-    
+        $dosens = Dosen::with('user')->get();
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
         if ($user->hasRole('Kepala LPPM')) {
             // Ambil semua usulan tanpa filter
@@ -58,7 +58,7 @@ class UsulanController extends Controller
    // Fetch all reviewers (if you need to display them too)
    $reviewers = Reviewer::with('user')->get();
     
-            return view('usulan.index', compact('usulans', 'jenis','reviewers'));
+            return view('usulan.index', compact('usulans','dosens','jenis','reviewers'));
         }
     
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
@@ -75,7 +75,7 @@ class UsulanController extends Controller
                                  ->where('jenis_skema', $jenis)
                                  ->paginate(10);
                                  $reviewers = Reviewer::with('user')->get();
-                                 return view('usulan.index', compact('usulans', 'jenis','reviewers'));
+                                 return view('usulan.index', compact('usulans', 'dosens', 'jenis','reviewers'));
             }
         }
     
@@ -327,7 +327,7 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
     public function show($jenis)
     {
         $user = auth()->user(); // Ambil data user yang sedang login
-    
+        $dosens = Dosen::with('user')->get();
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
         // Check if the user has the 'Kepala LPPM' role
     if ($user->hasRole('Kepala LPPM')) {
@@ -351,7 +351,7 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
         // Fetch all reviewers (if you need to display them too)
         $reviewers = Reviewer::with('user')->get();
 
-        return view('usulan.index', compact('usulans', 'reviewers', 'jenis'));
+        return view('usulan.index', compact('usulans', 'reviewers', 'jenis','dosens'));
     }
     
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
@@ -368,7 +368,7 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
                                  ->where('jenis_skema', $jenis)
                                  ->paginate(10);
                                  $reviewers = Reviewer::with('user')->get();
-                                 return view('usulan.index', compact('usulans', 'jenis','reviewers'));
+                                 return view('usulan.index', compact('usulans', 'jenis','reviewers','dosens'));
         
             }
 
@@ -653,6 +653,20 @@ public function validasiUsulanBaru($jenis)
 }
 
 
+ 
+
+
+public function filterByYear(Request $request)
+{
+    $year = $request->input('year');
+    $dosens = Dosen::with('user')
+        ->when($year, function ($query, $year) {
+            return $query->whereYear('created_at', $year);
+        })
+        ->get();
+
+    return response()->json(['dosens' => $dosens]);
+}
 
 
 }

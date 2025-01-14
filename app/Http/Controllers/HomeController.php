@@ -237,7 +237,7 @@ $totalProposal = $countPenelitian + $countPengabdian + $countAnggota2ProposalPen
 // Update jumlah_proposal di Model Dosen
 $dosenData->update([
     'jumlah_proposal' => $totalProposal,
-    'kuota_proposal' => 6-$totalProposal
+    'kuota_proposal' => 4-$totalProposal
 ]);
 
 
