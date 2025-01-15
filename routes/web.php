@@ -41,12 +41,15 @@ Route::post('register', [RegisterController::class, 'register']);
 
 Route::resource('profile', ProfileController::class);
 Route::get('profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::get('get-prodi/{fakultas_id}', [ProfileController::class, 'getProdiByFakultas'])->name('get-prodi');
 
 require __DIR__.'/auth.php';
 
 Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
+
+
 // Rute untuk Kepala LPPM dan Dosen (akses bersama)
      Route::group(['middleware' => ['role:Kepala LPPM|Dosen|Admin']], function () {
 
@@ -98,6 +101,9 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
 
 
     Route::get('/sinta-score/{nidn}', [SintaScoreController::class, 'getSintaScore'])->name('sinta.score');
+
+
+    
 });
 
 // Rute khusus untuk Kepala LPPM
@@ -121,6 +127,10 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     //plot
     Route::get('plot', [UsulanController::class, 'plot'])->name('plot.index');
     Route::get('/filter-dosens-by-year', [UsulanController::class, 'filterByYear'])->name('filter.dosens.by.year');
+    Route::get('per-fakultas', [UsulanController::class, 'grafikPerFakultas'])->name('grafik-per-fakultas.index');
+    Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-per-prodi.index');
+    Route::get('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.index');
+
     // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');
 });
 

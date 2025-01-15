@@ -6,6 +6,7 @@ use App\Models\Usulan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Dosen;
+use App\Models\Fakultas;
 use App\Models\AnggotaDosen;
 use App\Models\AnggotaMahasiswa;
 use App\Models\Reviewer;
@@ -668,5 +669,29 @@ public function filterByYear(Request $request)
     return response()->json(['dosens' => $dosens]);
 }
 
+
+
+public function grafikPerFakultas()
+    {
+        // Logika untuk grafik per fakultas
+        return view('grafik.per_fakultas');
+    }
+
+    public function grafikPerProdi()
+    {
+        // Logika untuk grafik per prodi
+        return view('grafik.per_prodi');
+    }
+
+    public function laporanHitunganUsulan(Request $request)
+{
+    // Retrieve the Prodi and Fakultas data
+    $dosen = Dosen::where('prodi', $request->prodi)->get(); // Assuming 'usulans' is a related model
+    // Pass the data to the view
+    $fakultas = Fakultas::all();
+    return view('grafik.laporan_hitungan_usulan', compact('dosen','fakultas'));
+}
+
+    
 
 }

@@ -36,9 +36,13 @@
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">NIDN</label>
                                     <div class="col-lg-8 fv-row">
-                                        <input id="nidn" type="number" class="form-control form-control-lg form-control-solid @error('nidn') is-invalid @enderror" name="nidn" value="{{ old('nidn', $dosen->nidn) }}" required placeholder="0715118702">
+                                        <input id="nidn" type="number"
+                                            class="form-control form-control-lg form-control-solid @error('nidn') is-invalid @enderror"
+                                            name="nidn" value="{{ old('nidn', $dosen->nidn) }}" required
+                                            placeholder="0715118702">
                                         @error('nidn')
-                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                            <span class="invalid-feedback"
+                                                role="alert"><strong>{{ $message }}</strong></span>
                                         @enderror
                                     </div>
                                 </div>
@@ -69,125 +73,106 @@
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">Fakultas</label>
                                     <div class="col-lg-8 fv-row">
-                                        <select id="fakultas" name="fakultas" class="form-control form-control-lg form-control-solid">
+                                        <select id="fakultas" name="fakultas"
+                                            class="form-control form-control-lg form-control-solid">
                                             <option value="" disabled>Pilih Fakultas</option>
-                                            <option value="Fakultas Agama Islam" {{ old('fakultas', $dosen->fakultas) == 'Fakultas Agama Islam' ? 'selected' : '' }}>Fakultas Agama Islam</option>
-                                            <option value="Fakultas Teknik" {{ old('fakultas', $dosen->fakultas) == 'Fakultas Teknik' ? 'selected' : '' }}>Fakultas Teknik</option>
-                                            <option value="Fakultas Teknologi Informasi" {{ old('fakultas', $dosen->fakultas) == 'Fakultas Teknologi Informasi' ? 'selected' : '' }}>Fakultas Teknologi Informasi</option>
-                                            <option value="Fakultas Ekonomi" {{ old('fakultas', $dosen->fakultas) == 'Fakultas Ekonomi' ? 'selected' : '' }}>Fakultas Ekonomi</option>
-                                            <option value="Fakultas Ilmu Pendidikan" {{ old('fakultas', $dosen->fakultas) == 'Fakultas Ilmu Pendidikan' ? 'selected' : '' }}>Fakultas Ilmu Pendidikan</option>
+                                            @foreach ($fakultas as $fakultasItem)
+                                                <option value="{{ $fakultasItem->id }}"
+                                                    {{ old('fakultas', $dosen->fakultas) == $fakultasItem->id ? 'selected' : '' }}>
+                                                    {{ $fakultasItem->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
-    
+
                                 <!-- Program Studi (Prodi) -->
                                 <div class="row mb-6">
-                                    <label class="col-lg-4 col-form-label required fw-bold fs-6">Program Studi (Prodi)</label>
+                                    <label class="col-lg-4 col-form-label required fw-bold fs-6">Program Studi
+                                        (Prodi)</label>
                                     <div class="col-lg-8 fv-row">
-                                        <select id="prodi" name="prodi" class="form-control form-control-lg form-control-solid">
-                                            <option value="" disabled>Pilih Prodi</option>
-                                            <!-- Prodi akan terisi otomatis berdasarkan Fakultas -->
+                                        <select id="prodi" name="prodi"
+                                            class="form-control form-control-lg form-control-solid">
+                                            <option value="" disabled>Pilih Program Studi</option>
                                         </select>
                                     </div>
                                 </div>
 
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const fakultasSelect = document.getElementById('fakultas');
+                                        const prodiSelect = document.getElementById('prodi');
+                                        const selectedProdi =
+                                        "{{ old('prodi', $dosen->prodi ?? '') }}"; // Fetch the selected Prodi from old input or DB
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Data array Fakultas dan Prodi terkait
-    const fakultasProdi = {
-        "Fakultas Agama Islam": [
-            "S1 Hukum Keluarga",
-            "S1 Hukum Ekonomi Syari'ah",
-            "S1 Manajemen Pendidikan Islam",
-            "S1 Komunikasi dan Penyiaran Islam",
-            "S1 Pendidikan Agama Islam",
-            "S1 Pendidikan Bahasa Arab",
-            "S1 Pendidikan Guru MI",
-            "S2 Pendidikan Pedidikan Bahasa Arab",
-            "S2 Pendidikan Agama Islam",
-            "S2 Hukum Keluarga",
-        ],
-        "Fakultas Teknik": [
-            "S1 Teknik Mesin",
-            "S1 Teknik Elektro",
-            "S1 Teknik Sipil",
-            "S1 Teknik Industri"
-        ],
-        "Fakultas Teknologi Informasi": [
-            "S1 Teknik Informatika",
-            "S1 Sistem Informasi",
-            "S1 Teknologi Informasi"
-        ],
-        "Fakultas Ekonomi": [
-            "S1 Manajemen",
-            "S1 Akuntansi",
-            "S1 Ekonomi Islam"
-        ],
-        "Fakultas Ilmu Pendidikan": [
-            "S1 Pendidikan Guru Sekolah Dasar",
-            "S1 Pendidikan Bahasa dan Sastra Indonesia",
-            "S1 Pendidikan Bahasa Inggris",
-            "S1 Pendidikan IPA",
-            "S1 Pendidikan Matematika"
-            "S2 Pendidikan Bahasa dan Sastra Indonesia",
-        ]
-    };
+                                        // Function to fetch Prodi based on Fakultas selection
+                                        function loadProdi(fakultasId) {
+                                            // Make an AJAX call to fetch Prodi data
+                                            fetch(`/get-prodi/${fakultasId}`)
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    // Clear previous options
+                                                    prodiSelect.innerHTML = '<option value="" disabled selected>Pilih Prodi</option>';
 
-    // Dosen's current fakultas and prodi from database
-    const selectedFakultas = "{{ old('fakultas', $dosen->fakultas) }}";
-    const selectedProdi = "{{ old('prodi', $dosen->prodi) }}";
+                                                    // Populate Prodi options based on the response
+                                                    if (data.length > 0) {
+                                                        data.forEach(prodi => {
+                                                            const option = document.createElement('option');
+                                                            option.value = prodi.id;
+                                                            option.textContent = prodi.name;
 
-    // Fungsi untuk mengisi dropdown Prodi berdasarkan Fakultas yang dipilih
-    const fakultasSelect = document.getElementById('fakultas');
-    const prodiSelect = document.getElementById('prodi');
+                                                            // Pre-select the option if it matches the selected Prodi
+                                                            if (selectedProdi && selectedProdi == prodi.id) {
+                                                                option.selected = true;
+                                                            }
 
-    fakultasSelect.addEventListener('change', function () {
-        const fakultas = this.value;
-        const prodiList = fakultasProdi[fakultas];
+                                                            prodiSelect.appendChild(option);
+                                                        });
+                                                    } else {
+                                                        const option = document.createElement('option');
+                                                        option.textContent = 'No Program Studi available';
+                                                        prodiSelect.appendChild(option);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error fetching Prodi:', error);
+                                                });
+                                        }
 
-        // Hapus semua opsi prodi sebelumnya
-        prodiSelect.innerHTML = '<option value="" disabled selected>Pilih Prodi</option>';
+                                        // Event listener for Fakultas selection
+                                        fakultasSelect.addEventListener('change', function() {
+                                            const fakultasId = this.value;
+                                            if (fakultasId) {
+                                                loadProdi(fakultasId);
+                                            } else {
+                                                prodiSelect.innerHTML = '<option value="" disabled selected>Pilih Prodi</option>';
+                                            }
+                                        });
 
-        // Tambahkan opsi prodi baru berdasarkan fakultas yang dipilih
-        if (prodiList) {
-            prodiList.forEach(function (prodi) {
-                const option = document.createElement('option');
-                option.value = prodi;
-                option.textContent = prodi;
-                prodiSelect.appendChild(option);
-            });
-        }
-
-        // Jika ada prodi yang sudah terpilih dari database, auto select
-        if (fakultas === selectedFakultas) {
-            prodiSelect.value = selectedProdi;
-        }
-    });
-
-    // Isi prodi saat halaman dimuat jika fakultas sudah ada dari database
-    if (selectedFakultas) {
-        fakultasSelect.value = selectedFakultas;
-        fakultasSelect.dispatchEvent(new Event('change')); // Trigger the change event to load prodies
-    }
-});
-</script>
-@endpush
-
-
+                                        // Trigger Prodi loading if Fakultas is already selected
+                                        const selectedFakultas = "{{ old('fakultas', $dosen->fakultas ?? '') }}";
+                                        if (selectedFakultas) {
+                                            fakultasSelect.value = selectedFakultas;
+                                            loadProdi(selectedFakultas); // Load Prodi for selected Fakultas
+                                        }
+                                    });
+                                </script>
 
                                 <!-- Score Sinta -->
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label fw-bold fs-6">Score Sinta</label>
                                     <div class="col-lg-8 fv-row">
-                                        <input id="score_sinta" type="number" step="0.01" class="form-control form-control-lg form-control-solid @error('score_sinta') is-invalid @enderror" name="score_sinta" value="{{ old('score_sinta', $dosen->score_sinta) }}" required readonly>
+                                        <input id="score_sinta" type="number" step="0.01"
+                                            class="form-control form-control-lg form-control-solid @error('score_sinta') is-invalid @enderror"
+                                            name="score_sinta" value="{{ old('score_sinta', $dosen->score_sinta) }}"
+                                            required readonly>
                                         @error('score_sinta')
-                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                            <span class="invalid-feedback"
+                                                role="alert"><strong>{{ $message }}</strong></span>
                                         @enderror
                                     </div>
                                 </div>
-                                
+
 
                                 <!-- Submit Button -->
                                 <div class="d-flex justify-content-end pt-7">
@@ -218,38 +203,37 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const nidnInput = document.getElementById('nidn');
-    const scoreSintaInput = document.getElementById('score_sinta');
+        const nidnInput = document.getElementById('nidn');
+        const scoreSintaInput = document.getElementById('score_sinta');
 
-    nidnInput.addEventListener('input', function() {
-        const nidn = this.value;
+        nidnInput.addEventListener('input', function() {
+            const nidn = this.value;
 
-        if (nidn) {
-            fetch(`/sinta-score/${nidn}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.score_sinta !== null) {
-                        scoreSintaInput.value = data.score_sinta;
-                        toastr.success('Data ditemukan: Score Sinta adalah ' + data.score_sinta);
-                    } else {
-                        scoreSintaInput.value = ''; // Clear if no score found
-                        toastr.error('Data tidak ditemukan untuk NIDN: ' + nidn);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching score Sinta:', error);
-                    toastr.error('Terjadi kesalahan saat mengambil data.');
-                });
-        } else {
-            scoreSintaInput.value = ''; // Clear input if NIDN is empty
-        }
+            if (nidn) {
+                fetch(`/sinta-score/${nidn}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.score_sinta !== null) {
+                            scoreSintaInput.value = data.score_sinta;
+                            toastr.success('Data ditemukan: Score Sinta adalah ' + data
+                                .score_sinta);
+                        } else {
+                            scoreSintaInput.value = ''; // Clear if no score found
+                            toastr.error('Data tidak ditemukan untuk NIDN: ' + nidn);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching score Sinta:', error);
+                        toastr.error('Terjadi kesalahan saat mengambil data.');
+                    });
+            } else {
+                scoreSintaInput.value = ''; // Clear input if NIDN is empty
+            }
+        });
     });
-});
-
 </script>
-
