@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('nidn');
             $table->integer('kuota_proposal')->default(4);
             $table->integer('jumlah_proposal');
-            $table->string('fakultas');
-            $table->string('prodi');
+            $table->string('fakultas_id');
+            $table->string('prodi_id');
             $table->enum('status', [
                 'anggota', 
                 'ketua']);

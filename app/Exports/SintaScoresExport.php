@@ -8,15 +8,25 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class SintaScoresExport implements FromCollection, WithHeadings
 {
+    /**
+     * Mengambil semua data untuk diekspor.
+     *
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
-        return SintaScore::all(); // Mengambil semua data Sinta Score
+        // Mengambil semua data dari tabel SintaScore
+        return SintaScore::select('sintaid', 'nidn', 'sintascorev3', 'tahun')->get();
     }
 
+    /**
+     * Menentukan header untuk file ekspor.
+     *
+     * @return array
+     */
     public function headings(): array
     {
         return [
-            'id',
             'sintaid',
             'nidn',
             'sintascorev3',

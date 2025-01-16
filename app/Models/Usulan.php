@@ -26,6 +26,7 @@ class Usulan extends Model
         'bidang_fokus',
         'tema_penelitian',
         'topik_penelitian',
+        'lokasi_penelitian',
         'lama_kegiatan',
     ];
 

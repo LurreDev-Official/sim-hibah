@@ -33,39 +33,6 @@ class HomeController extends Controller
     public function index()
     {
 
-        // /grafik
-
-         // Ambil jumlah usulan berdasarkan fakultas, dengan filter jenis_skema 'penelitian'
-    $usulanPerFakultas = Usulan::with('ketuaDosen') // Mengambil ketua dosen untuk mendapatkan fakultas
-    ->where('jenis_skema', 'penelitian') // Filter jenis_skema 'penelitian'
-    ->select(DB::raw('count(*) as usulan_count, ketua_dosen_id'))
-    ->groupBy('ketua_dosen_id') // Kelompokkan berdasarkan ketua dosen
-    ->get();
-
-// Ambil data fakultas dan hitung jumlah usulan per fakultas
-$fakultasData = [];
-foreach ($usulanPerFakultas as $data) {
-    // Ambil nama fakultas dari ketua dosen
-    $fakultas = $data->ketuaDosen->fakultas;
-    
-    // Menambahkan data fakultas dan jumlah usulan ke array
-    if (isset($fakultasData[$fakultas])) {
-        $fakultasData[$fakultas] += $data->usulan_count;
-    } else {
-        $fakultasData[$fakultas] = $data->usulan_count;
-    }
-}
-
-// Mengubah data menjadi format yang siap ditampilkan di grafik
-$fakultasDataFormatted = [];
-foreach ($fakultasData as $fakultas => $count) {
-    $fakultasDataFormatted[] = [
-        'fakultas' => $fakultas, 
-        'usulan_count' => $count
-    ];
-}
-
-                
     // Panggil fungsi untuk update semua dosen terkait proposal
         // Ambil user yang sedang login
         $user = Auth::user();
@@ -145,7 +112,6 @@ foreach ($fakultasData as $fakultas => $count) {
 
                 return view('dashboard.index', compact(
                     'user' ,
-        'fakultasDataFormatted',
                     'dosenData',
                     'countPenelitian',
                     'countPengabdian',

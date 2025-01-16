@@ -188,6 +188,19 @@
                                     </div>
                                 </div>
 
+                                <!-- Lokasi Penelitian -->
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Lokasi Penelitian:</strong>
+                                        <input type="text" name="lokasi_penelitian" class="form-control"
+                                            placeholder="Lokasi Penelitian" value="{{ old('lokasi_penelitian') }}">
+                                        @error('lokasi_penelitian')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+
                                 <!-- Dokumen Usulan -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">

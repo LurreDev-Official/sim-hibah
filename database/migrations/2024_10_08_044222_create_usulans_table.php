@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('rumpun_ilmu');
             $table->string('bidang_fokus');
             $table->string('tema_penelitian');
+            $table->string('lokasi_penelitian');
             $table->string('topik_penelitian');
             $table->string('lama_kegiatan');
             $table->timestamps();

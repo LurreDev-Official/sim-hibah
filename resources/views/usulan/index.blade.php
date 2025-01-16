@@ -133,11 +133,11 @@
                                             <td>{{ $usulan->tahun_pelaksanaan }}</td>
                                             <td>
                                                 @if ($usulan->status == 'draft')
-                                                    <span class="badge bg-warning">Draft</span>
+                                                    <span class="badge bg-warning">Draf</span>
                                                 @elseif ($usulan->status == 'submitted')
-                                                    <span class="badge bg-info">Submitted</span>
+                                                    <span class="badge bg-info">Dikirim</span>
                                                 @elseif ($usulan->status == 'review')
-                                                    <span class="badge bg-primary">In Review</span>
+                                                    <span class="badge bg-primary">Sedang Ditinjau</span>
                                                     @php
                                                         // Ambil reviewer dari PenilaianReviewer berdasarkan usulan_id
                                                         $getreviewer = \App\Models\PenilaianReviewer::where(
@@ -150,23 +150,23 @@
                                                     <ul>
                                                         @forelse ($getreviewer as $item)
                                                             @role('Kepala LPPM')
-                                                                <li> {{ $item->reviewer->user->name }}</li>
+                                                                <li>{{ $item->reviewer->user->name }}</li>
                                                             @endrole
                                                         @empty
-                                                            <li>Belum ada reviewer yang ditugaskan</li>
+                                                            <li>Belum ada peninjau yang ditugaskan</li>
                                                         @endforelse
                                                     </ul>
                                                 @elseif ($usulan->status == 'revision')
-                                                    <span class="badge bg-secondary">Needs Revision</span>
+                                                    <span class="badge bg-secondary">Perlu Revisi</span>
                                                 @elseif ($usulan->status == 'waiting approved')
-                                                    <span class="badge bg-secondary text-black">waiting approved</span>
+                                                    <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                                 @elseif ($usulan->status == 'approved')
-                                                    <span class="badge bg-success">Approved</span>
+                                                    <span class="badge bg-success">Disetujui</span>
                                                 @elseif ($usulan->status == 'rejected')
-                                                    <span class="badge bg-danger">Rejected</span>
+                                                    <span class="badge bg-danger">Ditolak</span>
                                                 @endif
-
                                             </td>
+                                            
                                             <td>{{ $usulan->rumpun_ilmu }}</td>
                                             <td>{{ $usulan->bidang_fokus }}</td>
                                             <td>{{ $usulan->tema_penelitian }}</td>

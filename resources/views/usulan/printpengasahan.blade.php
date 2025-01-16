@@ -76,51 +76,10 @@
             margin-top: 20px;
         }
     </style>
-
-    @php
-    
-    $listdekan =
-    [
-        [
-            'nama' => 'Dr. Jasminto, M.Pd.I., M.Ag',
-            'nidn' => '2112038101',
-            'fakultas' => 'Fakultas Agama Islam',
-        ],
-        [
-            'nama' => 'Dr. Resdianto Permata Raharjo, M.Pd',
-            'nidn' => '0701109201',
-            'fakultas' => 'Fakultas Ilmu Pendidikan',
-        ],
-        [
-            'nama' => 'Dr. Ir. Nur Kholis, S.T., M.T.',
-            'nidn' => '0021057204',
-            'fakultas' => 'Fakultas Teknik',
-        ],
-        [
-            'nama' => 'Aries Dwi Indriyanti, S.Kom., M.Kom',
-            'nidn' => '0012048006',
-            'fakultas' => 'Fakultas Teknologi Informasi',
-        ],
-        [
-            'nama' => 'Dr. Tony Seno Aji, S.E., M.E',
-            'nidn' => '0024097803',
-            'fakultas' => 'Fakultas Ekonomi'
-        ],
-    ];
-
-    $kepalaLPPM = [
-        'nama' => 'Prof. Dr. Udjang Pairin M. Basir, M.Pd',
-        'nidn' => '0010065707',
-    ];
-
-    @endphp
 </head>
 <body>
     <div class="container">
-        <p class="title">
-            HALAMAN PENGESAHAN
-        </p>
-        <p class="text-center" style="font-size: 12pt;">&nbsp;</p>
+        <p class="title">HALAMAN PENGESAHAN</p>
         <div class="table-container">
             <table>
                 <tbody>
@@ -128,16 +87,13 @@
                         <td>1.</td>
                         <td>Judul PKM</td>
                         <td class="text-center">:</td>
-                        <td colspan="1">
-                            <p>Dampak Digitalisasi Perilaku Perjalanan</p>
-                            <p>Terhadap Kesehatan Fisik Dan Sosial</p>
-                        </td>
+                        <td>{{ $formattedUsulan['judul_usulan'] }}</td>
                     </tr>
                     <tr>
                         <td>2.</td>
                         <td>Ketua</td>
                         <td class="text-center">&nbsp;</td>
-                        <td colspan="1">&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <td>&nbsp;</td>
@@ -147,7 +103,7 @@
                             </ol>
                         </td>
                         <td class="text-center">:</td>
-                        <td colspan="1">Nama, ST., MT</td>
+                        <td>{{ $formattedUsulan['ketuaDosen']['name'] }}</td>
                     </tr>
                     <tr>
                         <td>&nbsp;</td>
@@ -157,64 +113,32 @@
                             </ol>
                         </td>
                         <td class="text-center">:</td>
-                        <td colspan="1">07050</td>
+                        <td>{{ $formattedUsulan['ketuaDosen']['nidn'] }}</td>
                     </tr>
                     <tr>
                         <td>&nbsp;</td>
                         <td>
                             <ol start="3" style="list-style-type: lower-latin;">
-                                <li>Jabatan/Golongan</li>
-                            </ol>
-                        </td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">-</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ol start="4" style="list-style-type: lower-latin;">
                                 <li>Program Studi</li>
                             </ol>
                         </td>
                         <td class="text-center">:</td>
-                        <td colspan="1">Teknik Sipil</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ol start="5" style="list-style-type: lower-latin;">
-                                <li>Perguruan Tinggi</li>
-                            </ol>
-                        </td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">Universitas Hasyim Asy’ari</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ol start="6" style="list-style-type: lower-latin;">
-                                <li>Bidang Keahlian</li>
-                            </ol>
-                        </td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">Teknik Sipil</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ol start="7" style="list-style-type: lower-latin;">
-                                <li>Alamat Kantor/Telp/Faks/Surel</li>
-                            </ol>
-                        </td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">Jl. Irian Jaya No. 55. Tebuireng</td>
+                        <td>{{ $formattedUsulan['ketuaDosen']['prodi'] }}</td>
                     </tr>
                     <tr>
                         <td>3.</td>
                         <td>Anggota Peneliti</td>
-                        <td class="text-center">&nbsp;</td>
-                        <td colspan="1">&nbsp;</td>
+                        <td class="text-center">&nbsp; :</td>
+                        <td>
+                            @foreach ($formattedUsulan['anggotaDosen'] as $anggota)
+                                <p>{{ $anggota['name'] }} (NIDN: {{ $anggota['nidn'] }})</p>
+                            @endforeach
+                            @foreach ($formattedUsulan['anggotaMahasiswa'] as $anggota)
+                                <p>{{ $anggota['name'] }} (NIM: {{ $anggota['nim'] }})</p>
+                            @endforeach
+                        </td>
                     </tr>
+
                     <tr>
                         <td>&nbsp;</td>
                         <td>
@@ -223,37 +147,22 @@
                             </ol>
                         </td>
                         <td class="text-center">:</td>
-                        <td colspan="1">7 orang</td>
+                        <td colspan="1">{{ $formattedUsulan['jumlahAnggota'] }} orang</td>
                     </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>
-                            <ol start="2" style="list-style-type: lower-latin;">
-                                <li>Nama Anggota</li>
-                            </ol>
-                        </td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">
-                            <p>Nama, ST., MT NIDN. 07050</p>
-                            <p>Nama, ST., MT NIDN. 07050</p>
-                            <p>Nama, ST., MT NIDN. 07050</p>
-                            <p>Dst</p>
-                        </td>
-                    </tr>
+
+                    
                     <tr>
                         <td>4.</td>
-                        <td>Lokasi Kegiatan</td>
+                        <td>Jangka Waktu Pelaksanaan</td>
                         <td class="text-center">:</td>
-                        <td colspan="1">Kota Malang</td>
+                        <td>
+                            {{ $periode ? $periode->tanggal_awal->format('d M Y') : '-' }}
+                            -
+                            {{ $periode ? $periode->tanggal_akhir->format('d M Y') : '-' }}
+                        </td>
                     </tr>
                     <tr>
                         <td>5.</td>
-                        <td>Jangka waktu Pelaksanaan</td>
-                        <td class="text-center">:</td>
-                        <td colspan="1">Maret - Agustus 2022</td>
-                    </tr>
-                    <tr>
-                        <td>6.</td>
                         <td>Pendanaan</td>
                         <td class="text-center">:</td>
                         <td colspan="1">&nbsp;</td>
@@ -262,42 +171,64 @@
                         <td>&nbsp;</td>
                         <td>Sumber Biaya Unhasy</td>
                         <td class="text-center">:</td>
-                        <td colspan="1">Rp. 45.000.000</td>
+                        <td>
+                            Rp. {{ $periode ? number_format($periode->nominal, 0, ',', '.') : '0' }}
+                        </td>
                     </tr>
+
+                    
+                    <tr>
+                        <td>6.</td>
+                        <td>Lokasi Penelitian</td>
+                        <td class="text-center">:</td>
+                        <td>{{ $formattedUsulan['lokasi_penelitian'] }}</td>
+                    </tr>
+
+                    
+                    
                     <tr>
                         <td colspan="2" class="text-center">
-                            <p>&nbsp;</p>
+                            <br>
                             <p>Dekan</p>
-                            <p>&nbsp;</p>
-                            <p>&nbsp;</p>
-                            <p>Nama, ST M.T</p>
-                            <p>NIDN. 07050</p>
+                            <br>
+                            <br>
+                            <p>{{ $dekan['nama'] }}</p>
+                            <p>NIDN: {{ $dekan['nidn'] }}</p>
                         </td>
                         <td colspan="2" class="text-center">
-                            <p>Jombang, 08 Oktober 2024</p>
+                            <p>Jombang, {{ now()->format('d F Y') }}</p>
                             <p>Ketua Peneliti,</p>
-                            <p>&nbsp;</p>
-                            <p>&nbsp;</p>
-                            <p>Nama, ST., MT</p>
-                            <p>NIDN. 07050</p>
+                            <br>
+                            <br>
+                            <p>{{ $formattedUsulan['ketuaDosen']['name'] }}</p>
+                            <p>NIDN: {{ $formattedUsulan['ketuaDosen']['nidn'] }}</p>
                         </td>
                     </tr>
                     <tr>
                         <td colspan="5" class="text-center">
                             <p>Menyetujui,</p>
                             <p>Kepala LPPM Unhasy</p>
-                            <p>&nbsp;</p>
-                            <p>&nbsp;</p>
-                            <p>Prof. Dr. Udjang Pairin M. Basir, M.Pd</p>
-                            <p>NIDN. 07050</p>
+                            <br>
+                            <br>
+                            <p>{{ $kepalaLPPM['nama'] }}</p>
+                            <p>NIDN: {{ $kepalaLPPM['nidn'] }}</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            <p>Scan QR Code untuk Mengakses Dokumen Usulan:</p>
+                            <div>{!! $qrCodeSVG !!}</div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <div class="qrcode">
+         
+        </div>
     </div>
 </body>
-</html>
 <script>
     window.print();
     setTimeout(() => {
@@ -308,3 +239,4 @@
 
 </script>
 
+</html>

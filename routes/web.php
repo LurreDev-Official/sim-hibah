@@ -130,6 +130,7 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     Route::get('per-fakultas', [UsulanController::class, 'grafikPerFakultas'])->name('grafik-per-fakultas.index');
     Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-per-prodi.index');
     Route::get('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.index');
+    Route::post('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.filter');
 
     // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');
 });

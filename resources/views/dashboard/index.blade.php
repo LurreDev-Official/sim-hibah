@@ -315,7 +315,7 @@
                                                 <li>boleh menjadi ketua 1x judul usulan proposal</li>
                                                 <li>boleh anggota 1x judul usulan </li>
                                                 dan jika dibawah score 200
-                                                <li>boleh menjadi ketua 2x judul usulan proposal</li>
+                                                <li>boleh menjadi   2x menjadi anggota judul usulan proposal</li>
                                             </ul>
 
                                             <h6>2. Jumlah Anggota Pengusul (7 orang):</h6>

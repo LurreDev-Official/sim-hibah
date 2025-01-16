@@ -74,7 +74,11 @@
                                     </tr>
                                     <tr>
                                         <th>Lama Kegiatan</th>
-                                        <td>{{ $usulan->lama_kegiatan }}</td>
+                                        <td>{{ $usulan->lama_kegiatan }} tahun</td>
+                                    </tr>
+                                    <tr>
+                                        <th>lokasi penelitian</th>
+                                        <td>{{ $usulan->lokasi_penelitian }}</td>
                                     </tr>
                                 </tbody>
                             </table>

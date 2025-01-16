@@ -20,11 +20,20 @@ class Dosen extends Model
         'status',
         'kuota_proposal',
         'jumlah_proposal',
-        'fakultas',
-        'prodi',
+        'fakultas_id',
+        'prodi_id',
         'score_sinta',
     ];
 
+    public function fakultas()
+    {
+        return $this->belongsTo(Fakultas::class, 'fakultas_id');
+    }
+
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class, 'prodi_id');
+    }
     /**
      * Relasi ke model User (many-to-one)
      * Setiap dosen dimiliki oleh satu user.

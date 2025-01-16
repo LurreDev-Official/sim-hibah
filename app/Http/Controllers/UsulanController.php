@@ -22,6 +22,7 @@ use PDF;
 use Milon\Barcode\DNS1D;
 use Milon\Barcode\DNS2D;
 use App\Models\TemplateDokumen;
+use App\Models\Periode;
 use App\Exports\UsulanExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -163,6 +164,7 @@ class UsulanController extends Controller
             'bidang_fokus' => 'required|string|max:255',
             'tema_penelitian' => 'required|string|max:255',
             'topik_penelitian' => 'required|string|max:255',
+            'lokasi_penelitian' => 'required|string',
             'lama_kegiatan' => 'required|string|max:50',
             'status' => 'required',
         ]);
@@ -187,6 +189,7 @@ class UsulanController extends Controller
             'bidang_fokus' => $validated['bidang_fokus'],
             'tema_penelitian' => $validated['tema_penelitian'],
             'topik_penelitian' => $validated['topik_penelitian'],
+            'lokasi_penelitian' => $validated['lokasi_penelitian'],
             'lama_kegiatan' => $validated['lama_kegiatan'],
             'status' => $validated['status'] ?? 'draft', // Set default status to 'draft' jika tidak disediakan
         ]);
@@ -581,50 +584,113 @@ return view('usulan.perbaiki_revisi', compact('usulan', 'penilaianReviewer', 'in
 }
  
 
-
 public function cetakBuktiACC($id)
 {
     // Ambil data usulan dengan relasi terkait
-    $usulan = Usulan::with(['ketuaDosen', 'anggotaDosen.dosen.user', 'anggotaMahasiswa'])
+    $usulan = Usulan::with(['ketuaDosen.user', 'anggotaDosen.dosen.user'])
                     ->findOrFail($id);
 
-    // Ambil timestamp Unix
-    $timestamp = time(); // Mendapatkan timestamp Unix saat ini
+     $usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $id)->first();
+        // Generate QR Code menggunakan path dokumen
+     // Generate URL lengkap untuk dokumen
+    $dokumenPath = $usulanPerbaikan->dokumen_usulan ?? '';
+    $dokumenUrl = url($dokumenPath); // Base URL + path dokumen
 
-    // Generate Barcode 2D (QR Code) menggunakan milon/barcode
-    // Menggabungkan ID usulan dan timestamp ke dalam QR Code
-    $dataToEncode = [
-        'id' => $usulan->id,
-        'timestamp' => $timestamp,
+    // Generate QR Code dalam format SVG
+    $qrCodeSVG = \DNS2D::getBarcodeSVG($dokumenUrl, 'QRCODE', 3, 3); // Gunakan SVG
+        // Filter anggota dosen dengan status_anggota = 'anggota'
+     $filteredAnggotaDosen = $usulan->anggotaDosen->filter(function ($anggota) {
+        return $anggota->status_anggota === 'anggota';
+    });
+
+    // Hitung jumlah total anggota dosen dan mahasiswa
+    $jumlahAnggotaDosen = $filteredAnggotaDosen->count();
+    $jumlahAnggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->count();
+    $jumlahAnggotaTotal = $jumlahAnggotaDosen + $jumlahAnggotaMahasiswa;
+
+
+
+    // Ambil data anggota mahasiswa dari model AnggotaMahasiswa
+    $anggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->get();
+
+    // Ambil periode yang aktif
+    $periode = Periode::where('is_active', true)->first();
+
+    // Data dekan berdasarkan fakultas
+    $listdekan = [
+        'Fakultas Agama Islam' => [
+            'nama' => 'Dr. Jasminto, M.Pd.I., M.Ag',
+            'nidn' => '2112038101',
+        ],
+        'Fakultas Ilmu Pendidikan' => [
+            'nama' => 'Dr. Resdianto Permata Raharjo, M.Pd',
+            'nidn' => '0701109201',
+        ],
+        'Fakultas Teknik' => [
+            'nama' => 'Dr. Ir. Nur Kholis, S.T., M.T.',
+            'nidn' => '0021057204',
+        ],
+        'Fakultas Teknologi Informasi' => [
+            'nama' => 'Aries Dwi Indriyanti, S.Kom., M.Kom',
+            'nidn' => '0012048006',
+        ],
+        'Fakultas Ekonomi' => [
+            'nama' => 'Dr. Tony Seno Aji, S.E., M.E',
+            'nidn' => '0024097803',
+        ],
     ];
-    
-    // Encode data menjadi JSON string
-    $jsonData = json_encode($dataToEncode);
 
-    // Generate QR Code dalam format PNG
-    $barcode2D = \DNS2D::getBarcodePNG($jsonData, 'QRCODE'); // Menghasilkan barcode dalam format PNG
+    // Cocokkan dekan berdasarkan fakultas ketua dosen
+    $fakultasKetua = $usulan->ketuaDosen->fakultas->name ?? 'Unknown';
+    $dekan = $listdekan[$fakultasKetua] ?? ['nama' => 'Unknown', 'nidn' => 'Unknown'];
 
-    // Simpan Barcode 2D ke file sementara di storage
-    $barcode2DPath = 'public/images/ttd_usulan_2D_' . $usulan->id . '.png';
-    \Storage::put($barcode2DPath, base64_decode($barcode2D)); // Decode base64 sebelum disimpan
+    $kepalaLPPM = [
+        'nama' => 'Prof. Dr. Udjang Pairin M. Basir, M.Pd',
+        'nidn' => '0010065707',
+    ];
 
-    // Dapatkan URL untuk QR Code yang disimpan
-    $barcode2DUrl = \Storage::url($barcode2DPath); // Mendapatkan URL yang dapat diakses publik
+    // Format data usulan untuk dikirim ke view
+    $formattedUsulan = [
+        'judul_usulan' => $usulan->judul_usulan,
+        'lokasi_penelitian' => $usulan->lokasi_penelitian,
+        'ketuaDosen' => [
+            'name' => $usulan->ketuaDosen->user->name ?? 'Tidak Tersedia',
+            'nidn' => $usulan->ketuaDosen->nidn ?? '-',
+            'jabatan' => $usulan->ketuaDosen->jabatan ?? '-',
+            'prodi' => $usulan->ketuaDosen->prodi->name ?? '-',
+        ],
+        'anggotaDosen' => $usulan->anggotaDosen
+    ->filter(function ($anggota) {
+        return $anggota->status_anggota === 'anggota'; // Filter hanya yang status_anggota = 'anggota'
+    })
+    ->map(function ($anggota) {
+        return [
+            'name' => $anggota->dosen->user->name ?? 'Tidak Tersedia',
+            'nidn' => $anggota->dosen->nidn ?? '-',
+        ];
+    })
+    ->toArray(),
 
-    // Mengonversi QR Code ke Base64
-    $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/' . $barcode2DPath)));
+        'anggotaMahasiswa' => $anggotaMahasiswa->map(function ($anggota) {
+            return [
+                'name' => $anggota->nama_lengkap ?? 'Tidak Tersedia',
+                'nim' => $anggota->nim ?? '-',
+            ];
+        })->toArray(),
 
-    // Generate PDF
-    $pdf = \PDF::loadView('usulan.bukti_acc', [
-        'usulan' => $usulan,
-        'barcodeBase64' => $barcodeBase64, // Kirim Base64 barcode ke view
-    ]);
+        'jumlahAnggota' => $jumlahAnggotaTotal,
+        'dokumen_usulan' => $usulanPerbaikan->dokumen_usulan,
+    ];
 
-    // Kembalikan file PDF untuk diunduh
-    // return $pdf->download('bukti_acc_' . $usulan->id . '.pdf');
+ 
 
-    return view('usulan.printpengasahan', compact('usulan', 'barcodeBase64'));
+
+    // Return view dengan data
+    return view('usulan.printpengasahan', compact('formattedUsulan', 'usulan','periode', 'dekan', 'kepalaLPPM','qrCodeSVG'));
 }
+
+
+
 
 
 public function validasiUsulanBaru($jenis)
@@ -686,7 +752,7 @@ public function grafikPerFakultas()
     public function laporanHitunganUsulan(Request $request)
 {
     // Retrieve the Prodi and Fakultas data
-    $dosen = Dosen::where('prodi', $request->prodi)->get(); // Assuming 'usulans' is a related model
+    $dosen = Dosen::where('prodi_id', $request->prodi_id)->get(); // Assuming 'usulans' is a related model
     // Pass the data to the view
     $fakultas = Fakultas::all();
     return view('grafik.laporan_hitungan_usulan', compact('dosen','fakultas'));

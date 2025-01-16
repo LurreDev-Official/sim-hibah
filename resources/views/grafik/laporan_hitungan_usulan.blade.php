@@ -21,13 +21,7 @@
                         <div class="card-title">
                             <div class="d-flex align-items-center position-relative my-1">
                                 <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2"
-                                            rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
-                                        <path
-                                            d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z"
-                                            fill="black" />
-                                    </svg>
+                                    <!-- Icon Search -->
                                 </span>
                                 <input type="text" id="searchInput" class="form-control form-control-solid w-250px ps-15"
                                     placeholder="Cari Dosen" />
@@ -36,20 +30,28 @@
 
                         <!-- Filter Dropdown -->
                         <div class="d-flex mt-4">
-                            <select class="form-select" id="fakultas" aria-label="Fakultas">
-                                <option value="">Pilih Fakultas</option>
-                                @foreach($fakultas as $fakultasItem)
-                                    <option value="{{ $fakultasItem->id }}">{{ $fakultasItem->name }}</option>
-                                @endforeach
-                            </select>
-                            
-                            <select class="form-select ms-3" id="prodi" aria-label="Program Studi">
-                                <option value="">Pilih Program Studi</option>
-                            </select>
-                            
-                            <!-- Tombol Filter -->
-                            <button id="filterButton" class="btn btn-primary ms-3">Filter</button>
+                            <!-- Form untuk Filter -->
+                            <form action="{{ route('laporan-hitungan-usulan.filter') }}" method="POST" class="d-flex align-items-center">
+                                @csrf <!-- Tambahkan CSRF Token untuk keamanan -->
+                        
+                                <!-- Dropdown Fakultas -->
+                                <select name="fakultas" class="form-select" id="fakultas" aria-label="Fakultas" required>
+                                    <option value="">Pilih Fakultas</option>
+                                    @foreach($fakultas as $fakultasItem)
+                                        <option value="{{ $fakultasItem->id }}">{{ $fakultasItem->name }}</option>
+                                    @endforeach
+                                </select>
+                        
+                                <!-- Dropdown Program Studi -->
+                                <select name="prodi_id" class="form-select ms-3" id="prodi" aria-label="Program Studi">
+                                    <option value="">Pilih Program Studi</option>
+                                </select>
+                        
+                                <!-- Tombol Filter -->
+                                <button type="submit" class="btn btn-primary ms-3">Filter</button>
+                            </form>
                         </div>
+                        
                     </div>
 
                     <div class="card-body pt-0">
@@ -66,8 +68,8 @@
                                 @foreach ($dosen as $index => $data)
                                     <tr data-fakultas="{{ $data->fakultas_id }}" data-prodi="{{ $data->prodi_id }}">
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $data->nama_dosen }}</td>
-                                        <td>{{ $data->prodi }}</td>
+                                        <td>{{ $data->user->name }}</td>
+                                        <td>{{ $data->prodi->name }}</td>
                                         <td>{{ $data->jumlah_proposal }}</td>
                                     </tr>
                                 @endforeach
@@ -80,60 +82,64 @@
     </div>
 @endsection
 
+
+
+@section('js')
 <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-dosen').DataTable({
+            searchable: true,
+        });
+    </script>
+@endsection
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize DataTable
-        var table = $('#table-dosen').DataTable({
-            responsive: true,
-            processing: true,
-            paging: true,
-            searching: true,
-            columnDefs: [
-                { targets: 6, orderable: false } // Disable ordering for Actions column
-            ]
-        });
+        console.log("jQuery is working");
+    });
+</script>
 
-        // Event listener for Fakultas change
-        $('#fakultas').on('change', function() {
-            var fakultasId = $(this).val();
-            if (fakultasId) {
+<script>
+    $(document).ready(function () {
+        // Menangani perubahan pada dropdown fakultas
+        $('#fakultas').on('change', function () {
+            let fakultas_id = $(this).val(); // Ambil ID Fakultas yang dipilih
+            
+            // Kosongkan dropdown Program Studi dan tambahkan pesan "Memuat..."
+            $('#prodi').empty().append('<option value="">Memuat data...</option>');
+
+            if (fakultas_id) {
                 $.ajax({
-                    url: '/get-prodi/' + fakultasId,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
+                    url: '/get-prodi/' + fakultas_id, // URL dinamis
+                    method: 'GET',
+                    success: function (data) {
+                        console.log(data); // Log data untuk debugging
+                        
+                        // Hapus pesan "Memuat..." dan tambahkan opsi default
                         $('#prodi').empty().append('<option value="">Pilih Program Studi</option>');
-                        $.each(data, function(key, value) {
-                            $('#prodi').append('<option value="' + value.id + '">' + value.name + '</option>');
-                        });
-                        $('#prodi').prop('disabled', false);  // Enable Prodi dropdown
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            // Iterasi data JSON dan tambahkan opsi ke dropdown
+                            data.forEach(function (prodi) {
+                                $('#prodi').append('<option value="' + prodi.id + '">' + prodi.name + '</option>');
+                            });
+                        } else {
+                            // Jika data kosong
+                            $('#prodi').append('<option value="">Tidak ada program studi tersedia</option>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Terjadi kesalahan saat memuat data:", error);
+                        // Tampilkan pesan error di dropdown
+                        $('#prodi').empty().append('<option value="">Gagal memuat data</option>');
+                        alert("Gagal memuat data program studi. Silakan coba lagi.");
                     }
                 });
             } else {
+                // Jika tidak ada fakultas yang dipilih, reset dropdown Program Studi
                 $('#prodi').empty().append('<option value="">Pilih Program Studi</option>');
-                $('#prodi').prop('disabled', true);  // Disable Prodi dropdown
             }
-        });
-
-        // Filter Button click event
-        $('#filterButton').on('click', function() {
-            var fakultasId = $('#fakultas').val();
-            var prodiId = $('#prodi').val();
-
-            // Filter rows based on selected Fakultas and Program Studi
-            table.rows().every(function() {
-                var row = this.node();
-                var rowFakultasId = $(row).data('fakultas');
-                var rowProdiId = $(row).data('prodi');
-
-                if ((fakultasId === "" || rowFakultasId == fakultasId) &&
-                    (prodiId === "" || rowProdiId == prodiId)) {
-                    $(row).show();
-                } else {
-                    $(row).hide();
-                }
-            });
         });
     });
 </script>
+
