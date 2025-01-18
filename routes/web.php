@@ -97,6 +97,7 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::resource('luaran', LuaranController::class);
     Route::get('luaran/{jenis}', [LuaranController::class, 'show'])->name('luaran.show');
     Route::get('luaran/create/{jenis?}', [LuaranController::class, 'create'])->name('luaran.create');
+    Route::post('luaran/status/{id}', [LuaranController::class, 'updatestatus'])->name('luaran.status');
     Route::delete('luaran/{id}', [LuaranController::class, 'destroy'])->name('luaran.destroy');
 
 

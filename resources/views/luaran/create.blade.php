@@ -20,27 +20,27 @@
         <div class="post d-flex flex-column-fluid" id="kt_post">
             <div id="kt_content_container" class="container-xxl">
                 <!--begin::Card-->
-                    <div class="card">
-                        <!--begin::Card header-->
-                        <div class="card-header border-0 pt-6">
-                            <div class="card-title text-center">
-                                <h4 class="fw-bold">Data Usulan</h4>
-                            </div>
-                        </div>
-                        <!--end::Card header-->
-                
-                        <div class="card-body text-center">
-                            <div class="mb-3">
-                                <strong>Judul Usulan:</strong> {{ $usulan->judul_usulan }}
-                            </div>
-                            <div class="mb-3">
-                                <strong>Jenis Skema:</strong> {{ $usulan->jenis_skema }}
-                            </div>
-                            <div class="mb-3">
-                                <strong>Tahun Pelaksanaan:</strong> {{ $usulan->tahun_pelaksanaan }}
-                            </div>
+                <div class="card">
+                    <!--begin::Card header-->
+                    <div class="card-header border-0 pt-6">
+                        <div class="card-title text-center">
+                            <h4 class="fw-bold">Data Usulan</h4>
                         </div>
                     </div>
+                    <!--end::Card header-->
+
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <strong>Judul Usulan:</strong> {{ $usulan->judul_usulan }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Jenis Skema:</strong> {{ $usulan->jenis_skema }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Tahun Pelaksanaan:</strong> {{ $usulan->tahun_pelaksanaan }}
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card">
 
@@ -75,6 +75,7 @@
                                     <th>Luaran</th>
                                     <th>URL</th>
                                     <th>File LOA</th>
+                                    <th>Status</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -82,38 +83,84 @@
                                 @foreach ($luarans as $luaran)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td> 
-                                            @if($luaran->judul && $luaran->judul !== '0')
+                                        <td>
+                                            @if ($luaran->judul && $luaran->judul !== '0')
                                                 {{ $luaran->judul }}
-                                        @else
-                                            Belum diisi
-                                        @endif
+                                            @else
+                                                Belum diisi
+                                            @endif
                                         </td>
                                         <td>{{ $luaran->type }}</td>
                                         <td>{{ $luaran->jenis_luaran }}</td>
                                         <td>
-                                            @if($luaran->url && $luaran->url !== '0')
+                                            @if ($luaran->url && $luaran->url !== '0')
                                                 <a href="{{ $luaran->url }}" target="_blank">Link</a>
                                             @else
                                                 Belum diisi
                                             @endif
                                         </td>
                                         <td>
-                                            @if($luaran->file_loa && $luaran->file_loa !== '0')
+                                            @if ($luaran->file_loa && $luaran->file_loa !== '0')
                                                 {{ $luaran->file_loa }}
                                             @else
                                                 -
                                             @endif
                                         </td>
-                                        
-                                        <td class="text-end">
-                                            <button class="btn btn-light btn-active-light-primary btn-sm"
+                                        <td>
+                                            @if ($luaran->status == 'Terpenuhi')
+                                                <span class="badge badge-light-success">Terpenuhi</span>
+                                            @else
+                                                <span class="badge badge-light-danger">Tidak Terpenuhi</span>
+                                            @endif
+                                        <td class="text-justify">
+                                            <button class="btn btn-light btn-active-light-primary btn-sm me-2"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editModal{{ $luaran->id }}">Edit</button>
-                                            <button class="btn btn-danger btn-sm"
+                                            <button class="btn btn-danger btn-sm me-2"
                                                 onclick="deleteLuaran({{ $luaran->id }})">Hapus</button>
+                                            @role('Kepala LPPM')
+                                                <button class="btn btn-primary btn-sm p-2" data-bs-toggle="modal"
+                                                    data-bs-target="#updateStatusModal{{ $luaran->id }}">Update
+                                                    Status</button>
+                                            @endrole
                                         </td>
                                     </tr>
+
+                                    <div class="modal fade" id="updateStatusModal{{ $luaran->id }}" tabindex="-1"
+                                        aria-labelledby="updateStatusModalLabel{{ $luaran->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="updateStatusModalLabel{{ $luaran->id }}">
+                                                        Update Status Luaran</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <form action="{{ route('luaran.status', $luaran->id) }}" method="POST">
+                                                    @csrf
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="status{{ $luaran->id }}"
+                                                                class="form-label">Status</label>
+                                                            <select class="form-select" id="status{{ $luaran->id }}"
+                                                                name="status" required>
+                                                                <option value="Terpenuhi">Terpenuhi</option>
+                                                                <option value="Tidak Terpenuhi">Tidak Terpenuhi</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-primary">Update
+                                                            Status</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
 
                                     <!-- Edit Modal -->
                                     <div class="modal fade" id="editModal{{ $luaran->id }}" tabindex="-1"
@@ -133,18 +180,21 @@
 
                                                         <div class="mb-3">
                                                             <label for="judul" class="form-label">Judul</label>
-                                                            <input type=" text" class="form-control" name="judul" value="{{ $luaran->judul }}" required>
+                                                            <input type=" text" class="form-control" name="judul"
+                                                                value="{{ $luaran->judul }}" required>
                                                         </div>
 
-                                                    
+
                                                         <div class="mb-3">
                                                             <label for="type" class="form-label">Type</label>
-                                                            <input type="text" class="form-control" name="type" value="{{ $luaran->type }}" required>
+                                                            <input type="text" class="form-control" name="type"
+                                                                value="{{ $luaran->type }}" required>
                                                         </div>
 
                                                         <div class="mb-3">
                                                             <label for="url" class="form-label">URL</label>
-                                                            <input type="url" class="form-control" name="url" value="{{ $luaran->url }}" required>
+                                                            <input type="url" class="form-control" name="url"
+                                                                value="{{ $luaran->url }}" required>
                                                         </div>
 
                                                         <div class="mb-3">
@@ -153,7 +203,8 @@
                                                         </div>
 
                                                         <div class="text-end">
-                                                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan
+                                                                Perubahan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -180,7 +231,7 @@
                         <h5 class="modal-title">Tambah Luaran</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    
+
                     <div class="modal-body">
                         <form action="{{ route('luaran.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
@@ -189,7 +240,7 @@
                                 <label for="judul" class="form-label">Judul</label>
                                 <input type="text" class="form-control" name="judul" required>
                             </div>
-                        
+
                             <div class="mb-3">
                                 <label for="type" class="form-label">Type</label>
                                 <select class="form-select" name="type" required>
@@ -200,18 +251,18 @@
                                     <option value="lain-lain">Lain-lain</option>
                                 </select>
                             </div>
-                        
+
                             <div class="mb-3">
                                 <label for="url" class="form-label">URL</label>
                                 <input type="url" class="form-control" name="url" required>
                             </div>
-                        
+
                             <div class="mb-3">
                                 <label for="file_loa" class="form-label">File LOA</label>
                                 <input type="file" class="form-control" name="file_loa">
                                 <small class="form-text text-muted">Opsional: Unggah file LOA jika tersedia.</small>
                             </div>
-                        
+
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">Tambah Luaran</button>
                             </div>
@@ -230,8 +281,10 @@
                 processing: true,
                 paging: true,
                 searching: true,
-                columnDefs: [
-                    { targets: 5, orderable: false } // Disable ordering for Actions column
+                columnDefs: [{
+                        targets: 5,
+                        orderable: false
+                    } // Disable ordering for Actions column
                 ]
             });
         });
@@ -276,10 +329,10 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
-<script>
-    var xin_table = $('#table-luaran').DataTable({
-        searchable: true,
-    });
-</script>
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script>
+        var xin_table = $('#table-luaran').DataTable({
+            searchable: true,
+        });
+    </script>
 @endsection

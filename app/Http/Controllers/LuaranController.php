@@ -21,6 +21,7 @@ class LuaranController extends Controller
      */
     public function index()
     {
+
         $luarans = Luaran::all(); // Fetch all Luaran records
         return view('luaran.index', compact('luarans')); // Return the view with the data
     }
@@ -32,7 +33,7 @@ class LuaranController extends Controller
 {
     $usulan = Usulan::findOrFail($id); // More efficient than where()->first()
     $luarans = Luaran::where('usulan_id', $id)->pluck('jenis_luaran')->toArray(); // Get existing jenis_luaran directly
-    
+   
     $jenisLuarans = [
         'Laporan akhir penelitian',
         'Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4',
@@ -48,7 +49,6 @@ class LuaranController extends Controller
         $existingLuaran = Luaran::where('usulan_id', $usulan->id)
                                 ->where('type', $jenisLuaran)
                                 ->first();
-
         // If it doesn't exist, create a new Luaran
         if (!$existingLuaran) {
             Luaran::create([
@@ -59,21 +59,17 @@ class LuaranController extends Controller
                 'judul' => 0,  // Default value
                 'type' => $jenisLuaran,   // Default value
                 'url' => 0,    // Default value
+                'status' => 'belum terpenuhi',  // Default value
                 'file_loa' => 0, // Default value
             ]);
         }
     }
-
     // Retrieve the most recent 'luaran' data
     $luarans = Luaran::where('usulan_id', $id)->get();
     
     $jenis = $usulan->jenis_skema;
     return view('luaran.create', compact('luarans', 'usulan', 'jenis'));
 }
-
-    
-
-
     /**
      * Store a newly created resource in storage.
      */
@@ -115,6 +111,7 @@ class LuaranController extends Controller
             'judul' => $request->judul,
             'type' => $request->type,
             'url' => $request->url,
+            'status' => 'terpenuhi',  // Default value
             'file_loa' => $filePath, // This will be null if no file was uploaded
         ]);
 
@@ -132,6 +129,7 @@ class LuaranController extends Controller
      */
     public function show($jenis)
     {
+        
         $user = auth()->user(); // Ambil data user yang sedang login
         if ($user->hasRole('Kepala LPPM')) {
             $usulans = Usulan::where('jenis_skema', $jenis)->get();
@@ -228,4 +226,28 @@ class LuaranController extends Controller
     
         return redirect()->back()->with('success', 'Luaran deleted successfully.');
     }
+
+    
+
+    public function updatestatus(Request $request, $id)
+{
+    // Validasi data
+    $request->validate([
+        'status' => 'required',
+    ]);
+    // dd($request->all());
+
+    // Cari luaran berdasarkan ID
+    $luaran = Luaran::findOrFail($id);
+
+    // Perbarui status
+    $luaran->status = $request->input('status');
+    $luaran->save();
+
+    // Redirect kembali dengan pesan sukses
+    return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi: ' . ucfirst($luaran->status));
+}
+
+
+
 }

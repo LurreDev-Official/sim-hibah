@@ -16,6 +16,7 @@ class Luaran extends Model
         'jenis_luaran', // Tambahkan ini jika kolom enum diperlukan
         'type',
         'url',
+        'status',
         'file_loa',
     ];
 

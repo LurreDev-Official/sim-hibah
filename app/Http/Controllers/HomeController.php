@@ -54,7 +54,6 @@ class HomeController extends Controller
 
     return view('dashboard.index', compact(
         'user' ,
-        'fakultasDataFormatted',
         'dosenData',
         'countUsulan',
         'countLaporanKemajuan',

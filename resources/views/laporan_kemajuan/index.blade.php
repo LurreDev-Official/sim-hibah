@@ -40,14 +40,14 @@
                                     placeholder="Search Laporan" name="search" />
                             </div>
                         </div>
-
+                        <a href="{{ route('laporan-kemajuan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                            <i class="fa fa-download"></i> Export Data
+                        </a>
 
                     </div>
 
                     <div class="card-body pt-0">
-                        <a href="{{ route('laporan-kemajuan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
-                            <i class="fa fa-download"></i> Export Data
-                        </a>
+                        
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
@@ -85,9 +85,9 @@
                                         <td>{{ $laporan->jenis }}</td>
                                         <td>
                                             @if ($laporan->status == 'submitted')
-                                                <span class="badge bg-info">Submitted</span>
+                                                <span class="badge bg-info">Terkirim</span>
                                             @elseif ($laporan->status == 'review')
-                                                <span class="badge bg-primary">In Review</span>
+                                                <span class="badge bg-primary">Sedang Ditinjau</span>
                                                 @php
                                                     // Ambil reviewer dari PenilaianReviewer berdasarkan laporankemajuan_id
                                                     $getreviewer = \App\Models\PenilaianReviewer::where(
@@ -100,18 +100,18 @@
                                                 <ul>
                                                     @forelse ($getreviewer as $item)
                                                         @role('Kepala LPPM')
-                                                            <li> {{ $item->reviewer->user->name }}</li>
+                                                            <li>{{ $item->reviewer->user->name }}</li>
                                                         @endrole
                                                     @empty
                                                         <li>Belum ada reviewer yang ditugaskan</li>
                                                     @endforelse
                                                 </ul>
                                             @elseif ($laporan->status == 'revision')
-                                                <span class="badge bg-secondary">Needs Revision</span>
+                                                <span class="badge bg-secondary">Perlu Revisi</span>
                                             @elseif ($laporan->status == 'waiting approved')
-                                                <span class="badge bg-secondary text-black">waiting approved</span>
+                                                <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                             @elseif ($laporan->status == 'approved')
-                                                <span class="badge bg-success">Approved</span>
+                                                <span class="badge bg-success">Disetujui</span>
                                             @endif
                                         </td>
                                         <td>

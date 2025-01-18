@@ -82,9 +82,9 @@
                                         <td>{{ $laporan->jenis }}</td>
                                         <td>
                                             @if ($laporan->status == 'submitted')
-                                                <span class="badge bg-info">Submitted</span>
+                                                <span class="badge bg-info">Terkirim</span>
                                             @elseif ($laporan->status == 'review')
-                                                <span class="badge bg-primary">In Review</span>
+                                                <span class="badge bg-primary">Sedang Ditinjau</span>
                                                 @php
                                                     // Ambil reviewer dari PenilaianReviewer berdasarkan laporanakhir_id
                                                     $getreviewer = \App\Models\PenilaianReviewer::where(
@@ -97,18 +97,18 @@
                                                 <ul>
                                                     @forelse ($getreviewer as $item)
                                                         @role('Kepala LPPM')
-                                                            <li> {{ $item->reviewer->user->name }}</li>
+                                                            <li>{{ $item->reviewer->user->name }}</li>
                                                         @endrole
                                                     @empty
                                                         <li>Belum ada reviewer yang ditugaskan</li>
                                                     @endforelse
                                                 </ul>
                                             @elseif ($laporan->status == 'revision')
-                                                <span class="badge bg-secondary">Needs Revision</span>
+                                                <span class="badge bg-secondary">Perlu Revisi</span>
                                             @elseif ($laporan->status == 'waiting approved')
-                                                <span class="badge bg-secondary text-black">waiting approved</span>
+                                                <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                             @elseif ($laporan->status == 'approved')
-                                                <span class="badge bg-success">Approved</span>
+                                                <span class="badge bg-success">Disetujui</span>
                                             @endif
                                         </td>
                                         <td>

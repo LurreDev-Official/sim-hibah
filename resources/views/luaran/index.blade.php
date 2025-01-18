@@ -77,7 +77,8 @@
                                         <th class="min-w-125px">No</th>
                                         <th class="min-w-125px">Created</th>
                                         <th class="min-w-150px">Judul Usulan</th>
-                                        <th class="min-w-150px">Tahun Pelaksanaan</th>
+                                        <th class="min-w-150px">Tahun</th>
+                                        <th class="min-w-150px">Status</th>
                                         {{-- <th class="min-w-125px">Status</th>
                                         <th class="min-w-150px">Rumpun Ilmu</th>
                                         <th class="min-w-150px">Bidang Fokus</th>
@@ -99,7 +100,22 @@
                                             <td>{{ $usulan->created_at }}</td>
                                             <td>{{ $usulan->judul_usulan }}</td>
                                             <td>{{ $usulan->tahun_pelaksanaan }}</td>
-                                            {{-- <td>{{ $usulan->status }}</td>
+                                            <td>
+                                                @php
+                                                    $terpenuhiCount = App\Models\Luaran::where('usulan_id', $usulan->id )
+                                                        ->where('status', 'Terpenuhi')
+                                                        ->count();
+                                                @endphp
+
+                                                @if ($terpenuhiCount <3)
+                                                    <span class="badge badge-light-primary">Belum Terpenuhi= {{ $terpenuhiCount }}</span>
+                                                @else
+                                                    <span class="badge badge-light-success">Terpenuhi</span>
+                                                @endif
+
+
+                                            </td>
+                                            {{-- 
                                             <td>{{ $usulan->rumpun_ilmu }}</td>
                                             <td>{{ $usulan->bidang_fokus }}</td>
                                             <td>{{ $usulan->tema_penelitian }}</td>
@@ -114,13 +130,13 @@
                                                 @endif
                                             </td> --}}
                                             <td>
-                                                    <!-- Tombol create Luaran -->
-                                                    <div class="col p-2">
-                                                        <a href="{{ route('luaran.create', $usulan->id) }}"
-                                                            class="btn btn-info btn-sm">
-                                                            <i class="fas fa-info-circle"></i> Detail Luaran
-                                                        </a>
-                                                    </div>
+                                                <!-- Tombol create Luaran -->
+                                                <div class="col p-2">
+                                                    <a href="{{ route('luaran.create', $usulan->id) }}"
+                                                        class="btn btn-info btn-sm">
+                                                        <i class="fas fa-info-circle"></i> Detail Luaran
+                                                    </a>
+                                                </div>
                                             </td>
 
                                         </tr>
