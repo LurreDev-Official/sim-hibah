@@ -51,13 +51,13 @@
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                    <th>ID</th>
-                                    <th>Created</th>
+                                    <th>No Usulan</th>
+                                    <th>Tanggal</th>
                                     <th>Judul Laporan</th>
                                     <th>Jenis</th>
                                     <th>Status</th>
                                     <th>Dokumen</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-bold" id="myTable">
@@ -107,7 +107,7 @@
                                                     @endforelse
                                                 </ul>
                                             @elseif ($laporan->status == 'revision')
-                                                <span class="badge bg-secondary">Perlu Revisi</span>
+                                                <span class="badge bg-warning">Perlu Revisi</span>
                                             @elseif ($laporan->status == 'waiting approved')
                                                 <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                             @elseif ($laporan->status == 'approved')
@@ -229,7 +229,7 @@
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title"
                                                                     id="pilihKirimReviewerModalLabel-{{ $laporan->id }}">
-                                                                    Pilih/Kirim Usulan ke Reviewer
+                                                                    Kirim ke Reviewer
                                                                 </h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
@@ -289,7 +289,7 @@
                                                     <div class="col p-2">
                                                         <button class="btn btn-primary" data-bs-toggle="modal"
                                                             data-bs-target="#approveRejectModal{{ $laporan->id }}">
-                                                            Approve or Reject
+                                                            Diterima
                                                         </button>
                                                     </div>
 
@@ -303,7 +303,7 @@
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title"
                                                                         id="approveRejectModalLabel{{ $laporan->id }}">
-                                                                        Approve or Reject </h5>
+                                                                        Diterima</h5>
                                                                     <button type="button" class="btn-close"
                                                                         data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
@@ -317,16 +317,16 @@
                                                                             <label for="status">Select Status:</label>
                                                                             <select name="status" id="status"
                                                                                 class="form-select" required>
-                                                                                <option value="approved">Approve</option>
-                                                                                <option value="rejected">Reject</option>
+                                                                                <option value="approved">Diterima</option>
+                                                                                <option value="rejected">Ditolak</option>
                                                                             </select>
                                                                         </div>
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
+                                                                        data-bs-dismiss="modal">Tutup</button>
                                                                     <button type="submit"
-                                                                        class="btn btn-primary">Submit</button>
+                                                                        class="btn btn-primary">Simpan</button>
                                                                 </div>
                                                                 </form>
                                                             </div>

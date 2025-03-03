@@ -47,28 +47,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Kuota Proposal -->
-                                {{-- <div class="row mb-6">
-                                    <label class="col-lg-4 col-form-label readonly fw-bold fs-6">Kuota Proposal</label>
-                                    <div class="col-lg-8 fv-row">
-                                        <input id="kuota_proposal" type="number" class="form-control form-control-lg form-control-solid @error('kuota_proposal') is-invalid @enderror" name="kuota_proposal" value="{{ old('kuota_proposal', $dosen->kuota_proposal) }}" readonly>
-                                        @error('kuota_proposal')
-                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                                        @enderror
-                                    </div>
-                                </div> --}}
-
-                                <!-- Jumlah Proposal -->
-                                {{-- <div class="row mb-6">
-                                    <label class="col-lg-4 col-form-label required fw-bold fs-6">Jumlah Proposal</label>
-                                    <div class="col-lg-8 fv-row">
-                                        <input id="jumlah_proposal" type="number" class="form-control form-control-lg form-control-solid @error('jumlah_proposal') is-invalid @enderror" name="jumlah_proposal" value="{{ old('jumlah_proposal', $dosen->jumlah_proposal) }}" readonly>
-                                        @error('jumlah_proposal')
-                                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                                        @enderror
-                                    </div>
-                                </div> --}}
-
                                 <!-- Fakultas -->
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">Fakultas</label>
@@ -78,7 +56,7 @@
                                             <option value="" disabled>Pilih Fakultas</option>
                                             @foreach ($fakultas as $fakultasItem)
                                                 <option value="{{ $fakultasItem->id }}"
-                                                    {{ old('fakultas', $dosen->fakultas) == $fakultasItem->id ? 'selected' : '' }}>
+                                                    {{ old('fakultas', $dosen->fakultas_id) == $fakultasItem->id ? 'selected' : '' }}>
                                                     {{ $fakultasItem->name }}
                                                 </option>
                                             @endforeach
@@ -94,6 +72,7 @@
                                         <select id="prodi" name="prodi"
                                             class="form-control form-control-lg form-control-solid">
                                             <option value="" disabled>Pilih Program Studi</option>
+                                            <!-- Prodi options will be populated by JS -->
                                         </select>
                                     </div>
                                 </div>
@@ -102,12 +81,10 @@
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const fakultasSelect = document.getElementById('fakultas');
                                         const prodiSelect = document.getElementById('prodi');
-                                        const selectedProdi =
-                                        "{{ old('prodi', $dosen->prodi ?? '') }}"; // Fetch the selected Prodi from old input or DB
+                                        const selectedProdi = "{{ old('prodi', $dosen->prodi_id ?? '') }}";
 
                                         // Function to fetch Prodi based on Fakultas selection
                                         function loadProdi(fakultasId) {
-                                            // Make an AJAX call to fetch Prodi data
                                             fetch(`/get-prodi/${fakultasId}`)
                                                 .then(response => response.json())
                                                 .then(data => {
@@ -150,7 +127,7 @@
                                         });
 
                                         // Trigger Prodi loading if Fakultas is already selected
-                                        const selectedFakultas = "{{ old('fakultas', $dosen->fakultas ?? '') }}";
+                                        const selectedFakultas = "{{ old('fakultas', $dosen->fakultas_id ?? '') }}";
                                         if (selectedFakultas) {
                                             fakultasSelect.value = selectedFakultas;
                                             loadProdi(selectedFakultas); // Load Prodi for selected Fakultas
@@ -172,7 +149,6 @@
                                         @enderror
                                     </div>
                                 </div>
-
 
                                 <!-- Submit Button -->
                                 <div class="d-flex justify-content-end pt-7">
@@ -201,6 +177,7 @@
         toastr.error('Data tidak ditemukan untuk NIDN: ' + nidn);
     }
 </script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const nidnInput = document.getElementById('nidn');

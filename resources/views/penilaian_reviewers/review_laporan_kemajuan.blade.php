@@ -83,6 +83,10 @@
                                                                     <select name="status"
                                                                         id="status{{ $data->id }}"
                                                                         class="form-select me-3" required>
+                                                                        <option value="Di Revisi Kembali"
+                                                                        {{ $data->status == 'Di Revisi Kembali' ? 'selected' : '' }}>
+                                                                        Di Revisi Kembali
+                                                                        </option>
                                                                         <option value="Diterima"
                                                                             {{ $data->status_penilaian == 'Diterima' ? 'selected' : '' }}>
                                                                             Diterima

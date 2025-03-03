@@ -13,6 +13,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LaporanAkhir;
 use App\Models\LaporanKemajuan;
+use App\Exports\LuaranExport;
+
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class LuaranController extends Controller
 {
@@ -132,7 +136,7 @@ class LuaranController extends Controller
         
         $user = auth()->user(); // Ambil data user yang sedang login
         if ($user->hasRole('Kepala LPPM')) {
-            $usulans = Usulan::where('jenis_skema', $jenis)->get();
+            $usulans = Usulan::where('jenis_skema', $jenis)->where('status', 'approved')->get();
             return view('luaran.index', compact('usulans', 'jenis'));
 
         }
@@ -183,7 +187,7 @@ class LuaranController extends Controller
     $request->validate([
         'judul' => 'required|string|max:255',
         'type' => 'required|string|max:255',
-        'url' => 'required|url',
+        'url' => 'required',
         'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional file upload
     ]);
 
@@ -247,6 +251,12 @@ class LuaranController extends Controller
     // Redirect kembali dengan pesan sukses
     return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi: ' . ucfirst($luaran->status));
 }
+
+public function export($jenis)
+    {
+        // Return the export file as an Excel download
+        return Excel::download(new LuaranExport($jenis), 'luaran_' . $jenis . '.xlsx');
+    }
 
 
 

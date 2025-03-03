@@ -111,7 +111,8 @@
                                                             action="{{ route('users.update', $user->id) }}">
                                                             @csrf
                                                             @method('PUT')
-
+                                                            <input type="hidden" name="user_id"
+                                                            value="{{ $user->id }}">
                                                             <!-- Email Field -->
                                                             <div class="mb-3">
                                                                 <label for="email" class="form-label">Email</label>

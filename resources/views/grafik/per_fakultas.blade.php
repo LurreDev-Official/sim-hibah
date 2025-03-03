@@ -3,17 +3,14 @@
 <style>
     #usulanChart {
         width: 50% !important;
-        /* Adjust the width to 50% */
         height: auto !important;
-        /* Adjust the height automatically to maintain aspect ratio */
         margin: 0 auto;
     }
 </style>
+
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
-        <!--begin::Toolbar-->
         <div class="toolbar" id="kt_toolbar">
-            <!--begin::Container-->
             <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">
@@ -26,7 +23,6 @@
                 </div>
             </div>
         </div>
-        <!--end::Toolbar-->
 
         <div class="post d-flex flex-column-fluid" id="kt_post">
             <div id="kt_content_container" class="container-xxl">
@@ -55,12 +51,10 @@
         const usulanChart = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Fakultas Agama Islam', 'Fakultas Teknik', 'Fakultas Teknologi Informasi',
-                    'Fakultas Ekonomi', 'Fakultas Ilmu Pendidikan'
-                ],
+                labels: @json($labels), // Label Fakultas dari database
                 datasets: [{
                     label: 'Usulan Penelitian',
-                    data: [15, 25, 30, 10, 20],
+                    data: @json($totals), // Data jumlah usulan per fakultas
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -87,10 +81,9 @@
                     tooltip: {
                         callbacks: {
                             label: function(tooltipItem) {
-                                const total = tooltipItem.chart.data.datasets[0].data.reduce((a, b) => a + b,
-                                0); // total data
+                                const total = tooltipItem.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const value = tooltipItem.raw;
-                                const percentage = ((value / total) * 100).toFixed(2); // menghitung persentase
+                                const percentage = ((value / total) * 100).toFixed(2);
                                 return `${tooltipItem.label}: ${value} Usulan (${percentage}%)`;
                             }
                         }

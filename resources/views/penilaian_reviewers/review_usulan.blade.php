@@ -84,7 +84,8 @@
 
                                             @if ($usulanPerbaikan)
                                                 <div class="modal fade" id="perbaikanModal{{ $usulan->usulan_id }}"
-                                                    tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->usulan_id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="perbaikanModalLabel{{ $usulan->usulan_id }}"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog modal-lg">
                                                         <div class="modal-content">
@@ -118,6 +119,10 @@
                                                                         <select name="status"
                                                                             id="status{{ $usulan->usulan_id }}"
                                                                             class="form-select me-3" required>
+                                                                            <option value="Di Revisi Kembali"
+                                                                                {{ $usulanPerbaikan->status == 'Di Revisi Kembali' ? 'selected' : '' }}>
+                                                                                Di Revisi Kembali
+                                                                            </option>
                                                                             <option value="Diterima"
                                                                                 {{ $usulanPerbaikan->status == 'Diterima' ? 'selected' : '' }}>
                                                                                 Diterima

@@ -125,7 +125,7 @@ class LaporanKemajuanController extends Controller
     // Validate the input
     $validated = $request->validate([
         'usulan_id' => 'required|exists:usulans,id',
-        'dokumen_laporan_kemajuan' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'dokumen_laporan_kemajuan' => 'required|file|mimes:pdf,doc,docx|max:5048',
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
 
@@ -271,7 +271,7 @@ class LaporanKemajuanController extends Controller
     public function update(Request $request, $id)
 {
     $validated = $request->validate([
-        'dokumen_laporan_kemajuan' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        'dokumen_laporan_kemajuan' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
     ]);
 
     $laporanKemajuan = LaporanKemajuan::findOrFail($id);
@@ -291,7 +291,7 @@ class LaporanKemajuanController extends Controller
     // Perbarui data
     $laporanKemajuan->update($validated);
 
-    return redirect()->route('laporan-kemajuan.index')->with('success', 'Laporan kemajuan berhasil diperbarui.');
+    return redirect()->back()->with('success', 'Laporan kemajuan berhasil diperbarui.');
 }
 
     /**

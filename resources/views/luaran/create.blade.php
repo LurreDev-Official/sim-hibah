@@ -56,10 +56,33 @@
                             </div>
                         </div>
                         <div class="card-toolbar">
+                            @php
+                                    // Ambil data dosen terkait user yang sedang login
+                                    $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
+
+                                    // Ambil data anggota dosen berdasarkan dosen yang login
+                                    $anggotaDosencek = null;
+                                    if ($dosen) {
+                                        $anggotaDosencek = \App\Models\AnggotaDosen::where(
+                                            'dosen_id',
+                                            $dosen->id,
+                                        )->first();
+                                    }
+                                @endphp
+                                
+                                @role('Dosen')
+
+                            @if ($anggotaDosencek->status_anggota == 'ketua')
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#createModal">
-                                Tambah Luaran
-                            </button>
+                                    data-bs-target="#createModal">
+                                    Tambah Luaran
+                                </button>
+                             @endif
+                             @endrole
+
+
+                         
+
                         </div>
                     </div>
                     <!--end::Card header-->
@@ -74,7 +97,7 @@
                                     <th>jenis</th>
                                     <th>Luaran</th>
                                     <th>URL</th>
-                                    <th>File LOA</th>
+                                    <th>LoA</th>
                                     <th>Status</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
@@ -100,8 +123,9 @@
                                             @endif
                                         </td>
                                         <td>
+
                                             @if ($luaran->file_loa && $luaran->file_loa !== '0')
-                                                {{ $luaran->file_loa }}
+                                             <a href="{{ Storage::url($luaran->file_loa) }}" target="_blank">Link</a>
                                             @else
                                                 -
                                             @endif
@@ -113,11 +137,28 @@
                                                 <span class="badge badge-light-danger">Tidak Terpenuhi</span>
                                             @endif
                                         <td class="text-justify">
-                                            <button class="btn btn-light btn-active-light-primary btn-sm me-2"
+                                            
+                                @role('Dosen')
+
+                                        @if ($anggotaDosencek->status_anggota == 'ketua')
+                                        <button class="btn btn-light btn-active-light-primary btn-sm me-2"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editModal{{ $luaran->id }}">Edit</button>
-                                            <button class="btn btn-danger btn-sm me-2"
-                                                onclick="deleteLuaran({{ $luaran->id }})">Hapus</button>
+                                        @endif
+                                       
+                                        @endrole
+
+                                        @role('Dosen')
+
+                                           @if($luaran->jenis_luaran == 'wajib')
+                                           @else
+                                              @if ($anggotaDosencek->status_anggota == 'ketua')
+                                           <button class="btn btn-danger btn-sm me-2"
+                                           onclick="deleteLuaran({{ $luaran->id }})">Hapus</button>
+                                            @endif
+                                            @endif
+                                            @endrole
+
                                             @role('Kepala LPPM')
                                                 <button class="btn btn-primary btn-sm p-2" data-bs-toggle="modal"
                                                     data-bs-target="#updateStatusModal{{ $luaran->id }}">Update

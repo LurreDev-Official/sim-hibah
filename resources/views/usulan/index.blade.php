@@ -108,7 +108,7 @@
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                        <th class="min-w-125px">No</th>
+                                        <th class="min-w-125px">No Usulan</th>
                                         <th class="min-w-150px">Judul Usulan</th>
                                         <th class="min-w-150px">Tahun Pelaksanaan</th>
                                         <th class="min-w-125px">Status</th>
@@ -157,7 +157,7 @@
                                                         @endforelse
                                                     </ul>
                                                 @elseif ($usulan->status == 'revision')
-                                                    <span class="badge bg-secondary">Perlu Revisi</span>
+                                                    <span class="badge bg-warning">Perlu Revisi</span>
                                                 @elseif ($usulan->status == 'waiting approved')
                                                     <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                                 @elseif ($usulan->status == 'approved')
@@ -460,7 +460,7 @@
                                 @if ($usulan->status !== 'approved')
                                     <button class="btn btn-primary" data-bs-toggle="modal"
                                         data-bs-target="#approveRejectModal{{ $usulan->id }}">
-                                        Approve or Reject
+                                        Diterima Atau Ditolak
                                     </button>
                                 @endif
 
@@ -473,7 +473,7 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title" id="approveRejectModalLabel{{ $usulan->id }}">
-                                                        Approve or Reject Usulan</h5>
+                                                        Diterima Atau Ditolak Usulan</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                                 </div>
@@ -488,8 +488,8 @@
                                                             <label for="status">Select Status:</label>
                                                             <select name="status" id="status" class="form-select"
                                                                 required>
-                                                                <option value="approved">Approve</option>
-                                                                <option value="rejected">Reject</option>
+                                                                <option value="approved">Diterima</option>
+                                                                <option value="rejected">Ditolak</option>
                                                             </select>
                                                         </div>
                                                 </div>

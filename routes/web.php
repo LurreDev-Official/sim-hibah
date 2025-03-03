@@ -34,7 +34,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/google/redirect', [App\Http\Controllers\GoogleLoginController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/google/callback', [App\Http\Controllers\GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
+Route::get('/', function () {
+    return view('auth.login');
+});
 Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
@@ -62,7 +64,8 @@ Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])-
     Route::get('usulan/{id}/cetak-bukti-acc', [UsulanController::class, 'cetakBuktiACC'])->name('usulan.cetakBuktiACC');
     //export excel usulan
     Route::get('usulan/{jenis}/export', [UsulanController::class, 'export'])->name('usulan.export');
-
+    Route::get('luaran/{jenis}/export', [LuaranController::class, 'export'])->name('luaran.export');
+    
     Route::resource('perbaikan-usulan', UsulanPerbaikanController::class);
 
     Route::get('perbaikan-usulan/{jenis}', [UsulanPerbaikanController::class, 'show'])->name('perbaikan-usulan.show');
@@ -109,7 +112,7 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
 
 // Rute khusus untuk Kepala LPPM
 Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
-    Route::put('users/update', [UserController::class, 'update'])->name('users.update');
+    Route::put('users/update/{id}', [UserController::class, 'update'])->name('users.update');
     Route::resource('users', UserController::class);
     Route::resource('kriteria-penilaian', KriteriaPenilaianController::class);
     Route::delete('/kriteria-penilaian/{id}', [KriteriaPenilaianController::class, 'destroy'])->name('kriteria-penilaian.destroy');
@@ -129,7 +132,7 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     Route::get('plot', [UsulanController::class, 'plot'])->name('plot.index');
     Route::get('/filter-dosens-by-year', [UsulanController::class, 'filterByYear'])->name('filter.dosens.by.year');
     Route::get('per-fakultas', [UsulanController::class, 'grafikPerFakultas'])->name('grafik-per-fakultas.index');
-    Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-per-prodi.index');
+    Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-prodi.index');;
     Route::get('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.index');
     Route::post('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.filter');
 

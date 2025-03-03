@@ -52,32 +52,30 @@ class UserController extends Controller
         // Kembalikan data user dalam format JSON untuk digunakan di form edit (AJAX)
         return response()->json($user);
     }
-    public function update(Request $request)
+public function update(Request $request,$id)
 {
     // Validasi data yang diterima dari form
     $request->validate([
-        'user_id' => 'required|exists:users,id', // Pastikan user_id ada di tabel users
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $request->user_id, // Pastikan email unik kecuali email user ini
-        'password' => 'nullable|min:6|confirmed' // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
+        'password' => 'required' // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
     ]);
+    try {
+        // Ambil user berdasarkan user_id
+        $user = User::findOrFail($id);
 
-    // Ambil user berdasarkan user_id
-    $user = User::findOrFail($request->user_id);
+        // Jika ada password yang diisi, perbarui password
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
 
-    // Update informasi pengguna
-    $user->name = $request->name;
-    $user->email = $request->email;
+        // Simpan perubahan ke database
+        $user->save();
 
-    // Jika ada password yang diisi, perbarui password
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
+        // Tambahkan notifikasi sukses ke session
+        return redirect()->back()->with('success', 'Data pengguna berhasil diperbarui!');
+    } catch (\Exception $e) {
+        // Tambahkan notifikasi error ke session jika terjadi kesalahan
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data pengguna: ' . $e->getMessage());
     }
-
-    // Simpan perubahan ke database
-    $user->save();
- // Tambahkan notifikasi sukses ke session
- return redirect()->back()->with('success', 'Data pengguna berhasil diperbarui!');
 }
 
     

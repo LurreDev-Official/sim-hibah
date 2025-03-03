@@ -162,7 +162,7 @@
 
 
                 <div data-kt-menu-trigger="click"
-                    class="menu-item menu-accordion {{ request()->routeIs('grafik-per-fakultas.index') || request()->routeIs('grafik-per-prodi.index') || request()->routeIs('laporan-hitungan-usulan.index') ? 'show' : '' }}">
+                    class="menu-item menu-accordion {{ request()->routeIs('grafik-per-fakultas.index') || request()->routeIs('grafik-prodi.index') || request()->routeIs('laporan-hitungan-usulan.index') ? 'show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <span class="svg-icon svg-icon-2">
@@ -191,15 +191,15 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('grafik-per-prodi.index') ? 'active' : '' }}"
-                                href="{{ route('grafik-per-prodi.index') }}">
+                            <a class="menu-link {{ request()->routeIs('grafik-prodi.index') ? 'active' : '' }}"
+                                href="{{ route('grafik-prodi.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="pie-chart"></i>
                                 </span>
                                 <span class="menu-title">Grafik Per Prodi</span>
                             </a>
                         </div>
-                        <div class="menu-item">
+                        {{-- <div class="menu-item">
                             <a class="menu-link {{ request()->routeIs('laporan-hitungan-usulan.index') ? 'active' : '' }}"
                                 href="{{ route('laporan-hitungan-usulan.index') }}">
                                 <span class="menu-bullet">
@@ -207,7 +207,7 @@
                                 </span>
                                 <span class="menu-title">Laporan Hitungan Usulan by Dosen</span>
                             </a>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 

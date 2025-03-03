@@ -133,19 +133,7 @@
 
 
     <script>
-        $(document).ready(function() {
-            $('#table-sinta-scores').DataTable({
-                responsive: true,
-                processing: true,
-                paging: true,
-                searching: true,
-                columnDefs: [{
-                        targets: 5,
-                        orderable: false
-                    } // Disable ordering for Actions column
-                ]
-            });
-        });
+       
 
         function deleteSintaScore(id) {
             Swal.fire({
@@ -191,6 +179,12 @@
     <script>
         var xin_table = $('#table-sinta-scores').DataTable({
             searchable: true,
+            processing: true,
         });
+        // Fungsi untuk pencarian menggunakan input field
+    $('#searchInput').on('keyup', function() {
+        // Pencarian akan diterapkan ke DataTable berdasarkan nilai input
+        xin_table.search(this.value).draw();  // Menjalankan pencarian
+    });
     </script>
 @endsection
