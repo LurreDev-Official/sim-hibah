@@ -25,6 +25,9 @@ use App\Models\TemplateDokumen;
 use App\Exports\ReportExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
+
+use App\Exports\LaporanAkhirExport;
+
 class LaporanAkhirController extends Controller
 {
     /**
@@ -537,6 +540,11 @@ public function report(Request $request, $jenis)
         return redirect()->route('home')->with('error', 'Akses ditolak');
     }
 
+    public function export(Request $request, $jenis)
+    {
+        // Pass 'jenis' to the export class
+        return Excel::download(new LaporanAkhirExport($jenis), 'laporan_akhir_' . $jenis . '.xlsx');
+    }
 
     public function filterOrExport(Request $request)
     {

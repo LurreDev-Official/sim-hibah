@@ -39,6 +39,13 @@
                                 <input type="text" id="myInput" class="form-control form-control-solid w-250px ps-15"
                                     placeholder="Search Laporan" name="search" />
                             </div>
+
+                            <a href="{{ route('laporan-akhir.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                                <i class="fa fa-download"></i> Export Data
+                            </a>
+
+
+                            
                         </div>
 
 

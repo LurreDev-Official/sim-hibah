@@ -60,7 +60,7 @@
                                         $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
                                         $scoreSinta = $dosen->score_sinta;
                                     @endphp
-                                    @if ($scoreSinta > 200)
+                                    @if ($scoreSinta > 200 && $isButtonActive)
                                         <!-- Tombol aktif jika skor Sinta lebih dari 200 -->
                                         <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}"
                                             class="btn btn-primary mr-3">Tambah Usulan</a>
@@ -369,16 +369,16 @@
                                             @role('Kepala LPPM')
                                                 <td>
                                                     <div class="col p-2">
-                                                        <!-- Button Pilih/Kirim Ke Reviewer -->
+                                                        <!-- Button Kirim Ke Reviewer -->
                                                         @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review')
                                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
                                                                 data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
-                                                                <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
+                                                                <i class="fas fa-paper-plane"></i> Kirim Ke Reviewer
                                                             </button>
                                                         @endif
 
 
-                                                        <!-- Modal Pilih/Kirim Ke Reviewer -->
+                                                        <!-- Modal Kirim Ke Reviewer -->
                                                         <div class="modal fade"
                                                             id="pilihKirimReviewerModal-{{ $usulan->id }}" tabindex="-1"
                                                             aria-labelledby="pilihKirimReviewerModalLabel-{{ $usulan->id }}"
@@ -485,7 +485,7 @@
 
                                                         <!-- Dropdown to choose status -->
                                                         <div class="form-group">
-                                                            <label for="status">Select Status:</label>
+                                                            <label for="status">Pilih Status:</label>
                                                             <select name="status" id="status" class="form-select"
                                                                 required>
                                                                 <option value="approved">Diterima</option>

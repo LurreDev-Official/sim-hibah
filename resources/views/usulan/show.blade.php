@@ -277,7 +277,7 @@
                                                         "Fakultas Ekonomi": [
                                                             "S1 Manajemen",
                                                             "S1 Akuntansi",
-                                                            "S1 Ekonomi Islam"
+                                                            "S1 Akuntansi"
                                                         ],
                                                         "Fakultas Ilmu Pendidikan": [
                                                             "S1 Pendidikan Guru Sekolah Dasar",
