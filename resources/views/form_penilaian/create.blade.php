@@ -141,7 +141,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="text" name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" value="{{ old('indikator.' . $indikator->id . '.catatan', '') }}" required >
+                                                        <textarea name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" style="height: 200px;" required>{{ old('indikator.' . $indikator->id . '.catatan', '') }}</textarea>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -196,7 +196,7 @@
                                     
                                         <!-- Submit Button -->
                                         <div class="text-end mt-4">
-                                            <button type="submit" class="btn btn-primary">Submit Penilaian</button>
+                                            <button type="submit" class="btn btn-primary">Simpan Penilaian</button>
                                         </div>
                                     </form>
                                     

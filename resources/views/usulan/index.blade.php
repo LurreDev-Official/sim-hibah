@@ -3,19 +3,16 @@
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
 
+        <!--begin::Toolbar-->
         <div class="toolbar" id="kt_toolbar">
-            <!--begin::Container-->
             <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
-                <!--begin::Page title-->
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
-                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Dashboard
+                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Usulan
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Daftar Usulan {{ $jenis }}</small>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">List</small>
                     </h1>
                 </div>
-                <!--end::Page title-->
             </div>
-            <!--end::Container-->
         </div>
         <!--end::Toolbar-->
 
@@ -495,8 +492,8 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                        data-bs-dismiss="modal">Tutup</button>
+                                                    <button type="submit" class="btn btn-primary">Simpan</button>
                                                 </div>
                                                 </form>
                                             </div>

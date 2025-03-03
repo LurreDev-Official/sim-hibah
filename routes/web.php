@@ -91,6 +91,8 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::delete('laporan-akhir/{id}', [LaporanAkhirController::class, 'destroy'])->name('laporan-akhir.destroy');
     Route::put('laporan-akhir/{id}/update-status', [LaporanAkhirController::class, 'updateStatus'])->name('laporan-akhir.updateStatus');
     Route::get('laporan-akhir/{id}/cetak-bukti-acc', [LaporanAkhirController::class, 'cetakBuktiACC'])->name('laporan-akhir.cetakBuktiACC');
+    Route::get('laporan-akhir/{jenis}/export', [LaporanKemajuanController::class, 'export'])->name('laporan-akhir.export');
+    
     Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
     Route::post('/report/filter', [LaporanAkhirController::class, 'filterOrExport'])->name('report.filter');
 
