@@ -112,6 +112,9 @@
                                                             @csrf
                                                             @method('PUT')
 
+                                                            <input type="hidden" name="user_id"
+                                                                value="{{ $user->id }}">
+
                                                             <!-- Email Field -->
                                                             <div class="mb-3">
                                                                 <label for="email" class="form-label">Email</label>
@@ -130,8 +133,8 @@
                                                             <div class="text-end">
                                                                 <button type="button" class="btn btn-light"
                                                                     data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-primary">Save
-                                                                    changes</button>
+                                                                <button type="submit" class="btn btn-primary">Perbarui
+                                                                </button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -149,7 +152,7 @@
                     </div>
 
 
-                    
+
                 </div>
             </div>
         </div>

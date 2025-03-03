@@ -37,6 +37,17 @@ class UsulanController extends Controller
      */
     public function index()
     {
+
+        //cek periode
+        $periode = Periode::where('is_active', true)->first();
+        $isButtonActive = false;
+
+        if ($periode) {
+            $tanggalAwal = Carbon::parse($periode->tanggal_awal);
+            $isButtonActive = $tanggalAwal->addWeeks(2)->isPast();
+        }
+
+
         $user = auth()->user(); // Ambil data user yang sedang login
         $dosens = Dosen::with('user')->get();
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
@@ -60,7 +71,7 @@ class UsulanController extends Controller
    // Fetch all reviewers (if you need to display them too)
    $reviewers = Reviewer::with('user')->get();
     
-            return view('usulan.index', compact('usulans','dosens','jenis','reviewers'));
+            return view('usulan.index', compact('usulans','dosens','jenis','reviewers','isButtonActive'));
         }
     
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
@@ -77,7 +88,7 @@ class UsulanController extends Controller
                                  ->where('jenis_skema', $jenis)
                                  ->paginate(10);
                                  $reviewers = Reviewer::with('user')->get();
-                                 return view('usulan.index', compact('usulans', 'dosens', 'jenis','reviewers'));
+                                 return view('usulan.index', compact('usulans', 'dosens', 'jenis','reviewers','isButtonActive'));
             }
         }
     
@@ -159,7 +170,7 @@ class UsulanController extends Controller
         $validated = $request->validate([
             'judul_usulan' => 'required|string|max:255',
             'tahun_pelaksanaan' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
-            'dokumen_usulan' => 'required|file|mimes:pdf|max:2048', // Only allow PDF files up to 2MB
+            'dokumen_usulan' => 'required|file|mimes:pdf|max:5048',  
             'rumpun_ilmu' => 'required|string|max:255',
             'bidang_fokus' => 'required|string|max:255',
             'tema_penelitian' => 'required|string|max:255',
@@ -330,6 +341,15 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
 
     public function show($jenis)
     {
+         //cek periode
+         $periode = Periode::where('is_active', true)->first();
+         $isButtonActive = false;
+ 
+         if ($periode) {
+             $tanggalAwal = Carbon::parse($periode->tanggal_awal);
+             $isButtonActive = $tanggalAwal->addWeeks(2)->isPast();
+         }
+
         $user = auth()->user(); // Ambil data user yang sedang login
         $dosens = Dosen::with('user')->get();
         // Jika user memiliki role Kepala LPPM, tampilkan semua usulan
@@ -355,14 +375,13 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
         // Fetch all reviewers (if you need to display them too)
         $reviewers = Reviewer::with('user')->get();
 
-        return view('usulan.index', compact('usulans', 'reviewers', 'jenis','dosens'));
+        return view('usulan.index', compact('usulans', 'reviewers', 'jenis','dosens','isButtonActive'));
     }
     
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
         elseif ($user->hasRole('Dosen')) {
             // Ambil data dosen terkait user yang login
             $dosen = Dosen::where('user_id', $user->id)->first();
-           
             if ($dosen) {
                 // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
                 $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->pluck('usulan_id');
@@ -372,7 +391,7 @@ $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
                                  ->where('jenis_skema', $jenis)
                                  ->paginate(10);
                                  $reviewers = Reviewer::with('user')->get();
-                                 return view('usulan.index', compact('usulans', 'jenis','reviewers','dosens'));
+                                 return view('usulan.index', compact('usulans', 'jenis','reviewers','dosens','isButtonActive'));
         
             }
 
@@ -681,17 +700,9 @@ public function cetakBuktiACC($id)
         'jumlahAnggota' => $jumlahAnggotaTotal,
         'dokumen_usulan' => $usulanPerbaikan->dokumen_usulan,
     ];
-
- 
-
-
     // Return view dengan data
     return view('usulan.printpengasahan', compact('formattedUsulan', 'usulan','periode', 'dekan', 'kepalaLPPM','qrCodeSVG'));
 }
-
-
-
-
 
 public function validasiUsulanBaru($jenis)
 {
@@ -720,9 +731,6 @@ public function validasiUsulanBaru($jenis)
 }
 
 
- 
-
-
 public function filterByYear(Request $request)
 {
     $year = $request->input('year');
@@ -738,15 +746,52 @@ public function filterByYear(Request $request)
 
 
 public function grafikPerFakultas()
-    {
-        // Logika untuk grafik per fakultas
-        return view('grafik.per_fakultas');
-    }
+{
+    $data = Dosen::with('fakultas')
+        ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
+        ->selectRaw('fakultas_id, COUNT(usulans.id) as total')
+        ->groupBy('fakultas_id')
+        ->get();
 
-    public function grafikPerProdi()
+    // Format data untuk grafik
+    $labels = $data->map(function ($item) {
+        return $item->fakultas->name ?? 'Tidak Ada Fakultas';
+    });
+
+    $totals = $data->pluck('total');
+
+    // Kirim data ke view
+    return view('grafik.per_fakultas', compact('labels', 'totals'));
+}
+
+    public function grafikPerProdi(Request $request)
     {
         // Logika untuk grafik per prodi
-        return view('grafik.per_prodi');
+        // Ambil fakultas dari parameter (filter)
+        $fakultasId = $request->get('fakultas_id', null);
+
+        // Ambil data prodi berdasarkan fakultas
+        $query = Dosen::with('prodi')
+            ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
+            ->selectRaw('prodi_id, COUNT(usulans.id) as total')
+            ->groupBy('prodi_id');
+
+        if ($fakultasId) {
+            $query->where('fakultas_id', $fakultasId);
+        }
+
+        $data = $query->get();
+
+        // Format data untuk grafik
+        $labels = $data->map(function ($item) {
+            return $item->prodi->name ?? 'Tidak Ada Prodi';
+        });
+
+        $totals = $data->pluck('total');
+
+        // Kirim data ke view
+        $fakultas = Fakultas::all(); // Untuk dropdown filter
+        return view('grafik.per_prodi', compact('labels', 'totals', 'fakultas', 'fakultasId'));
     }
 
     public function laporanHitunganUsulan(Request $request)

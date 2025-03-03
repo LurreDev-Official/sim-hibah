@@ -17,47 +17,55 @@ class ProfileController extends Controller
         $this->middleware('auth');
     }
     public function edit($id)
-    {
-        $user = User::findOrFail($id);
+{
+    // Mengambil data user berdasarkan ID, jika tidak ada, akan melempar ModelNotFoundException
+    $user = User::findOrFail($id);
     
-        // Ambil data Fakultas untuk dropdown
-        $fakultas = Fakultas::all(); // Mengambil semua fakultas dari database
+    // Ambil data Fakultas untuk dropdown
+    $fakultas = Fakultas::all(); // Mengambil semua fakultas dari database
     
-        if (Auth::user()->hasRole('Kepala LPPM')) {
-            return view('profile.kepala_lppm_edit', compact('user', 'fakultas'));
-        }
-        elseif (Auth::user()->hasRole('Dosen')) {
-            // Cek apakah data Dosen sudah ada atau buat jika tidak ada
-            $dosen = Dosen::firstOrCreate(
-                ['user_id' => $user->id], // Kondisi pencarian
-                [
-                    'nidn' => 0, // Default value jika tidak ditemukan
-                    'kuota_proposal' => 4,
-                    'jumlah_proposal' => 0,
-                    'fakultas' => '-', // Default fakultas
-                    'prodi' => '-', // Default prodi
-                    'score_sinta' => 0,
-                    'status' => 'anggota'
-                ]
-            );
-    
-            // Pass both User, Dosen, and Fakultas data to the view
-            return view('profile.dosen_edit', compact('user', 'dosen', 'fakultas'));
-        }
-        elseif (Auth::user()->hasRole('Reviewer')) {
-            $reviewer = Reviewer::firstOrCreate(
-                ['user_id' => Auth::id()], // Kondisi untuk mencari
-                [
-                    'nidn' => '0', // Nilai default untuk kolom nidn
-                    'fakultas' => '', // Nilai default untuk kolom fakultas
-                    'prodi' => '' // Nilai default untuk kolom prodi
-                ]
-            );
-            return view('profile.reviewer_edit', compact('user', 'reviewer', 'fakultas'));
-        }
-    
-        return redirect()->url('/')->with('success', 'updated successfully.');
+    // Menangani pengeditan berdasarkan peran pengguna
+    if ($user->hasRole('Kepala LPPM')) {
+        // Jika pengguna adalah Kepala LPPM, tampilkan halaman edit untuk Kepala LPPM
+        return view('profile.kepala_lppm_edit', compact('user', 'fakultas'));
+    } 
+    elseif ($user->hasRole('Dosen')) {
+        // Cek apakah data Dosen sudah ada atau buat jika tidak ada
+        $dosen = Dosen::firstOrCreate(
+            ['user_id' => $user->id], // Kondisi pencarian
+            [
+                'nidn' => 0, // Default value jika tidak ditemukan
+                'kuota_proposal' => 4,
+                'jumlah_proposal' => 0,
+                'fakultas_id'=> 1, // Bisa diubah sesuai dengan data yang sesuai
+                'prodi_id'=> 1, // Bisa diubah sesuai dengan data yang sesuai
+                'score_sinta' => 0,
+                'status' => 'anggota'
+            ]
+        );
+
+        // Pass both User, Dosen, and Fakultas data to the view
+        return view('profile.dosen_edit', compact('user', 'dosen', 'fakultas'));
     }
+    elseif ($user->hasRole('Reviewer')) {
+        // Cek jika data Reviewer sudah ada, jika tidak buat baru dengan nilai default
+        $reviewer = Reviewer::firstOrCreate(
+            ['user_id' => $user->id], // Gunakan user_id yang benar, jangan menggunakan Auth::id() di sini
+            [
+                'nidn' => '0', // Nilai default untuk kolom nidn
+                'fakultas' => '', // Nilai default untuk kolom fakultas
+                'prodi' => '' // Nilai default untuk kolom prodi
+            ]
+        );
+
+        // Tampilkan halaman edit reviewer
+        return view('profile.reviewer_edit', compact('user', 'reviewer', 'fakultas'));
+    }
+
+    // Jika role tidak sesuai dengan yang diharapkan, redirect ke dashboard dengan pesan sukses
+    return redirect()->route('dashboard')->with('success', 'Kembali ke menu.');
+}
+
 
 
 
@@ -98,8 +106,8 @@ class ProfileController extends Controller
                 $dosen = Dosen::find($id);
                 if ($dosen) {
                     $dosen->nidn = $request->nidn;
-                    $dosen->fakultas = $request->fakultas;
-                    $dosen->prodi = $request->prodi;
+                    $dosen->fakultas_id = $request->fakultas;
+                    $dosen->prodi_id = $request->prodi;
                     $dosen->score_sinta = $request->score_sinta;
                     $dosen->save();
 

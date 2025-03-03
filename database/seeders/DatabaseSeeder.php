@@ -326,7 +326,7 @@ foreach ($permissions as $permission) {
         
         Prodi::create([
             'fakultas_id' => 4,
-            'name' => 'S1 Ekonomi Islam',
+            'name' => 'S1 Akuntansi',
             'initial' => 'S1 EI',
             'created_at' => now(),
             'updated_at' => now()

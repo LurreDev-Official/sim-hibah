@@ -58,12 +58,12 @@ class UserController extends Controller
     $request->validate([
         'user_id' => 'required|exists:users,id', // Pastikan user_id ada di tabel users
         'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,' . $request->user_id, // Pastikan email unik kecuali email user ini
-        'password' => 'nullable|min:6|confirmed' // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
+        'email' => 'required,' . $id, // Pastikan email unik kecuali email user ini
+        'password' => 'nullable|min:6' // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
     ]);
 
     // Ambil user berdasarkan user_id
-    $user = User::findOrFail($request->user_id);
+    $user = User::findOrFail($id);
 
     // Update informasi pengguna
     $user->name = $request->name;

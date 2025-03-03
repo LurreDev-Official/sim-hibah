@@ -10,7 +10,7 @@
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Dashboard
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Daftar Usulan {{ $jenis }}</small>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">Daftar Luaran {{ $jenis }}</small>
                     </h1>
                 </div>
                 <!--end::Page title-->
@@ -74,8 +74,8 @@
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                        <th class="min-w-125px">No</th>
-                                        <th class="min-w-125px">Created</th>
+                                        <th class="min-w-125px">No Usulan</th>
+                                        <th class="min-w-125px">Tanggal</th>
                                         <th class="min-w-150px">Judul Usulan</th>
                                         <th class="min-w-150px">Tahun</th>
                                         <th class="min-w-150px">Status</th>

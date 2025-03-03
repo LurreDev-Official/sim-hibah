@@ -10,7 +10,7 @@
         <div class="toolbar" id="kt_toolbar">
             <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
-                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Laporan Kemajuan
+                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Laporan Akhir
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
                         <small class="text-muted fs-7 fw-bold my-1 ms-1">List</small>
                     </h1>
@@ -40,28 +40,25 @@
                                     placeholder="Search Laporan" name="search" />
                             </div>
                         </div>
-                        <a href="{{ route('laporan-kemajuan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
-                            <i class="fa fa-download"></i> Export Data
-                        </a>
+
 
                     </div>
 
                     <div class="card-body pt-0">
-                        
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                    <th>ID</th>
-                                    <th>Created</th>
+                                    <th>No Usulan</th>
+                                    <th>Tanggal</th>
                                     <th>Judul Laporan</th>
                                     <th>Jenis</th>
                                     <th>Status</th>
                                     <th>Dokumen</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-bold" id="myTable">
-                                @foreach ($laporanKemajuan as $laporan)
+                                @foreach ($laporanAkhir as $laporan)
 
                                 @php
                                     // Ambil data dosen terkait user yang sedang login
@@ -79,7 +76,7 @@
 
 
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $laporan->usulan->id }}</td>
                                         <td>{{ $laporan->created_at }}</td>
                                         <td>{{ $laporan->usulan->judul_usulan }}</td>
                                         <td>{{ $laporan->jenis }}</td>
@@ -89,9 +86,9 @@
                                             @elseif ($laporan->status == 'review')
                                                 <span class="badge bg-primary">Sedang Ditinjau</span>
                                                 @php
-                                                    // Ambil reviewer dari PenilaianReviewer berdasarkan laporankemajuan_id
+                                                    // Ambil reviewer dari PenilaianReviewer berdasarkan laporanakhir_id
                                                     $getreviewer = \App\Models\PenilaianReviewer::where(
-                                                        'laporankemajuan_id',
+                                                        'laporanakhir_id',
                                                         $laporan->id,
                                                     )
                                                         ->with('reviewer') // Load relasi reviewer dan user untuk nama
@@ -115,12 +112,12 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <!-- Tombol Lihat Dokumen Laporan Kemajuan -->
+                                            <!-- Tombol Lihat Dokumen Laporan Akhir -->
                                             <div class="col p-2">
-                                                @if ($laporan->dokumen_laporan_kemajuan)
+                                                @if ($laporan->dokumen_laporan_akhir)
                                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                                         data-bs-target="#lihatDokumenModal-{{ $laporan->id }}">
-                                                        <i class="fas fa-file-pdf"></i> Lihat Dokumen Laporan Kemajuan
+                                                        <i class="fas fa-file-pdf"></i> Lihat Dokumen Laporan Akhir
                                                     </button>
                                                 @else
                                                     <span class="text-danger">Tidak ada dokumen</span>
@@ -128,7 +125,7 @@
                                             </div>
 
                                             <!-- Modal untuk Melihat Dokumen PDF -->
-                                            @if ($laporan->dokumen_laporan_kemajuan)
+                                            @if ($laporan->dokumen_laporan_akhir)
                                                 <div class="modal fade" id="lihatDokumenModal-{{ $laporan->id }}"
                                                     tabindex="-1"
                                                     aria-labelledby="lihatDokumenModalLabel-{{ $laporan->id }}"
@@ -138,20 +135,20 @@
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title"
                                                                     id="lihatDokumenModalLabel-{{ $laporan->id }}">Lihat
-                                                                    Dokumen Laporan Kemajuan</h5>
+                                                                    Dokumen Laporan Akhir</h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <!-- Iframe untuk Menampilkan PDF -->
                                                                 <iframe
-                                                                    src="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                                                    src="{{ asset('storage/' . $laporan->dokumen_laporan_akhir) }}"
                                                                     width="100%" height="500px" frameborder="0"></iframe>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Tutup</button>
-                                                                <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                                                <a href="{{ asset('storage/' . $laporan->dokumen_laporan_akhir) }}"
                                                                     class="btn btn-success" target="_blank">
                                                                     <i class="fas fa-download"></i> Download
                                                                 </a>
@@ -175,7 +172,7 @@
                                                 <!-- Tombol Download Bukti ACC -->
                                                 @if ($laporan->status == 'approved')
                                                     <div class="col p-2">
-                                                        <a href="{{ route('laporan-kemajuan.cetakBuktiACC', $laporan->id) }}"
+                                                        <a href="{{ route('laporan-akhir.cetakBuktiACC', $laporan->id) }}"
                                                             class="btn btn-success btn-sm" target="_blank">
                                                             <i class="fas fa-download"></i> Download Bukti ACC
                                                         </a>
@@ -187,7 +184,7 @@
                                                 <!-- Tombol Perbaiki Revisi -->
                                                 @if ($laporan->status == 'revision')
                                                     <div class="d-flex justify-content-end mt-4">
-                                                        <a href="{{ route('laporan-kemajuan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $laporan->id]) }}"
+                                                        <a href="{{ route('laporan-akhir.perbaikiRevisi', ['jenis' => $jenis, 'id' => $laporan->id]) }}"
                                                             class="btn btn-secondary">
                                                             <i class="fas fa-edit"></i> Perbaiki Revisi
                                                         </a>
@@ -229,19 +226,19 @@
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title"
                                                                     id="pilihKirimReviewerModalLabel-{{ $laporan->id }}">
-                                                                    Pilih/Kirim Usulan ke Reviewer
+                                                                    Pilih/Kirim ke Reviewer
                                                                 </h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <p>Silakan pilih reviewer untuk mengirim atau mengirim ulang
-                                                                    usulan ini.</p>
+                                                                    Laporan Akhir ini.</p>
                                                                 <form id="pilihKirimReviewerForm-{{ $laporan->id }}"
-                                                                    action="{{ route('laporan-kemajuan.kirim', ['jenis' => $jenis]) }}"
+                                                                    action="{{ route('laporan-akhir.kirim', ['jenis' => $jenis]) }}"
                                                                     method="POST">
                                                                     @csrf
-                                                                    <input type="hidden" name="laporankemajuan_id"
+                                                                    <input type="hidden" name="laporanakhir_id"
                                                                         value="{{ $laporan->id }}">
                                                                     <input type="hidden" name="jenis"
                                                                         value="{{ $jenis }}">
@@ -309,7 +306,7 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form
-                                                                        action="{{ route('laporan-kemajuan.updateStatus', $laporan->id) }}"
+                                                                        action="{{ route('laporan-akhir.updateStatus', $laporan->id) }}"
                                                                         method="POST">
                                                                         @csrf
                                                                         @method('PUT')
@@ -375,13 +372,7 @@
                                                 }
                                             </script>
                                         @endrole
-
-
-
-
                                         </td>
-
-
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -393,32 +384,32 @@
     </div>
 @endsection
 
-@foreach ($laporanKemajuan as $laporan)
+@foreach ($laporanAkhir as $laporan)
     <div class="modal fade" id="editModal{{ $laporan->id }}" tabindex="-1" aria-labelledby="editModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="{{ route('laporan-kemajuan.update', $laporan->id) }}"
+                <form method="POST" action="{{ route('laporan-akhir.update', $laporan->id) }}"
                     enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Update Dokumen Laporan Kemajuan</h5>
+                        <h5 class="modal-title" id="editModalLabel">Update Dokumen Laporan Akhir</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <!-- File upload input -->
                         <div class="mb-3">
-                            <label for="dokumen_laporan_kemajuan{{ $laporan->id }}" class="form-label">Dokumen
+                            <label for="dokumen_laporan_akhir{{ $laporan->id }}" class="form-label">Dokumen
                                 Laporan</label>
                             <input type="file" class="form-control"
-                                id="dokumen_laporan_kemajuan{{ $laporan->id }}" name="dokumen_laporan_kemajuan"
+                                id="dokumen_laporan_akhir{{ $laporan->id }}" name="dokumen_laporan_akhir"
                                 accept=".pdf,.doc,.docx">
                             <!-- Show current document if exists -->
-                            @if ($laporan->dokumen_laporan_kemajuan)
+                            @if ($laporan->dokumen_laporan_akhir)
                                 <div class="mt-2">
-                                    <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                    <a href="{{ asset('storage/' . $laporan->dokumen_laporan_akhir) }}"
                                         target="_blank">Lihat Dokumen Lama</a>
                                 </div>
                             @endif

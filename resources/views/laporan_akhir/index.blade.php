@@ -39,6 +39,13 @@
                                 <input type="text" id="myInput" class="form-control form-control-solid w-250px ps-15"
                                     placeholder="Search Laporan" name="search" />
                             </div>
+
+                            <a href="{{ route('laporan-akhir.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
+                                <i class="fa fa-download"></i> Export Data
+                            </a>
+
+
+                            
                         </div>
 
 
@@ -48,8 +55,8 @@
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                    <th>ID</th>
-                                    <th>Created</th>
+                                    <th>No Usulan</th>
+                                    <th>Tanggal</th>
                                     <th>Judul Laporan</th>
                                     <th>Jenis</th>
                                     <th>Status</th>

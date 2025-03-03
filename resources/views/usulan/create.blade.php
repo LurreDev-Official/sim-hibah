@@ -120,8 +120,17 @@
                                             <option value="Ilmu Alam"
                                                 {{ old('rumpun_ilmu') == 'Ilmu Alam' ? 'selected' : '' }}>Ilmu Alam
                                             </option>
-                                            <option value="Ilmu Komputer"
-                                                {{ old('rumpun_ilmu') == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu Komputer
+                                            <option value="Ilmu Terapan"
+                                                {{ old('rumpun_ilmu') == 'Ilmu Terapan' ? 'selected' : '' }}>Ilmu Terapan
+                                            </option>
+                                            <option value="Ilmu Formal"
+                                                {{ old('rumpun_ilmu') == 'Ilmu Formal' ? 'selected' : '' }}>Ilmu Formal
+                                            </option>
+                                            <option value="Ilmu Humaniora"
+                                                {{ old('rumpun_ilmu') == 'Ilmu Humaniora' ? 'selected' : '' }}>Ilmu Humaniora
+                                            </option>
+                                            <option value="Ilmu Keagamaan"
+                                                {{ old('rumpun_ilmu') == 'Ilmu Keagamaan' ? 'selected' : '' }}>Ilmu Keagamaan
                                             </option>
                                         </select>
                                         @error('rumpun_ilmu')
@@ -133,18 +142,18 @@
                                 <!-- Bidang Fokus -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">
-                                        <strong>Bidang Fokus:</strong>
+                                        <strong>Pohon Ilmu:</strong>
                                         <select name="bidang_fokus" class="form-control select2">
-                                            <option value="" disabled selected>Pilih Bidang Fokus</option>
-                                            <option value="Ilmu Sosial"
-                                                {{ old('bidang_fokus') == 'Ilmu Sosial' ? 'selected' : '' }}>Ilmu Sosial
+                                            <option value="" disabled selected>Pilih Pohon Ilmu</option>
+                                            <option value="Astronomi"
+                                                {{ old('bidang_fokus') == 'Astronomi' ? 'selected' : '' }}>Astronomi
                                             </option>
-                                            <option value="Ilmu Alam"
-                                                {{ old('bidang_fokus') == 'Ilmu Alam' ? 'selected' : '' }}>Ilmu Alam
+                                            <option value="Biofisika"
+                                                {{ old('bidang_fokus') == 'Biofisika' ? 'selected' : '' }}>Biofisika
                                             </option>
-                                            <option value="Ilmu Komputer"
-                                                {{ old('bidang_fokus') == 'Ilmu Komputer' ? 'selected' : '' }}>Ilmu
-                                                Komputer</option>
+                                            <option value="Biologi"
+                                                {{ old('bidang_fokus') == 'Biologi' ? 'selected' : '' }}>
+                                                Biologi</option>
                                         </select>
                                         @error('bidang_fokus')
                                             <span class="text-danger">{{ $message }}</span>
@@ -153,7 +162,10 @@
                                 </div>
 
                                 <!-- Tema Penelitian -->
-                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+
+                                <input type="text" value="-" name="tema_penelitian" hidden>
+                                <input type="text" value="-" name="topik_penelitian" hidden>
+                                {{-- <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">
                                         <strong>Tema Penelitian:</strong>
                                         <input type="text" name="tema_penelitian" class="form-control"
@@ -162,10 +174,10 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <!-- Topik Penelitian -->
-                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                {{-- <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">
                                         <strong>Topik Penelitian:</strong>
                                         <input type="text" name="topik_penelitian" class="form-control"
@@ -174,7 +186,7 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <!-- Lama Kegiatan -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
@@ -204,7 +216,7 @@
                                 <!-- Dokumen Usulan -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">
-                                        <strong>Dokumen Usulan (PDF):</strong>
+                                        <strong>Dokumen Usulan (PDF): MAX (5mb)</strong>
                                         <input type="file" name="dokumen_usulan"
                                             class="form-control form-control-lg form-control-solid" accept=".pdf" />
                                         @error('dokumen_usulan')

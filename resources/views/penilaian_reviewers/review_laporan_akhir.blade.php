@@ -32,7 +32,8 @@
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                        <th class="min-w-50px">No</th>
+                                        <th class="min-w-50px">No Usulan</th>
+                                        <th class="min-w-50px">Tanggal</th>
                                         <th class="min-w-150px">Proposal Title</th>
                                         <th class="min-w-100px">Status Review</th>
                                         <th class="min-w-100px">Total Nilai</th>
@@ -45,7 +46,7 @@
                                 <tbody class="text-gray-600 fw-bold">
                                     @foreach ($getpenilaianreview as $key => $data)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $data->laporanakhir->usulan->id }}</td>
                                         <td>{{ $data->laporanakhir->usulan->judul_usulan }}</td>
                                         {{-- <td>{{ $data->laporanakhir->dokumen_laporan_akhir }}</td> --}}
                                         <td>
@@ -84,6 +85,10 @@
                                                                     <select name="status"
                                                                         id="status{{ $data->id }}"
                                                                         class="form-select me-3" required>
+                                                                        <option value="Di Revisi Kembali"
+                                                                        {{ $usulanPerbaikan->status == 'Di Revisi Kembali' ? 'selected' : '' }}>
+                                                                        Di Revisi Kembali
+                                                                        </option>
                                                                         <option value="Diterima"
                                                                             {{ $data->status_penilaian == 'Diterima' ? 'selected' : '' }}>
                                                                             Diterima

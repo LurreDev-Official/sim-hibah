@@ -60,7 +60,7 @@
                                         $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
                                         $scoreSinta = $dosen->score_sinta;
                                     @endphp
-                                    @if ($scoreSinta > 200)
+                                    @if ($scoreSinta > 200 && $isButtonActive)
                                         <!-- Tombol aktif jika skor Sinta lebih dari 200 -->
                                         <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}"
                                             class="btn btn-primary mr-3">Tambah Usulan</a>
@@ -108,7 +108,7 @@
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                        <th class="min-w-125px">No</th>
+                                        <th class="min-w-125px">No Usulan</th>
                                         <th class="min-w-150px">Judul Usulan</th>
                                         <th class="min-w-150px">Tahun Pelaksanaan</th>
                                         <th class="min-w-125px">Status</th>
@@ -157,7 +157,7 @@
                                                         @endforelse
                                                     </ul>
                                                 @elseif ($usulan->status == 'revision')
-                                                    <span class="badge bg-secondary">Perlu Revisi</span>
+                                                    <span class="badge bg-warning">Perlu Revisi</span>
                                                 @elseif ($usulan->status == 'waiting approved')
                                                     <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                                 @elseif ($usulan->status == 'approved')
@@ -369,16 +369,16 @@
                                             @role('Kepala LPPM')
                                                 <td>
                                                     <div class="col p-2">
-                                                        <!-- Button Pilih/Kirim Ke Reviewer -->
+                                                        <!-- Button Kirim Ke Reviewer -->
                                                         @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review')
                                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
                                                                 data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
-                                                                <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
+                                                                <i class="fas fa-paper-plane"></i> Kirim Ke Reviewer
                                                             </button>
                                                         @endif
 
 
-                                                        <!-- Modal Pilih/Kirim Ke Reviewer -->
+                                                        <!-- Modal Kirim Ke Reviewer -->
                                                         <div class="modal fade"
                                                             id="pilihKirimReviewerModal-{{ $usulan->id }}" tabindex="-1"
                                                             aria-labelledby="pilihKirimReviewerModalLabel-{{ $usulan->id }}"
@@ -473,7 +473,7 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title" id="approveRejectModalLabel{{ $usulan->id }}">
-                                                        Approve or Reject Usulan</h5>
+                                                        Diterima Atau Ditolak Usulan</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                                 </div>
@@ -485,11 +485,11 @@
 
                                                         <!-- Dropdown to choose status -->
                                                         <div class="form-group">
-                                                            <label for="status">Select Status:</label>
+                                                            <label for="status">Pilih Status:</label>
                                                             <select name="status" id="status" class="form-select"
                                                                 required>
-                                                                <option value="approved">Approve</option>
-                                                                <option value="rejected">Reject</option>
+                                                                <option value="approved">Diterima</option>
+                                                                <option value="rejected">Ditolak</option>
                                                             </select>
                                                         </div>
                                                 </div>
