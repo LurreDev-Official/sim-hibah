@@ -10,13 +10,13 @@
                     data-kt-swapper-parent="{default: '#kt_content_container', 'lg': '#kt_toolbar_container'}"
                     class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <!--begin::Title-->
-                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Dashboard
+                    <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Kelola Penguna
                         <!--begin::Separator-->
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
                     </h1>
                     <!--end::Separator-->
                     <!--begin::Description-->
-                    <small class="text-muted fs-7 fw-bold my-1 ms-1">Users </small>
+                    {{-- <small class="text-muted fs-7 fw-bold my-1 ms-1">Users </small> --}}
                     <!--end::Description-->
                     <!--end::Title-->
                 </div>
@@ -66,10 +66,10 @@
                                 <thead>
                                     <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                         <th class="min-w-125px">No</th>
-                                        <th class="min-w-125px">Username</th>
+                                        <th class="min-w-125px">Nama</th>
                                         <th class="min-w-125px">Email</th>
-                                        <th class="min-w-150px">Roles</th> <!-- Kolom untuk Role -->
-                                        <th class="text-end min-w-100px">Actions</th>
+                                        <th class="min-w-150px">Akses</th> <!-- Kolom untuk Role -->
+                                        <th class="text-end min-w-100px">Aksi</th>
                                     </tr>
                                 </thead>
                                 <!--end::Table head-->
@@ -130,9 +130,8 @@
                                                             <!-- Submit Button -->
                                                             <div class="text-end">
                                                                 <button type="button" class="btn btn-light"
-                                                                    data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-primary">Save
-                                                                    changes</button>
+                                                                    data-bs-dismiss="modal">Batal</button>
+                                                                <button type="submit" class="btn btn-primary">Simpan</button>
                                                             </div>
                                                         </form>
                                                     </div>

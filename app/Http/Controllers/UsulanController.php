@@ -154,6 +154,16 @@ class UsulanController extends Controller
      */
     public function store(Request $request, $jenis)
     {
+
+        $periode = Periode::where('is_active', true)->first();
+         $isButtonActive = false;
+ 
+         if ($periode) {
+             $tanggalAwal = Carbon::parse($periode->tanggal_awal);
+             $isButtonActive = $tanggalAwal->addWeeks(2)->isPast();
+         }
+
+
         $validation = $this->validasiUsulanBaru($jenis);
 
         if ($validation instanceof \Illuminate\Http\RedirectResponse) {
@@ -225,7 +235,7 @@ class UsulanController extends Controller
          $usulans = Usulan::where('jenis_skema', $jenis)->get();
          $reviewers = Reviewer::with('user')->get();
 
-         return view('usulan.index', compact('usulans', 'jenis','reviewers')) ->with('success', 'Usulan berhasil ditambah!');
+         return view('usulan.index', compact('usulans', 'jenis','reviewers','isButtonActive')) ->with('success', 'Usulan berhasil ditambah!');
 
     }
 
@@ -766,35 +776,37 @@ public function grafikPerFakultas()
     return view('grafik.per_fakultas', compact('labels', 'totals'));
     }
 
-    public function grafikPerProdi(Request $request)
-    {
-        // Logika untuk grafik per prodi
-        // Ambil fakultas dari parameter (filter)
-        $fakultasId = $request->get('fakultas_id', null);
+    public function grafikPerProdi()
+{
+    // Query untuk mengambil data usulan berdasarkan fakultas dan prodi
+    $data = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
+        ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id') // Join dengan tabel prodi
+        ->join('fakultas', 'prodis.fakultas_id', '=', 'fakultas.id') // Join dengan tabel fakultas
+        ->selectRaw('fakultas.name as fakultas_name, prodis.name as prodi_name, COUNT(usulans.id) as total_usulan')
+        ->groupBy('fakultas.name', 'prodis.name')
+        ->orderBy('fakultas.name') // Urutkan berdasarkan nama fakultas
+        ->get();
 
-        // Ambil data prodi berdasarkan fakultas
-        $query = Dosen::with('prodi')
-            ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
-            ->selectRaw('prodi_id, COUNT(usulans.id) as total')
-            ->groupBy('prodi_id');
+    // Format data untuk grafik
+    $formattedData = [];
+    foreach ($data as $item) {
+        $fakultasName = $item->fakultas_name;
+        $prodiName = $item->prodi_name;
+        $totalUsulan = $item->total_usulan;
 
-        if ($fakultasId) {
-            $query->where('fakultas_id', $fakultasId);
+        // Tambahkan data ke array formattedData
+        if (!isset($formattedData[$fakultasName])) {
+            $formattedData[$fakultasName] = [];
         }
-
-        $data = $query->get();
-
-        // Format data untuk grafik
-        $labels = $data->map(function ($item) {
-            return $item->prodi->name ?? 'Tidak Ada Prodi';
-        });
-
-        $totals = $data->pluck('total');
-
-        // Kirim data ke view
-        $fakultas = Fakultas::all(); // Untuk dropdown filter
-        return view('grafik.per_prodi', compact('labels', 'totals', 'fakultas', 'fakultasId'));
+        $formattedData[$fakultasName][] = [
+            'prodi' => $prodiName,
+            'total' => $totalUsulan,
+        ];
     }
+
+    // Kirim data ke view
+    return view('grafik.per_prodi_per_fakultas', compact('formattedData'));
+}
 
     public function laporanHitunganUsulan(Request $request)
 {

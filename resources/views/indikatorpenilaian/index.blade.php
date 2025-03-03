@@ -50,7 +50,7 @@
                                     <th>No</th>
                                     <th>Nama Indikator</th>
                                     <th>Jumlah Bobot</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-bold">

@@ -28,7 +28,10 @@ class ProfileController extends Controller
     if ($user->hasRole('Kepala LPPM')) {
         // Jika pengguna adalah Kepala LPPM, tampilkan halaman edit untuk Kepala LPPM
         return view('profile.kepala_lppm_edit', compact('user', 'fakultas'));
-    } 
+    } elseif ($user->hasRole('Admin')) {
+        // Jika pengguna adalah Admin, tampilkan halaman edit untuk Admin
+        return view('profile.admin_edit', compact('user', 'fakultas'));
+    }
     elseif ($user->hasRole('Dosen')) {
         // Cek apakah data Dosen sudah ada atau buat jika tidak ada
         $dosen = Dosen::firstOrCreate(

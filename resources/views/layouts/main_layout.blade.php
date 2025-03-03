@@ -294,7 +294,7 @@
                                             <!--end::Menu separator-->
                                             <!--begin::Menu item-->
                                             <div class="menu-item px-5">
-                                                <a href="{{ route('profile.edit', auth()->user()->id) }}" class="menu-link px-5">My Profile</a>
+                                                <a href="{{ route('profile.edit', auth()->user()->id) }}" class="menu-link px-5">Setting Akun</a>
                                             </div>
                                             <div class="menu-item px-5">
                                                 <form action="{{ route('logout') }}" method="post">

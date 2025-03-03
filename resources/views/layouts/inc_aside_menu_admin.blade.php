@@ -43,7 +43,7 @@
             </div>
 
 
-            <!-- Menu Kelola Users untuk role admin-->
+            <!-- Menu Kelola Pengguna untuk role admin-->
             @role('Admin')
                 <div data-kt-menu-trigger="click"
                     class="menu-item menu-accordion {{ request()->routeIs('users.index') || request()->routeIs('kriteria-penilaian.index') || request()->routeIs('indikator-penilaian.index') ? 'show' : '' }}">
@@ -61,7 +61,7 @@
                                 </svg>
                             </span>
                         </span>
-                        <span class="menu-title">Kelola Users</span>
+                        <span class="menu-title">Master Data</span>
                         <span class="menu-arrow"></span>
                     </span>
                     <div class="menu-sub menu-sub-accordion">
@@ -71,7 +71,7 @@
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="list"></i>
                                 </span>
-                                <span class="menu-title">Daftar Users</span>
+                                <span class="menu-title">Kelola Pengguna</span>
                             </a>
                         </div>
                         <div class="menu-item">
@@ -125,7 +125,7 @@
                 </div>
 
             @endrole
-            <!-- Menu Kelola Users untuk Role "Kepala LPPM" -->
+            <!-- Menu Kelola Pengguna untuk Role "Kepala LPPM" -->
             @role('Kepala LPPM')
                 <!-- Menu Kelola periodes -->
                 <div data-kt-menu-trigger="click"

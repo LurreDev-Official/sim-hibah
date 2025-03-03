@@ -33,19 +33,7 @@
                             <div class="card card-xl-stretch mb-5 mb-xl-8">
                                 <div class="card-header border-0 pt-5">
                                     <h3 class="card-title">Grafik Hibah Usulan Penelitian per Program Studi</h3>
-                                    <div class="d-flex justify-content-between">
-                                        <form method="GET" action="{{ route('grafik-prodi.index') }}">
-                                            <select name="fakultas_id" id="fakultasFilter" class="form-select" style="width: 200px;"
-                                                onchange="this.form.submit()">
-                                                <option value="">Pilih Fakultas</option>
-                                                @foreach ($fakultas as $f)
-                                                    <option value="{{ $f->id }}" {{ $f->id == $fakultasId ? 'selected' : '' }}>
-                                                        {{ $f->nama }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </form>
-                                    </div>
+                                     
                                 </div>
                                 <div class="card-body col-6">
                                     <canvas id="usulanByProdiChart" width="200" height="200"></canvas>

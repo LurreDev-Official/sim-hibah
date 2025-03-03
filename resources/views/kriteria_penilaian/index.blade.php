@@ -56,7 +56,7 @@
                                     <th>Nama</th>
                                     <th>Jenis</th>
                                     <th>Proses</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
