@@ -85,7 +85,7 @@ class LuaranController extends Controller
         'judul' => 'required|string|max:255',
         'type' => 'required|string|max:255',
         'url' => 'required|url',
-        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Make file_loa optional
+        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:10048', // Make file_loa optional
     ]);
 
     try {
@@ -188,7 +188,7 @@ class LuaranController extends Controller
         'judul' => 'required|string|max:255',
         'type' => 'required|string|max:255',
         'url' => 'required',
-        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional file upload
+        'file_loa' => 'nullable|file|mimes:pdf,doc,docx|max:10048', // Optional file upload
     ]);
 
     // Update the Luaran record

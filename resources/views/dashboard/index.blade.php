@@ -81,7 +81,9 @@
 
                                     // Logika berdasarkan role
                                     if (Auth::user()->hasRole('Kepala LPPM') || Auth::user()->hasRole('Admin')) {
-                                        $notifikasi = \App\Models\Usulan::all();
+                                        $notifikasi = \App\Models\Usulan::where('status', 'submitted')
+                                            ->orWhere('status', 'waiting approved')
+                                            ->get();
                                     } elseif (Auth::user()->hasRole('Dosen')) {
                                         $dosen = \App\Models\Dosen::where('user_id', Auth::id())->first();
                                         if ($dosen) {

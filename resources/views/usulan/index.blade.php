@@ -454,12 +454,10 @@
 
                             </div>
                             @if ($usulan->allReviewersAccepted)
-                                @if ($usulan->status !== 'approved')
                                     <button class="btn btn-primary" data-bs-toggle="modal"
                                         data-bs-target="#approveRejectModal{{ $usulan->id }}">
                                         Diterima Atau Ditolak
                                     </button>
-                                @endif
 
 
                                 <!-- Modal for Approving or Rejecting Usulan -->
@@ -505,70 +503,63 @@
                             @endif
                             <div class="col p-2">
                                 <button class="btn btn-danger btn-sm"
-                                    onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})" <i
-                                    class="fas fa-trash-alt"></i> Hapus
+                                    onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }}, this)">
+                                    <i class="fas fa-trash-alt"></i> Hapus
                                 </button>
+                            
+                                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            
+                                <script>
+                                    function deleteUsulan(jenis, id, button) {
+                                        Swal.fire({
+                                            title: 'Apakah Anda yakin?',
+                                            text: "Usulan ini akan dihapus secara permanen!",
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#3085d6',
+                                            cancelButtonColor: '#d33',
+                                            confirmButtonText: 'Ya, hapus!',
+                                            cancelButtonText: 'Batal'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                $.ajax({
+                                                    url: `/usulan/${jenis}/${id}/hapus`, // Sesuai dengan Route::delete
+                                                    type: 'DELETE',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // CSRF Token harus dikirim di HEADER
+                                                    },
+                                                    success: function(response) {
+                                                        Swal.fire(
+                                                            'Dihapus!',
+                                                            response.success,
+                                                            'success'
+                                                        ).then(() => {
+                                                            $(button).closest('.col').remove();
+                                                        });
+                                                    },
+                                                    error: function(xhr) {
+                                                        let errorMsg = 'Terjadi kesalahan saat menghapus data.';
+                                                        if (xhr.status === 403) {
+                                                            errorMsg = 'Akses ditolak! Anda tidak memiliki izin untuk menghapus.';
+                                                        } else if (xhr.status === 404) {
+                                                            errorMsg = 'Usulan tidak ditemukan.';
+                                                        } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                                                            errorMsg = xhr.responseJSON.error;
+                                                        }
+                                                        Swal.fire('Error!', errorMsg, 'error');
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                </script>
                             </div>
-
-
+                            
+                            
                             </td>
 
-                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                            <script>
-                                function deleteUsulan(jenis, id, rowId) {
-                                    // Menggunakan SweetAlert2 untuk dialog konfirmasi
-                                    Swal.fire({
-                                        title: 'Apakah Anda yakin?',
-                                        text: "Usulan ini akan dihapus secara permanen!",
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#3085d6',
-                                        cancelButtonColor: '#d33',
-                                        confirmButtonText: 'Ya, hapus!',
-                                        cancelButtonText: 'Batal'
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            // Jika konfirmasi di-klik
-                                            $.ajax({
-                                                url: '{{ url('usulan') }}/' + jenis + '/' +
-                                                    id, // Pastikan URL-nya sesuai dengan route di controller
-                                                type: 'DELETE', // HTTP method DELETE
-                                                data: {
-                                                    "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
-                                                },
-                                                success: function(response) {
-                                                    // Tampilkan pesan sukses dengan SweetAlert2
-                                                    Swal.fire(
-                                                        'Dihapus!',
-                                                        response.success,
-                                                        'success'
-                                                    ).then(() => {
-                                                        // Hapus elemen usulan dari DOM (misalnya baris tabel yang berisi usulan)
-                                                        $('#' + rowId).remove(); // Hapus baris dengan id 'rowId'
-                                                    });
-                                                },
-                                                error: function(xhr) {
-                                                    if (xhr.status === 404) {
-                                                        // Jika usulan tidak ditemukan
-                                                        Swal.fire(
-                                                            'Error!',
-                                                            'Usulan tidak ditemukan.',
-                                                            'error'
-                                                        );
-                                                    } else {
-                                                        // Jika terjadi error lainnya
-                                                        Swal.fire(
-                                                            'Error!',
-                                                            'Terjadi kesalahan: ' + xhr.responseJSON.error,
-                                                            'error'
-                                                        );
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            </script>
+                           
                         @endrole
 
 

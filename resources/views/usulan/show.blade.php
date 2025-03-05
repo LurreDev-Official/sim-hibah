@@ -69,7 +69,9 @@
                             // Ambil data anggota dosen berdasarkan dosen yang login
                             $anggotaDosencek = null;
                             if ($dosen) {
-                                $anggotaDosencek = \App\Models\AnggotaDosen::where('dosen_id', $dosen->id)->where('usulan_id',$usulan->id)->first();
+                                $anggotaDosencek = \App\Models\AnggotaDosen::where('dosen_id', $dosen->id)
+                                    ->where('usulan_id', $usulan->id)
+                                    ->first();
                             }
                         @endphp
 
@@ -116,22 +118,28 @@
 
 
                                             <!-- Jika status dosen adalah 'pending', munculkan tombol Setuju dan Tolak -->
-                                            @if ($dosen->status == 'belum disetujui' && $anggotaDosencek->status_anggota == 'anggota')
-                                                <form
-                                                    action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
-                                                    method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-success btn-sm">Setuju</button>
-                                                </form>
-                                                <form
-                                                    action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
-                                                    method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
-                                                </form>
-                                            @endif
+                                            {{-- @if (Auth::check() && Auth::user()->dosen_id == $dosen->id) --}}
+                                                {{-- Hanya tampilkan jika pengguna yang login adalah dosen yang bersangkutan --}}
+                                                @if ($dosen->status == 'belum disetujui' && $anggotaDosencek->status_anggota == 'anggota')
+                                                    <form
+                                                        action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit"
+                                                            class="btn btn-success btn-sm">Setuju</button>
+                                                    </form>
+                                                    <form
+                                                        action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
+                                                    </form>
+                                                @endif
+                                            {{-- @endif --}}
+
+
                                         </td>
 
                                     </tr>
@@ -378,13 +386,13 @@
                             </tbody>
                         </table>
 
-                         
+
 
                         @if (
                             $anggotaDosencek &&
                                 $anggotaDosencek->status_anggota == 'ketua' &&
-                                !in_array($usulan->status, ['submitted', 'review','waiting approved', 'revision', 'approved', 'rejected']))
-                          <div class="col-12 py-4 text-center">
+                                !in_array($usulan->status, ['submitted', 'review', 'waiting approved', 'revision', 'approved', 'rejected']))
+                            <div class="col-12 py-4 text-center">
                                 <!-- Form untuk mengajukan usulan -->
                                 <form id="submitUsulanForm_{{ $usulan->id }}"
                                     action="{{ route('usulan.submit', ['jenis' => $jenis, 'usulan' => $usulan->id]) }}"
@@ -392,10 +400,10 @@
                                     @csrf
                                     @method('PATCH')
                                 </form>
-    
+
                                 <!-- Tombol untuk Ajukan -->
-                                <button id="submitUsulanButton_{{ $usulan->id }}"
-                                    type="button" class="btn btn-info btn-lg"
+                                <button id="submitUsulanButton_{{ $usulan->id }}" type="button"
+                                    class="btn btn-info btn-lg"
                                     onclick="
                                     Swal.fire({
                                         title: 'Apakah Anda yakin?',
@@ -420,7 +428,7 @@
                         @endif
 
                     </div>
-                   
+
                 </div>
             </div>
 

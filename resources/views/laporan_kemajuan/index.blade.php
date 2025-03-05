@@ -79,7 +79,7 @@
 
 
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $laporan->usulan->id }}</td>
                                         <td>{{ $laporan->created_at }}</td>
                                         <td>{{ $laporan->usulan->judul_usulan }}</td>
                                         <td>{{ $laporan->jenis }}</td>

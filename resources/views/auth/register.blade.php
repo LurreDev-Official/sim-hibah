@@ -39,7 +39,7 @@
 							
 							<!-- Nama Lengkap -->
 							<div class="mb-3">
-								<label for="name" class="form-label">Nama Lengkap</label>
+								<label for="name" class="form-label">Nama Lengkap dan Gelar</label>
 								<input type="text" name="name" class="form-control form-control-lg @error('name') is-invalid @enderror" placeholder="Nama Lengkap" required>
 								@error('name')
 									<span class="text-danger">{{ $message }}</span>

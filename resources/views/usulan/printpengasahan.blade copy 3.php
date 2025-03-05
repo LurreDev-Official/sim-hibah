@@ -252,6 +252,7 @@
                             Rp. {{ $periode ? number_format($periode->nominal, 0, ',', '.') : '0' }}
                         </td>
                     </tr>
+
                     
                     <tr>
                         <td>6.</td>
@@ -259,32 +260,8 @@
                         <td class="text-center">:</td>
                         <td>{{ $formattedUsulan['lokasi_penelitian'] }}</td>
                     </tr>
-                    <tr>
-                        <td>7.</td>
-                        <td>Tingkat Kecukupan Teknologi (TKT)</td>
-                        <td class="text-center">:</td>
-                        <td>{{ $formattedUsulan['tingkat_kecukupan_teknologi'] }}</td>
-                    </tr>
-                    <tr>
-                        <td>8.</td>
-                        <td>Nama Mitra (Bidang)</td>
-                        <td class="text-center">:</td>
-                        <td>{{ $formattedUsulan['nama_mitra'] }}-{{ $formattedUsulan['bidang_mitra'] }}</td>
-                    </tr>
-                    <tr>
-                        <td>9.</td>
-                        <td>Lokasi Mitra/Jarak</td>
-                        <td class="text-center">:</td>
-                        <td>{{ $formattedUsulan['lokasi_mitra'] }}- {{ $formattedUsulan['jarak_pt_ke_lokasi_mitra'] }} km</td>
-                    </tr>
-                    
-                    <tr>
-                        <td>10.</td>
-                        <td>Luaran</td>
-                        <td class="text-center">:</td>
-                        <td>{{ $formattedUsulan['luaran'] }}</td>
-                    </tr>
 
+                    
                     
                     <tr>
                         <td colspan="2" class="text-center">

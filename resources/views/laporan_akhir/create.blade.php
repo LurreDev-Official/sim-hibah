@@ -76,7 +76,7 @@
                             <!-- Dokumen Laporan Akhir -->
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
-                                    <label for="dokumen_laporan_akhir"><strong>Dokumen Laporan Akhir:</strong></label>
+                                    <label for="dokumen_laporan_akhir"><strong>Dokumen Laporan Akhir PDF MAX (5mb) :</strong></label>
                                     <input type="file" name="dokumen_laporan_akhir" id="dokumen_laporan_akhir" class="form-control" />
                                 </div>
                             </div>

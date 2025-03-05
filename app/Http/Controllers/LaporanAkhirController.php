@@ -233,50 +233,49 @@ public function kirim(Request $request)
 
 
         } elseif ($user->hasRole('Dosen')) {
-            // Get the Laporan Akhir for the logged-in dosen
-            // Ambil data usulan berdasarkan ketua dosen dan jenis skema
-            $getUsulan = Usulan::where('ketua_dosen_id', $user->dosen->id)
-                ->where('jenis_skema', $jenis)
-                ->get(); // Menggunakan get() karena bisa ada lebih dari satu usulan
-        
-            // Cek apakah ada laporan kemajuan untuk usulan tersebut
-            foreach ($getUsulan as $usulan) {
-                $existingLaporan = laporanAkhir::where('usulan_id', $usulan->id)->first();
-        
-                // Jika laporan kemajuan tidak ditemukan, arahkan ke halaman pembuatan laporan baru
+            // Ambil data dosen terkait user yang login
+            $dosen = Dosen::where('user_id', $user->id)->first();
+           
+            if ($dosen) {
+            // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
+            $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->where('jenis_skema', $jenis)->pluck('usulan_id');
+            
+            // Ambil semua usulan berdasarkan usulan_id yang ditemukan di AnggotaDosen
+            $usulans = Usulan::whereIn('id', $usulanIds)
+                 ->where('jenis_skema', $jenis)
+                 ->get();
+            
+            // Cek apakah ada laporan akhir untuk usulan tersebut
+            foreach ($usulans as $usulan) {
+                $existingLaporan = LaporanAkhir::where('usulan_id', $usulan->id)->where('jenis', $jenis)->first();
+            
+                // Jika laporan akhir tidak ditemukan, arahkan ke halaman pembuatan laporan baru
                 if (!$existingLaporan) {
-                    return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
-                        ->with('info', 'Belum ada laporan Akhir untuk Laporan Kemajuan ini. Silakan buat laporan baru.');
+                return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
+                ->with('info', 'Belum ada laporan akhir untuk usulan ini. Silakan buat laporan baru.');
                 }
             }
-
-
-            $laporanAkhir = $laporanAkhirQuery->where('ketua_dosen_id', $user->dosen->id)->get();
-            // Check if there are no reports
-            if ($laporanAkhir->isEmpty()) {
-                // Option 1: Redirect to the create page with the jenis parameter
-                return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
-                                 ->with('info', 'Belum ada Laporan Akhir. Silakan buat laporan baru.');
-            } else {
-                // Option 2: Return the view with the Laporan Akhir data and an info message
-
-       
-
-                // Check if all reviewers for each usulan have accepted (status == 'Diterima')
-                foreach ($laporanAkhir as $usulan) {
-                    // Count the total number of reviewers
-                    $totalReviewers = $usulan->penilaianReviewers->count();
-
-                    // Count the number of reviewers who have accepted (status == 'Diterima')
-                    $acceptedReviewers = $usulan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
-
-                    // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
-                    $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
-                }
-
-
-                return view('laporan_akhir.index', compact('laporanAkhir', 'jenis','usulan'))
-                       ->with('info', 'Belum ada Laporan Akhir. Silakan buat laporan baru.');
+            
+            // Ambil laporan akhir setelah pengecekan
+            $laporanAkhir = LaporanAkhir::with('usulan', 'penilaianReviewers.reviewer')
+                ->whereIn('usulan_id', $usulanIds) // Mengambil laporan akhir berdasarkan usulan_id yang ditemukan
+                ->get();
+            
+            // Check if all reviewers for each usulan have accepted (status == 'Diterima')
+            foreach ($laporanAkhir as $laporan) {
+                // Hitung jumlah reviewer
+                $totalReviewers = $laporan->penilaianReviewers->count();
+            
+                // Hitung jumlah reviewer yang diterima (status == 'Diterima')
+                $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+            
+                // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
+                $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+            }
+            
+            // Kembalikan tampilan dengan data laporan akhir
+            return view('laporan_akhir.index', compact('laporanAkhir', 'jenis'))
+                ->with('info', 'Laporan akhir baru telah dibuat untuk usulan yang belum ada laporan akhirnya.');
             }
         }
          elseif ($user->hasRole('Reviewer')) {

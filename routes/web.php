@@ -31,6 +31,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/test-email', function () {
+    $details = [
+        'title' => 'Test Email dari Laravel',
+        'body' => 'Ini adalah email uji coba untuk memastikan konfigurasi SMTP berfungsi.'
+    ];
+
+    Mail::to('edwinhap.lurredev@gmail.com')->send(new \App\Mail\TestMail($details));
+
+    return "Email telah dikirim!";
+});
+
+
 Route::get('/google/redirect', [App\Http\Controllers\GoogleLoginController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/google/callback', [App\Http\Controllers\GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
@@ -135,7 +149,6 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-prodi.index');;
     Route::get('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.index');
     Route::post('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.filter');
-
     // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');
 });
 
@@ -209,8 +222,6 @@ Route::group(['middleware' => ['role:Reviewer']], function () {
 
     // Route untuk form penilaian Laporan Akhir
     Route::post('form-penilaian/laporan-akhir/{id}', [FormPenilaianController::class, 'storeLaporanAkhir'])->name('form-penilaian.laporan-akhir.store');
-
-
 
     Route::get('perbaikan-penilaian/{usulan_id}', [FormPenilaianController::class, 'perbaikan'])->name('perbaikan-penilaian.lihat');
     Route::resource('reviewer', ReviewerController::class);

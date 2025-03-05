@@ -28,6 +28,12 @@ class Usulan extends Model
         'topik_penelitian',
         'lokasi_penelitian',
         'lama_kegiatan',
+        'tingkat_kecukupan_teknologi', // TKT
+        'nama_mitra',
+        'lokasi_mitra',
+        'bidang_mitra',
+        'jarak_pt_ke_lokasi_mitra', // dalam km
+        'luaran',
     ];
 
     /**

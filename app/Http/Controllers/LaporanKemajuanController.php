@@ -130,7 +130,8 @@ class LaporanKemajuanController extends Controller
     ]);
 
      // Check if usulan_id already exists in LaporanKemajuan
-     $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])->first();
+     $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])
+     ->where('jenis', $request->jenis)->first();
 
      if ($existingLaporanKemajuan) {
          // If there's already a LaporanKemajuan for the given usulan_id
@@ -200,35 +201,42 @@ class LaporanKemajuanController extends Controller
 
 
         } elseif ($user->hasRole('Dosen')) {
-            // Ambil data usulan berdasarkan ketua dosen dan jenis skema
-            $getUsulan = Usulan::where('ketua_dosen_id', $user->dosen->id)
-                ->where('jenis_skema', $jenis)
-                ->get(); // Menggunakan get() karena bisa ada lebih dari satu usulan
+            // Ambil data dosen terkait user yang login
+            $dosen = Dosen::where('user_id', $user->id)->first();
+           
+            if ($dosen) {
+            // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
+            $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->where('jenis_skema', $jenis)->pluck('usulan_id');
+        
+            // Ambil semua usulan berdasarkan usulan_id yang ditemukan di AnggotaDosen
+            $usulans = Usulan::whereIn('id', $usulanIds)
+                     ->where('jenis_skema', $jenis)
+                     ->get();
         
             // Cek apakah ada laporan kemajuan untuk usulan tersebut
-            foreach ($getUsulan as $usulan) {
-                $existingLaporan = LaporanKemajuan::where('usulan_id', $usulan->id)->first();
-        
+            foreach ($usulans as $usulan) {
+                $existingLaporan = LaporanKemajuan::where('usulan_id', $usulan->id)->where('jenis', $jenis)->first();
+            
                 // Jika laporan kemajuan tidak ditemukan, arahkan ke halaman pembuatan laporan baru
                 if (!$existingLaporan) {
-                    return redirect()->route('laporan-kemajuan.create', ['jenis' => $jenis])
-                        ->with('info', 'Belum ada laporan kemajuan untuk usulan ini. Silakan buat laporan baru.');
+                return redirect()->route('laporan-kemajuan.create', ['jenis' => $jenis])
+                    ->with('info', 'Belum ada laporan kemajuan untuk usulan ini. Silakan buat laporan baru.');
                 }
             }
         
             // Ambil laporan kemajuan setelah pengecekan
             $laporanKemajuan = LaporanKemajuan::with('usulan', 'penilaianReviewers.reviewer')
-                ->whereIn('usulan_id', $getUsulan->pluck('id')) // Mengambil laporan kemajuan berdasarkan usulan_id yang ditemukan
+                ->whereIn('usulan_id', $usulanIds) // Mengambil laporan kemajuan berdasarkan usulan_id yang ditemukan
                 ->get();
         
             // Check if all reviewers for each usulan have accepted (status == 'Diterima')
             foreach ($laporanKemajuan as $laporan) {
                 // Hitung jumlah reviewer
                 $totalReviewers = $laporan->penilaianReviewers->count();
-        
+            
                 // Hitung jumlah reviewer yang diterima (status == 'Diterima')
                 $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
-        
+            
                 // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
                 $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
             }
@@ -236,6 +244,7 @@ class LaporanKemajuanController extends Controller
             // Kembalikan tampilan dengan data laporan kemajuan
             return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis'))
                 ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
+            }
         }
         
          elseif ($user->hasRole('Reviewer')) {

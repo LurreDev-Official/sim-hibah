@@ -123,14 +123,14 @@ class UsulanController extends Controller
         $user_id = auth()->user()->id;
         $dosen = Dosen::where('user_id', $user_id)->first();
         $usulanKetua = Usulan::
-        where('ketua_dosen_id','=', $dosen->id) // Ganti '1' dengan ID dosen yang sesuai
+        where('ketua_dosen_id','==', $dosen->id) // Ganti '1' dengan ID dosen yang sesuai
         ->where('tahun_pelaksanaan', Carbon::now()->year) // Pastikan tahun saat ini
         ->where('jenis_skema',$jenis) // Validasi berdasarkan jenis skema
         ->count(); // Hitung jumlah record yang sesuai
 
     // dd($usulanKetua);
 
-        if ($usulanKetua >= 1) {
+        if ($usulanKetua >= 2) {
             // Menggunakan back dengan pesan error
             return back()->with('error', 'Anda hanya bisa menjadi ketua di 1 usulan proposal untuk jenis skema: ' . $jenis);
 
@@ -164,11 +164,11 @@ class UsulanController extends Controller
          }
 
 
-        $validation = $this->validasiUsulanBaru($jenis);
+        // $validation = $this->validasiUsulanBaru($jenis);
 
-        if ($validation instanceof \Illuminate\Http\RedirectResponse) {
-            return $validation; // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
-        }
+        // if ($validation instanceof \Illuminate\Http\RedirectResponse) {
+        //     return $validation; // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
+        // }
     
         $dosen = Dosen::where('user_id', Auth::user()->id)->first();
         if ($dosen->sinta_score >= 200) {
@@ -187,6 +187,12 @@ class UsulanController extends Controller
             'topik_penelitian' => 'required|string|max:255',
             'lokasi_penelitian' => 'required|string',
             'lama_kegiatan' => 'required|string|max:50',
+            'tingkat_kecukupan_teknologi' => 'required|string|max:255',
+            'nama_mitra' => 'required|string|max:255',
+            'lokasi_mitra' => 'required|string',
+            'bidang_mitra' => 'required|string|max:255',
+            'jarak_pt_ke_lokasi_mitra' => 'required|numeric', // dalam km
+            'luaran' => 'required|string',
             'status' => 'required',
         ]);
 
@@ -213,6 +219,12 @@ class UsulanController extends Controller
             'lokasi_penelitian' => $validated['lokasi_penelitian'],
             'lama_kegiatan' => $validated['lama_kegiatan'],
             'status' => $validated['status'] ?? 'draft', // Set default status to 'draft' jika tidak disediakan
+            'tingkat_kecukupan_teknologi' => $validated['tingkat_kecukupan_teknologi'], // TKT
+            'nama_mitra' => $validated['nama_mitra'],
+            'lokasi_mitra' => $validated['lokasi_mitra'],
+            'bidang_mitra' => $validated['bidang_mitra'],
+            'jarak_pt_ke_lokasi_mitra' => $validated['jarak_pt_ke_lokasi_mitra'], // dalam km
+            'luaran' => $validated['luaran'],
         ]);
 
         // Setelah usulan berhasil dibuat, buat anggota dosen
@@ -336,10 +348,10 @@ class UsulanController extends Controller
         $usulan = Usulan::with('ketuaDosen', 'anggotaDosen', 'anggotaMahasiswa')->findOrFail($id);
 
        // Ambil data dosen terkait user yang sedang login
-$currentDosen = Dosen::where('user_id', auth()->id())->first();
+        $currentDosen = Dosen::where('user_id', auth()->id())->first();
 
-// Ambil semua dosen kecuali yang sedang login
-$dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
+        // Ambil semua dosen kecuali yang sedang login
+        $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
 
 
         // Ambil data anggota dosen dan mahasiswa berdasarkan usulan
@@ -636,7 +648,8 @@ public function cetakBuktiACC($id)
     // Hitung jumlah total anggota dosen dan mahasiswa
     $jumlahAnggotaDosen = $filteredAnggotaDosen->count();
     $jumlahAnggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->count();
-    $jumlahAnggotaTotal = $jumlahAnggotaDosen + $jumlahAnggotaMahasiswa;
+    // $jumlahAnggotaTotal = $jumlahAnggotaDosen + $jumlahAnggotaMahasiswa;
+    $jumlahAnggotaTotal = $jumlahAnggotaDosen;
 
 
 
@@ -683,6 +696,12 @@ public function cetakBuktiACC($id)
     $formattedUsulan = [
         'judul_usulan' => $usulan->judul_usulan,
         'lokasi_penelitian' => $usulan->lokasi_penelitian,
+        'tingkat_kecukupan_teknologi' => $usulan->tingkat_kecukupan_teknologi,
+        'nama_mitra' => $usulan->nama_mitra,
+        'bidang_mitra' => $usulan->bidang_mitra,
+        'lokasi_mitra' => $usulan->lokasi_mitra,
+        'jarak_pt_ke_lokasi_mitra' => $usulan->jarak_pt_ke_lokasi_mitra,
+        'luaran' => $usulan->luaran,
         'ketuaDosen' => [
             'name' => $usulan->ketuaDosen->user->name ?? 'Tidak Tersedia',
             'nidn' => $usulan->ketuaDosen->nidn ?? '-',
@@ -731,6 +750,7 @@ public function validasiUsulanBaru($jenis)
 
     $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
         ->where('status_anggota', 'anggota')
+        ->where('jenis_skema', $jenis)
         ->whereHas('proposal', function($query) {
             $query->whereYear('tahun_pelaksanaan', Carbon::now()->year);
         })
@@ -760,10 +780,14 @@ public function grafikPerFakultas()
     {
        
         $data = Dosen::with('fakultas')
-            ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
-            ->selectRaw('fakultas_id, COUNT(usulans.id) as total')
-            ->groupBy('fakultas_id')
-            ->get();
+    ->join('usulans', function ($join) {
+        $join->on('dosens.id', '=', 'usulans.ketua_dosen_id')
+             ->where('usulans.status', '=', 'approved'); // Filter hanya yang 'approved'
+    })
+    ->selectRaw('dosens.fakultas_id, COUNT(usulans.id) as total')
+    ->groupBy('dosens.fakultas_id')
+    ->get();
+
 
         // Format data untuk grafik
         $labels = $data->map(function ($item) {

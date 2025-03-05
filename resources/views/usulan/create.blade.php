@@ -212,7 +212,65 @@
                                     </div>
                                 </div>
 
-
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Tingkat Kecukupan Teknologi (TKT):</strong>
+                                        <input type="number" name="tingkat_kecukupan_teknologi" class="form-control" placeholder="TKT" value="{{ old('tingkat_kecukupan_teknologi') }}">
+                                        @error('tingkat_kecukupan_teknologi')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Nama Mitra:</strong>
+                                        <input type="text" name="nama_mitra" class="form-control" placeholder="Nama Mitra" value="{{ old('nama_mitra') }}">
+                                        @error('nama_mitra')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Lokasi Mitra:</strong>
+                                        <input type="text" name="lokasi_mitra" class="form-control" placeholder="Lokasi Mitra" value="{{ old('lokasi_mitra') }}">
+                                        @error('lokasi_mitra')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Bidang Mitra:</strong>
+                                        <input type="text" name="bidang_mitra" class="form-control" placeholder="Bidang Mitra" value="{{ old('bidang_mitra') }}">
+                                        @error('bidang_mitra')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Jarak PT ke Lokasi Mitra (km):</strong>
+                                        <input type="number" step="0.01" name="jarak_pt_ke_lokasi_mitra" class="form-control" placeholder="Jarak dalam km" value="{{ old('jarak_pt_ke_lokasi_mitra') }}">
+                                        @error('jarak_pt_ke_lokasi_mitra')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
+                                    <div class="form-group">
+                                        <strong>Luaran:</strong>
+                                        <textarea name="luaran" class="form-control" rows="3" placeholder="Deskripsi Luaran">{{ old('luaran', 'Laporan akhir penelitian,\nArtikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4,\nArtikel ilmiah di prosiding SAINSTEKNOPAK') }}</textarea>
+                                        @error('luaran')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
                                 <!-- Dokumen Usulan -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">

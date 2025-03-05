@@ -67,13 +67,30 @@
 								</div>
 								<!--end::Wrapper-->
 								<!--begin::Input-->
-								<input class="form-control form-control-lg form-control-solid @error('password') is-invalid @enderror" type="password" name="password" autocomplete="off" />
+								<div class="input-group">
+									<input class="form-control form-control-lg form-control-solid @error('password') is-invalid @enderror" type="password" name="password" id="password" autocomplete="off" />
+									<div class="input-group-append d-flex">
+										<span class="input-group-text d-flex" onclick="togglePasswordVisibility()">
+											<i class="fa fa-eye" id="togglePasswordIcon"></i>
+										</span>
+									</div>
+								</div>
 								@error('password')
 								<span class="invalid-feedback" role="alert">
 									<strong>{{ $message }}</strong>
 								</span>
 								@enderror
 							</div>
+
+							<script>
+								function togglePasswordVisibility() {
+									const passwordField = document.getElementById('password');
+									const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+									const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+									passwordField.setAttribute('type', type);
+									togglePasswordIcon.classList.toggle('fa-eye-slash');
+								}
+							</script>
 							<!--end::Input group-->
 							
 							<!-- Error untuk login gagal -->

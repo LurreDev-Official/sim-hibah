@@ -35,6 +35,13 @@ return new class extends Migration
             $table->string('lokasi_penelitian');
             $table->string('topik_penelitian');
             $table->string('lama_kegiatan');
+            $table->string('tingkat_kecukupan_teknologi')->nullable(); // TKT
+            $table->string('nama_mitra')->nullable();
+            $table->string('lokasi_mitra')->nullable();
+            $table->string('bidang_mitra')->nullable();
+            $table->decimal('jarak_pt_ke_lokasi_mitra', 8, 2)->nullable(); // dalam km
+            $table->text('luaran')->nullable();
+
             $table->timestamps();
 
         });

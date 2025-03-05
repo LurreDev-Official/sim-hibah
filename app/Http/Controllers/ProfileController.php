@@ -113,7 +113,9 @@ class ProfileController extends Controller
                     $dosen->prodi_id = $request->prodi;
                     $dosen->score_sinta = $request->score_sinta;
                     $dosen->save();
-
+                    $user = User::findOrFail($dosen->user_id);
+                    $user->name = $request->name;
+                    $user->save();
                     return redirect()->route('dashboard')->with('success', 'Dosen updated successfully.');
 
                 }  

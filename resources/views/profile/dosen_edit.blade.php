@@ -46,7 +46,22 @@
                                         @enderror
                                     </div>
                                 </div>
-
+                                <!-- Nama Lengkap Dan Gelar -->
+                                <!-- Nama Lengkap Dan Gelar -->
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label required fw-bold fs-6">Nama Lengkap dan
+                                        Gelar</label>
+                                    <div class="col-lg-8 fv-row">
+                                        <input id="name" type="text"
+                                            class="form-control form-control-lg form-control-solid @error('name') is-invalid @enderror"
+                                            name="name" value="{{ old('name', $dosen->user->name) }}" required
+                                            placeholder="Dr. Nama Dosen, M.Sc">
+                                        @error('name')
+                                            <span class="invalid-feedback"
+                                                role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                </div>
                                 <!-- Fakultas -->
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">Fakultas</label>
