@@ -40,15 +40,27 @@
                                     placeholder="Search Laporan" name="search" />
                             </div>
 
-                            <a href="{{ route('laporan-akhir.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
-                                <i class="fa fa-download"></i> Export Data
-                            </a>
-
-
+                        
                             
+                            <div class="d-flex justify-content-end mb-4 p-2">
+                                <div class="d-flex justify-content-end mb-4">
+                                    @if (isset($dosen) && $usulans->isNotEmpty())
+                                        @foreach ($usulans as $usulan)
+                                            @if ($usulan->ketua_dosen_id == $dosen->id)
+                                                <a href="{{ route('laporan-akhir.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary">
+                                                    <i class="fas fa-plus"></i> Tambah Laporan Akhir
+                                                </a>
+                                                @break <!-- Hentikan loop jika kondisi terpenuhi -->
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </div>
+                                
+                                <a href="{{ url('laporan-akhir/export/' . $jenis) }}" class="btn btn-success ml-2">
+                                    <i class="fa fa-download"></i> Export Data
+                                </a>
+                            </div>
                         </div>
-
-
                     </div>
 
                     <div class="card-body pt-0">

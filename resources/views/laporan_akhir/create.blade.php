@@ -65,7 +65,7 @@
                                 <div class="form-group">
                                     <label for="usulan_id"><strong>Laporan Kemajuan Sebelumnya:</strong></label>
                                     <select name="usulan_id" id="usulan_id" class="form-select">
-                                        <option value="">Pilih Usulan</option>
+                                        <option value="">Pilih Laporan Kemajuan</option>
                                         @foreach ($laporakemajuans as $laporankemajuan)
                                         <option value="{{ $laporankemajuan->usulan_id }}">{{ $laporankemajuan->usulan->judul_usulan }}</option>
                                         @endforeach

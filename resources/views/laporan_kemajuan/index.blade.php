@@ -12,7 +12,7 @@
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Laporan Kemajuan
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        <small class="text-muted fs-7 fw-bold my-1 ms-1">List</small>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">List {{ $jenis }}</small>
                     </h1>
                 </div>
             </div>
@@ -40,14 +40,30 @@
                                     placeholder="Search Laporan" name="search" />
                             </div>
                         </div>
-                        <a href="{{ route('laporan-kemajuan.export', ['jenis' => $jenis]) }}" class="btn btn-success ml-2">
-                            <i class="fa fa-download"></i> Export Data
-                        </a>
-
+                        
+                        <!-- Tombol Tambah Laporan Kemajuan -->
+                        <div class="d-flex justify-content-end mb-4 p-2">
+                            <div class="d-flex justify-content-end mb-4">
+                                @if (isset($dosen) && $usulans->isNotEmpty())
+                                    @foreach ($usulans as $usulan)
+                                        @if ($usulan->ketua_dosen_id == $dosen->id)
+                                            <a href="{{ route('laporan-kemajuan.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i> Tambah Laporan Kemajuan
+                                            </a>
+                                            @break <!-- Hentikan loop jika kondisi terpenuhi -->
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </div>
+                            
+                            <a href="{{ url('laporan-kemajuan/export/' . $jenis) }}" class="btn btn-success ml-2">
+                                <i class="fa fa-download"></i> Export Data
+                            </a>
+                        </div>
                     </div>
 
                     <div class="card-body pt-0">
-                        
+
                         <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-laporan">
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
@@ -62,20 +78,19 @@
                             </thead>
                             <tbody class="text-gray-600 fw-bold" id="myTable">
                                 @foreach ($laporanKemajuan as $laporan)
+                                    @php
+                                        // Ambil data dosen terkait user yang sedang login
+                                        $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
 
-                                @php
-                                    // Ambil data dosen terkait user yang sedang login
-                                    $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
-
-                                    // Ambil data anggota dosen berdasarkan dosen yang login
-                                    $anggotaDosencek = null;
-                                    if ($dosen) {
-                                        $anggotaDosencek = \App\Models\AnggotaDosen::where(
-                                            'dosen_id',
-                                            $dosen->id,
-                                        )->first();
-                                    }
-                                @endphp
+                                        // Ambil data anggota dosen berdasarkan dosen yang login
+                                        $anggotaDosencek = null;
+                                        if ($dosen) {
+                                            $anggotaDosencek = \App\Models\AnggotaDosen::where(
+                                                'dosen_id',
+                                                $dosen->id,
+                                            )->first();
+                                        }
+                                    @endphp
 
 
                                     <tr>
@@ -165,11 +180,11 @@
                                             @role('Dosen')
                                             <td>
                                                 @if ($laporan->status == 'submitted')
-                                                <!-- Tombol Edit -->
-                                                <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
-                                                    data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
-                                                    Edit
-                                                </button>
+                                                    <!-- Tombol Edit -->
+                                                    <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
+                                                        data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
+                                                        Edit
+                                                    </button>
                                                 @endif
 
                                                 <!-- Tombol Download Bukti ACC -->
@@ -182,7 +197,7 @@
                                                     </div>
                                                 @endif
 
-                                              
+
 
                                                 <!-- Tombol Perbaiki Revisi -->
                                                 @if ($laporan->status == 'revision')
@@ -333,7 +348,7 @@
                                                         </div>
                                                     </div>
                                                 @else
-                                                tidak ada aksi
+                                                    tidak ada aksi
                                                 @endif
 
                                             </td>

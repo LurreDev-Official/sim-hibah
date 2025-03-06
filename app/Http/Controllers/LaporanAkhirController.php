@@ -55,7 +55,7 @@ class LaporanAkhirController extends Controller
         // Check if the user has the 'Dosen' role
         if ($user->hasRole('Dosen')) {
             // Filter Usulan based on ketua_dosen_id and optionally the 'jenis' if provided
-            $laporakemajuans = LaporanKemajuan::where('ketua_dosen_id', $user->dosen->id)
+            $laporakemajuans = LaporanAkhir::where('ketua_dosen_id', $user->dosen->id)
             ->when($jenis, function($query, $jenis) {
                 return $query->where('jenis', $jenis);  // Filtering by jenis
             })
@@ -79,10 +79,11 @@ class LaporanAkhirController extends Controller
         'dokumen_laporan_akhir' => 'required|file|mimes:pdf,doc,docx|max:2048',
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
-    $existingLaporanKemajuan = LaporanAkhir::where('usulan_id', $validated['usulan_id'])->first();
+    $existingLaporanAkhir = LaporanAkhir::where('usulan_id', $validated['usulan_id'])
+    ->where('jenis', $request->jenis)->first();
 
-    if ($existingLaporanKemajuan) {
-        // If there's already a LaporanKemajuan for the given usulan_id
+    if ($existingLaporanAkhir) {
+        // If there's already a LaporanAkhir for the given usulan_id
         return back()->with('error', 'Laporan Akhir untuk usulan ini sudah ada.');
     }else{
 
@@ -234,64 +235,83 @@ public function kirim(Request $request)
 
         } elseif ($user->hasRole('Dosen')) {
             // Ambil data dosen terkait user yang login
-            $dosen = Dosen::where('user_id', $user->id)->first();
-           
-            if ($dosen) {
-            // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
-            $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->where('jenis_skema', $jenis)->pluck('usulan_id');
-            
-            // Ambil semua usulan berdasarkan usulan_id yang ditemukan di AnggotaDosen
-            $usulans = Usulan::whereIn('id', $usulanIds)
-                 ->where('jenis_skema', $jenis)
-                 ->get();
-            
-            // Cek apakah ada laporan akhir untuk usulan tersebut
-            foreach ($usulans as $usulan) {
-                $existingLaporan = LaporanAkhir::where('usulan_id', $usulan->id)->where('jenis', $jenis)->first();
-            
-                // Jika laporan akhir tidak ditemukan, arahkan ke halaman pembuatan laporan baru
-                if (!$existingLaporan) {
-                return redirect()->route('laporan-akhir.create', ['jenis' => $jenis])
-                ->with('info', 'Belum ada laporan akhir untuk usulan ini. Silakan buat laporan baru.');
-                }
-            }
-            
-            // Ambil laporan akhir setelah pengecekan
-            $laporanAkhir = LaporanAkhir::with('usulan', 'penilaianReviewers.reviewer')
-                ->whereIn('usulan_id', $usulanIds) // Mengambil laporan akhir berdasarkan usulan_id yang ditemukan
-                ->get();
-            
-            // Check if all reviewers for each usulan have accepted (status == 'Diterima')
-            foreach ($laporanAkhir as $laporan) {
-                // Hitung jumlah reviewer
-                $totalReviewers = $laporan->penilaianReviewers->count();
-            
-                // Hitung jumlah reviewer yang diterima (status == 'Diterima')
-                $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
-            
-                // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
-                $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
-            }
+              // Ambil data dosen terkait user yang login
+              $dosen = Dosen::where('user_id', $user->id)->first();
+
+              if ($dosen) {
+                  // Ambil ID usulan yang terkait dengan dosen (sebagai ketua atau anggota)
+                  $usulanIds = Usulan::where('ketua_dosen_id', $dosen->id) // Ketua dosen
+                      ->orWhereHas('anggotaDosen', function ($query) use ($dosen) {
+                          $query->where('dosen_id', $dosen->id); // Anggota dosen
+                      })
+                      ->pluck('id'); // Ambil hanya kolom ID
+  
+                  // Ambil laporan kemajuan berdasarkan usulan_id yang ditemukan
+                  $laporanAkhir = LaporanAkhir::with(['usulan', 'penilaianReviewers.reviewer'])
+                      ->whereIn('usulan_id', $usulanIds)
+                    ->where('jenis', $jenis)
+                      ->get();
+  
+                  // Filter jenis laporan (opsional)
+                  if ($jenis) {
+                      $laporanAkhir = $laporanAkhir->where('jenis', $jenis);
+                  }
+  
+                  // Check if all reviewers for each laporan kemajuan have accepted (status == 'Diterima')
+                  foreach ($laporanAkhir as $laporan) {
+                      // Hitung jumlah reviewer
+                      $totalReviewers = $laporan->penilaianReviewers->count();
+  
+                      // Hitung jumlah reviewer yang diterima (status_penilaian == 'Diterima')
+                      $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+  
+                      // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
+                      $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+                  }
             
             // Kembalikan tampilan dengan data laporan akhir
-            return view('laporan_akhir.index', compact('laporanAkhir', 'jenis'))
-                ->with('info', 'Laporan akhir baru telah dibuat untuk usulan yang belum ada laporan akhirnya.');
+            $laporanExists = LaporanKemajuan::whereIn('usulan_id', $usulanIds)
+                ->where('jenis', $jenis)
+                ->exists();
+
+            
+
+            // Jika laporan kemajuan sudah ada, redirect dengan pesan
+            if ($laporanExists) {
+                $usulans = Usulan::whereIn('id', $usulanIds)
+                ->where('status', 'approved')
+                ->where('jenis_skema', $jenis)
+                ->get();
+                return view('laporan_akhir.index', compact('laporanAkhir', 'jenis','usulans','dosen')) ;
+                    // ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
+            }else{
+                // dd($usulanIds);
+                $laporakemajuans = LaporanKemajuan::with('usulan')
+                ->where('jenis', $jenis)
+                ->where('status', 'approved')
+                ->get();
+                // dd($laporakemajuans);
+                // Ambil template laporan kemajuan (opsional)
+                $getTemplate = TemplateDokumen::where('skema', $jenis)->first();
+                return view('laporan_akhir.create', compact('laporakemajuans', 'jenis', 'getTemplate'));
             }
+
+             
         }
          elseif ($user->hasRole('Reviewer')) {
             // Reviewer can see only reports associated with the proposals they are reviewing
             $laporanAkhir = $laporanAkhirQuery->whereHas('usulan.penilaianReviewers', function ($query) use ($user) {
                 $query->where('reviewer_id', $user->reviewer->id);
             })->get();
+        return view('laporan_akhir.index', compact('laporanAkhir', 'jenis'));
+
         } else {
             // If the user has no valid role, deny access or return an error
             return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
-    
-        // Return the view with the filtered data
-        return view('laporan_akhir.index', compact('laporanAkhir', 'jenis'));
+
     }
-    
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -357,7 +377,7 @@ public function kirim(Request $request)
         ->whereIn('kriteria_id', KriteriaPenilaian::where('jenis', $jenis)->where('proses', 'Laporan Akhir')->pluck('id'))
         ->get();
 
-    // Fetch the related LaporanKemajuan (if exists)
+    // Fetch the related LaporanAkhir (if exists)
     $laporanAkhir = LaporanAkhir::where('id', $id)
         ->first(); // Fetch the existing LaporanAkhir record
     // Return the perbaiki revisi view with the additional laporanAkhir variable
@@ -394,7 +414,7 @@ public function simpanPerbaikan(Request $request, $id)
     $filePath = $file->storeAs('laporan_akhir', $originalFileName, 'public'); // Store with original name
     
    
-    // Update the LaporanKemajuan record with the new file path
+    // Update the LaporanAkhir record with the new file path
     $laporanAkhir->dokumen_laporan_akhir = $filePath;
     $laporanAkhir->status = 'waiting approved';
     $laporanAkhir->save();

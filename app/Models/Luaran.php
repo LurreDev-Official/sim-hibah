@@ -19,8 +19,9 @@ class Luaran extends Model
         'status',
         'file_loa',
     ];
+    
     public function usulan()
-    {
-        return $this->hasMany(Usulan::class, 'id', 'usulan_id');
-    }
+{
+    return $this->belongsTo(Usulan::class, 'usulan_id');
+}
 }

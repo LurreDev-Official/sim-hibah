@@ -61,7 +61,7 @@ class LuaranExport implements FromCollection, WithHeadings, WithMapping
             $luaran->id,
             $luaran->usulan_id,
             $luaran->usulan_id,
-            $luaran->usulan->ketuaDosen->user->name ?? 'N/A', // Mengambil Nama Ketua Dosen
+            $luaran->usulan?->ketuaDosen?->user?->name ?? 'N/A', // Mengambil Nama Ketua Dosen
             $luaran->judul,
             $luaran->jenis_luaran,
             $luaran->type,

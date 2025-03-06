@@ -6,6 +6,7 @@ use App\Models\Usulan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Dosen;
+use App\Models\Prodi;
 use App\Models\Fakultas;
 use App\Models\AnggotaDosen;
 use App\Models\AnggotaMahasiswa;
@@ -774,63 +775,61 @@ public function filterByYear(Request $request)
     return response()->json(['dosens' => $dosens]);
 }
 
-
-
-public function grafikPerFakultas()
-    {
-       
-        $data = Dosen::with('fakultas')
-    ->join('usulans', function ($join) {
-        $join->on('dosens.id', '=', 'usulans.ketua_dosen_id')
-             ->where('usulans.status', '=', 'approved'); // Filter hanya yang 'approved'
-    })
-    ->selectRaw('dosens.fakultas_id, COUNT(usulans.id) as total')
-    ->groupBy('dosens.fakultas_id')
-    ->get();
-
-
-        // Format data untuk grafik
-        $labels = $data->map(function ($item) {
-            return $item->fakultas->name ?? 'Tidak Ada Fakultas';
-        });
-
-        $totals = $data->pluck('total');
-        // Kirim data ke view
-          // Kirim data ke view
-    return view('grafik.per_fakultas', compact('labels', 'totals'));
-    }
-
-    public function grafikPerProdi()
+public function grafikUsulan(Request $request)
 {
-    // Query untuk mengambil data usulan berdasarkan fakultas dan prodi
-    $data = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
-        ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id') // Join dengan tabel prodi
-        ->join('fakultas', 'prodis.fakultas_id', '=', 'fakultas.id') // Join dengan tabel fakultas
-        ->selectRaw('fakultas.name as fakultas_name, prodis.name as prodi_name, COUNT(usulans.id) as total_usulan')
-        ->groupBy('fakultas.name', 'prodis.name')
-        ->orderBy('fakultas.name') // Urutkan berdasarkan nama fakultas
-        ->get();
+    // Ambil tahun dari request (opsional)
+    $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
+
+    // Ambil list nama prodi
+    $prodis = Prodi::all(); // Mengambil semua data prodi
+
+    // Query untuk menghitung usulan berdasarkan prodi
+    $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
+        ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')->where('tahun_pelaksanaan', '=',$tahun)
+        ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan');
+    // Eksekusi query
+    $data = $query->groupBy('prodis.name')->get();
 
     // Format data untuk grafik
-    $formattedData = [];
-    foreach ($data as $item) {
-        $fakultasName = $item->fakultas_name;
-        $prodiName = $item->prodi_name;
-        $totalUsulan = $item->total_usulan;
-
-        // Tambahkan data ke array formattedData
-        if (!isset($formattedData[$fakultasName])) {
-            $formattedData[$fakultasName] = [];
-        }
-        $formattedData[$fakultasName][] = [
-            'prodi' => $prodiName,
-            'total' => $totalUsulan,
-        ];
-    }
+    $labels = $prodis->pluck('name'); // Nama prodi sebagai label
+    $totals = $prodis->map(function ($prodi) use ($data) {
+        $item = $data->firstWhere('prodi_name', $prodi->name);
+        return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
+    });
 
     // Kirim data ke view
-    return view('grafik.per_prodi_per_fakultas', compact('formattedData'));
+    return view('grafik.grafik_usulan', compact('labels', 'totals', 'tahun'));
 }
+
+public function grafikPenerimaHibah(Request $request)
+{
+     // Ambil tahun dari request (opsional)
+     $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
+
+     // Ambil list nama prodi
+     $prodis = Prodi::all(); // Mengambil semua data prodi
+ 
+     // Query untuk menghitung usulan berdasarkan prodi
+     $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
+         ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')->where('tahun_pelaksanaan', '=',$tahun) ->where('usulans.status', '=', 'approved')
+         ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan');
+     // Eksekusi query
+     $data = $query->groupBy('prodis.name')->get();
+ 
+     // Format data untuk grafik
+     $labels = $prodis->pluck('name'); // Nama prodi sebagai label
+     $totals = $prodis->map(function ($prodi) use ($data) {
+         $item = $data->firstWhere('prodi_name', $prodi->name);
+         return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
+     });
+ 
+     // Kirim data ke view
+     return view('grafik.grafik_penerima_hibah', compact('labels', 'totals', 'tahun'));
+}
+
+
+
+
 
     public function laporanHitunganUsulan(Request $request)
 {

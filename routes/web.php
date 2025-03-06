@@ -70,8 +70,9 @@ Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])-
     Route::resource('template-dokumen', TemplateDokumenController::class);
     // Rute terkait usulan
     Route::get('usulan/{jenis}', [UsulanController::class, 'show'])->name('usulan.show');
-    Route::delete('usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
-
+    // Route untuk menghapus usulan (POST method)
+    Route::post('/usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
+    
     Route::put('usulan/{id}/update-status', [UsulanController::class, 'updateStatus'])->name('usulan.updateStatus');
     Route::get('usulan/{id}/cetak-bukti-acc', [UsulanController::class, 'cetakBuktiACC'])->name('usulan.cetakBuktiACC');
     //export excel usulan
@@ -96,7 +97,7 @@ Route::delete('laporan-kemajuan/{id}', [LaporanKemajuanController::class, 'destr
 Route::put('laporan-kemajuan/{id}/update-status', [LaporanKemajuanController::class, 'updateStatus'])->name('laporan-kemajuan.updateStatus');
 Route::get('laporan-kemajuan/{id}/cetak-bukti-acc', [LaporanKemajuanController::class, 'cetakBuktiACC'])->name('laporan-kemajuan.cetakBuktiACC');
 
-Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class, 'export'])->name('laporan-kemajuan.export');
+Route::get('laporan-kemajuan/export/{jenis}', [LaporanKemajuanController::class, 'export'])->name('laporan-kemajuan.export');
 
     Route::resource('review-laporan-akhir', LaporanAkhirController::class);
     Route::resource('laporan-akhir', LaporanAkhirController::class);
@@ -105,7 +106,7 @@ Route::get('laporan-kemajuan/{jenis}/export', [LaporanKemajuanController::class,
     Route::delete('laporan-akhir/{id}', [LaporanAkhirController::class, 'destroy'])->name('laporan-akhir.destroy');
     Route::put('laporan-akhir/{id}/update-status', [LaporanAkhirController::class, 'updateStatus'])->name('laporan-akhir.updateStatus');
     Route::get('laporan-akhir/{id}/cetak-bukti-acc', [LaporanAkhirController::class, 'cetakBuktiACC'])->name('laporan-akhir.cetakBuktiACC');
-    Route::get('laporan-akhir/{jenis}/export', [LaporanKemajuanController::class, 'export'])->name('laporan-akhir.export');
+Route::get('laporan-akhir/export/{jenis}', [LaporanAkhirController::class, 'export'])->name('laporan-kemajuan.export');
     
     Route::get('report/{jenis}', [LaporanAkhirController::class, 'report'])->name('report.lihat');
     Route::post('/report/filter', [LaporanAkhirController::class, 'filterOrExport'])->name('report.filter');
@@ -145,8 +146,17 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     //plot
     Route::get('plot', [UsulanController::class, 'plot'])->name('plot.index');
     Route::get('/filter-dosens-by-year', [UsulanController::class, 'filterByYear'])->name('filter.dosens.by.year');
-    Route::get('per-fakultas', [UsulanController::class, 'grafikPerFakultas'])->name('grafik-per-fakultas.index');
-    Route::get('per-prodi', [UsulanController::class, 'grafikPerProdi'])->name('grafik-prodi.index');;
+
+
+    // Route untuk Grafik Usulan
+    Route::get('/grafik-usulan', [UsulanController::class, 'grafikUsulan'])->name('grafik-usulan.index');
+    Route::post('/grafik-usulan', [UsulanController::class, 'grafikUsulan'])->name('grafik-usulan.index');
+
+    // Route untuk Grafik Penerima Hibah
+    Route::get('/grafik-penerima-hibah', [UsulanController::class, 'grafikPenerimaHibah'])->name('grafik-penerima-hibah.index');
+    Route::post('/grafik-penerima-hibah', [UsulanController::class, 'grafikPenerimaHibah'])->name('grafik-penerima-hibah.index');
+
+    
     Route::get('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.index');
     Route::post('laporan-hitungan-usulan', [UsulanController::class, 'laporanHitunganUsulan'])->name('laporan-hitungan-usulan.filter');
     // Route::get('setting-lembar-pengesahan', [UsulanController::class, 'settingLembarPengesahan'])->name('setting-lembar-pengesahan.index');

@@ -35,39 +35,73 @@ class LuaranController extends Controller
      */
     public function create($id)
 {
-    $usulan = Usulan::findOrFail($id); // More efficient than where()->first()
-    $luarans = Luaran::where('usulan_id', $id)->pluck('jenis_luaran')->toArray(); // Get existing jenis_luaran directly
-   
+    // Mengambil data Usulan berdasarkan ID
+    $usulan = Usulan::findOrFail($id); // Lebih efisien daripada where()->first()
+    
+    // Mengambil data Luaran terkait usulan
+    $luarans = Luaran::where('usulan_id', $id)->pluck('jenis_luaran')->toArray(); // Mengambil jenis_luaran yang sudah ada
+    
+    // Mengambil laporan akhir terkait usulan
+    $laporanakhir = LaporanAkhir::where('usulan_id', $id)->first();
+
+    // Mengambil dokumen laporan akhir jika ada
+    if ($laporanakhir) {
+        $dokumenLaporanAkhir = $laporanakhir->dokumen_laporan_akhir;
+    } else {
+        $dokumenLaporanAkhir = null;  // Atur menjadi null jika tidak ada
+    }
+
+    // Jenis-jenis luaran yang wajib
     $jenisLuarans = [
         'Laporan akhir penelitian',
         'Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4',
         'Artikel ilmiah di prosiding SAINSTEKNOPAK'
     ];
     
-    // Filter the jenisLuarans that do not exist in the database
+    // Filter jenisLuarans yang belum ada di database
     $missingLuarans = array_diff($jenisLuarans, $luarans);
 
-    // Check and insert only the missing types
+    // Cek dan insert hanya jenis luaran yang belum ada
     foreach ($missingLuarans as $jenisLuaran) {
-        // Check if a Luaran with this type and usulan_id already exists
+        // Cek jika luaran dengan jenis ini dan usulan_id sudah ada
         $existingLuaran = Luaran::where('usulan_id', $usulan->id)
                                 ->where('type', $jenisLuaran)
                                 ->first();
-        // If it doesn't exist, create a new Luaran
+
+        // Jika luaran dengan jenis ini belum ada, buat yang baru
         if (!$existingLuaran) {
+            $url = '';
+            $judul = '';
+            $status = '';
+
+            // Jika jenis luaran adalah 'Laporan akhir penelitian', tentukan URL otomatis
+            if ($jenisLuaran == 'Laporan akhir penelitian') {
+                $judul = $usulan->judul_usulan;
+                $status= 'Terpenuhi';
+                $url = $dokumenLaporanAkhir ? url('storage/' . $dokumenLaporanAkhir) : '';  // Jika ada dokumen, ambil URL-nya
+            }
+
+            // Membuat Luaran baru dengan URL yang sesuai
             Luaran::create([
-                'laporankemajuan_id'=> 0,
-                'laporanakhir_id'=> 0,
-                'usulan_id' => $usulan->id,
-                'jenis_luaran' => 'wajib',  // Default value
-                'judul' => 0,  // Default value
-                'type' => $jenisLuaran,   // Default value
-                'url' => 0,    // Default value
-                'status' => 'belum terpenuhi',  // Default value
-                'file_loa' => 0, // Default value
+                'laporankemajuan_id' => 0,   // Nilai default
+                'laporanakhir_id' => $laporanakhir ? $laporanakhir->id : 0,  // Ambil ID laporan akhir jika ada
+                'usulan_id' => $usulan->id,  // Menghubungkan dengan usulan
+                'jenis_luaran' => 'wajib',   // Nilai default
+                'judul' => $judul,                // Nilai default
+                'type' => $jenisLuaran,      // Jenis luaran yang hilang
+                'url' => $url,               // URL yang telah diisi
+                'status' => $status, // Status default
+                'file_loa' => 0,             // Nilai default
             ]);
         }
     }
+
+    // Optional: Mengembalikan response atau render view sesuai kebutuhan
+    // return response()->json([
+    //     'message' => 'Luaran berhasil diproses.',
+    //     'laporan_akhir_dokumen' => $dokumenLaporanAkhir
+    // ]);
+
     // Retrieve the most recent 'luaran' data
     $luarans = Luaran::where('usulan_id', $id)->get();
     
@@ -115,7 +149,7 @@ class LuaranController extends Controller
             'judul' => $request->judul,
             'type' => $request->type,
             'url' => $request->url,
-            'status' => 'terpenuhi',  // Default value
+            'status' => 'Terpenuhi',  // Default value
             'file_loa' => $filePath, // This will be null if no file was uploaded
         ]);
 
@@ -161,11 +195,12 @@ class LuaranController extends Controller
     public function edit(Luaran $luaran)
     {
       
-        $user = auth()->user(); // Get the currently authenticated user
+        $luaran = Luaran::findOrFail($luaran->id); 
+        $usulan = Usulan::findOrFail($luaran->usulan_id);
         // Check if the user has the 'Dosen' role
         if ($user->hasRole('Dosen')) {
             // Filter Usulan based on ketua_dosen_id and optionally the 'jenis' if provided
-            $usulans = Usulan::where('ketua_dosen_id', $user->dosen->id)
+            $usulans = Usulan::where('ketua_dosen_id', $usulan->ketua_dosen_id)
             ->when($jenis, function($query, $jenis) {
                 return $query->where('jenis_skema', $jenis);  // Filtering by jenis
             })

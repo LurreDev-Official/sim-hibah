@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('usulan_id'); // Relasi ke usulan
             $table->string('dokumen_laporan_kemajuan'); // File dokumen kemajuan
             $table->string('status');
-            $table->enum('jenis', ['Penelitian', 'Pengabdian']);
+            $table->enum('jenis', ['penelitian', 'penelitian']);
             $table->timestamps();
             $table->foreign('ketua_dosen_id')->references('id')->on('dosens')->onDelete('cascade');
             $table->foreign('usulan_id')->references('id')->on('usulans')->onDelete('cascade');

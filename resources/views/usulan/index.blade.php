@@ -163,7 +163,7 @@
                                                     <span class="badge bg-danger">Ditolak</span>
                                                 @endif
                                             </td>
-                                            
+
                                             <td>{{ $usulan->rumpun_ilmu }}</td>
                                             <td>{{ $usulan->bidang_fokus }}</td>
                                             <td>{{ $usulan->tema_penelitian }}</td>
@@ -297,7 +297,7 @@
                                                     @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
                                                         <div class="col p-2">
                                                             <button class="btn btn-danger btn-sm"
-                                                                onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})"
+                                                                onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})">
                                                                 <i class="fas fa-trash-alt"></i> Hapus
                                                             </button>
                                                         </div>
@@ -323,9 +323,8 @@
                                                             if (result.isConfirmed) {
                                                                 // Jika konfirmasi di-klik
                                                                 $.ajax({
-                                                                    url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus',
-                                                                    id, // URL endpoint dengan jenis dan ID usulan
-                                                                    type: 'DELETE', // HTTP method DELETE
+                                                                    url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus', // URL endpoint dengan jenis dan ID usulan
+                                                                    type: 'POST', // HTTP method POST
                                                                     data: {
                                                                         "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
                                                                     },
@@ -336,8 +335,7 @@
                                                                             response.success,
                                                                             'success'
                                                                         ).then(() => {
-                                                                            location
-                                                                                .reload(); // Reload halaman setelah penghapusan berhasil
+                                                                            location.reload(); // Reload halaman setelah penghapusan berhasil
                                                                         });
                                                                     },
                                                                     error: function(xhr) {
@@ -454,10 +452,10 @@
 
                             </div>
                             @if ($usulan->allReviewersAccepted)
-                                    <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#approveRejectModal{{ $usulan->id }}">
-                                        Diterima Atau Ditolak
-                                    </button>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#approveRejectModal{{ $usulan->id }}">
+                                    Diterima Atau Ditolak
+                                </button>
 
 
                                 <!-- Modal for Approving or Rejecting Usulan -->
@@ -506,10 +504,10 @@
                                     onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }}, this)">
                                     <i class="fas fa-trash-alt"></i> Hapus
                                 </button>
-                            
+
                                 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                            
+
                                 <script>
                                     function deleteUsulan(jenis, id, button) {
                                         Swal.fire({
@@ -555,11 +553,9 @@
                                     }
                                 </script>
                             </div>
-                            
-                            
-                            </td>
 
-                           
+
+                            </td>
                         @endrole
 
 
@@ -595,6 +591,3 @@
         });
     </script>
 @endsection
-
-
-

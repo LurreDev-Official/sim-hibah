@@ -154,8 +154,11 @@ class LaporanKemajuanController extends Controller
     }
     $user = auth()->user(); 
     // Set the status to 'submitted'
+    $usulan = Usulan::findOrFail($validated['usulan_id']);
     $validated['status'] = 'submitted';
-    $validated['ketua_dosen_id'] = $user->dosen->id;
+    $validated['ketua_dosen_id'] =$usulan->ketua_dosen_id;
+    $validated['jenis'] = $request->jenis;
+
     // Create the LaporanKemajuan record in the database
     LaporanKemajuan::create($validated);
 
@@ -200,53 +203,68 @@ class LaporanKemajuanController extends Controller
 
 
 
-        } elseif ($user->hasRole('Dosen')) {
+        } else// Pastikan user memiliki role 'Dosen'
+        if ($user->hasRole('Dosen')) {
             // Ambil data dosen terkait user yang login
             $dosen = Dosen::where('user_id', $user->id)->first();
-           
+
             if ($dosen) {
-            // Ambil semua usulan_id yang terkait dengan dosen dari tabel AnggotaDosen
-            $usulanIds = AnggotaDosen::where('dosen_id', $dosen->id)->where('jenis_skema', $jenis)->pluck('usulan_id');
-        
-            // Ambil semua usulan berdasarkan usulan_id yang ditemukan di AnggotaDosen
-            $usulans = Usulan::whereIn('id', $usulanIds)
-                     ->where('jenis_skema', $jenis)
-                     ->get();
-        
-            // Cek apakah ada laporan kemajuan untuk usulan tersebut
-            foreach ($usulans as $usulan) {
-                $existingLaporan = LaporanKemajuan::where('usulan_id', $usulan->id)->where('jenis', $jenis)->first();
-            
-                // Jika laporan kemajuan tidak ditemukan, arahkan ke halaman pembuatan laporan baru
-                if (!$existingLaporan) {
-                return redirect()->route('laporan-kemajuan.create', ['jenis' => $jenis])
-                    ->with('info', 'Belum ada laporan kemajuan untuk usulan ini. Silakan buat laporan baru.');
+                // Ambil ID usulan yang terkait dengan dosen (sebagai ketua atau anggota)
+                $usulanIds = Usulan::where('ketua_dosen_id', $dosen->id) // Ketua dosen
+                    ->orWhereHas('anggotaDosen', function ($query) use ($dosen) {
+                        $query->where('dosen_id', $dosen->id); // Anggota dosen
+                    })
+                    ->pluck('id'); // Ambil hanya kolom ID
+
+                // Ambil laporan kemajuan berdasarkan usulan_id yang ditemukan
+                $laporanKemajuan = LaporanKemajuan::with(['usulan', 'penilaianReviewers.reviewer'])
+                    ->whereIn('usulan_id', $usulanIds)
+                    ->where('jenis', $jenis)
+                    ->get();
+
+                // Filter jenis laporan (opsional)
+                if ($jenis) {
+                    $laporanKemajuan = $laporanKemajuan->where('jenis', $jenis);
                 }
-            }
-        
-            // Ambil laporan kemajuan setelah pengecekan
-            $laporanKemajuan = LaporanKemajuan::with('usulan', 'penilaianReviewers.reviewer')
-                ->whereIn('usulan_id', $usulanIds) // Mengambil laporan kemajuan berdasarkan usulan_id yang ditemukan
+
+                // Check if all reviewers for each laporan kemajuan have accepted (status == 'Diterima')
+                foreach ($laporanKemajuan as $laporan) {
+                    // Hitung jumlah reviewer
+                    $totalReviewers = $laporan->penilaianReviewers->count();
+
+                    // Hitung jumlah reviewer yang diterima (status_penilaian == 'Diterima')
+                    $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
+
+                    // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
+                    $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+                }
+
+                $laporanExists = LaporanKemajuan::whereIn('usulan_id', $usulanIds)
+                ->where('jenis', $jenis)
+                ->exists();
+
+            
+
+            // Jika laporan kemajuan sudah ada, redirect dengan pesan
+            if ($laporanExists) {
+                $usulans = Usulan::whereIn('id', $usulanIds)
+                ->where('status', 'approved')
+                ->where('jenis_skema', $jenis)
                 ->get();
-        
-            // Check if all reviewers for each usulan have accepted (status == 'Diterima')
-            foreach ($laporanKemajuan as $laporan) {
-                // Hitung jumlah reviewer
-                $totalReviewers = $laporan->penilaianReviewers->count();
-            
-                // Hitung jumlah reviewer yang diterima (status == 'Diterima')
-                $acceptedReviewers = $laporan->penilaianReviewers->where('status_penilaian', 'Diterima')->count();
-            
-                // Jika jumlah reviewer yang diterima sama dengan total reviewer, set allReviewersAccepted ke true
-                $laporan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+                return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis','usulans','dosen')) ;
+                    // ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
+            }else{
+                $usulans = Usulan::whereIn('id', $usulanIds)
+                ->where('status', 'approved')
+                ->where('jenis_skema', $jenis)
+                ->get();
+                // Ambil template laporan kemajuan (opsional)
+            $getTemplate = TemplateDokumen::where('skema', $jenis)->first();
+                return view('laporan_kemajuan.create', compact('usulans', 'jenis', 'getTemplate'));
             }
-        
-            // Kembalikan tampilan dengan data laporan kemajuan
-            return view('laporan_kemajuan.index', compact('laporanKemajuan', 'jenis'))
-                ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
+                
             }
         }
-        
          elseif ($user->hasRole('Reviewer')) {
             // Reviewer can see only reports associated with the proposals they are reviewing
             $laporanKemajuan = $laporanKemajuanQuery->whereHas('usulan.penilaianReviewers', function ($query) use ($user) {

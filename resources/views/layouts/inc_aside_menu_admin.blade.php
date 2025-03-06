@@ -182,32 +182,26 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('grafik-per-fakultas.index') ? 'active' : '' }}"
-                                href="{{ route('grafik-per-fakultas.index') }}">
+                            <a class="menu-link {{ request()->routeIs('grafik-usulan.index') ? 'active' : '' }}"
+                                href="{{ route('grafik-usulan.index') }}">
                                 <span class="menu-bullet">
                                     <i class="align-middle" data-feather="bar-chart-2"></i>
                                 </span>
-                                <span class="menu-title">Grafik Per Fakultas</span>
+                                <span class="menu-title">Grafik Usulan</span>
                             </a>
                         </div>
+                        
                         <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('grafik-prodi.index') ? 'active' : '' }}"
-                                href="{{ route('grafik-prodi.index') }}">
+                            <a class="menu-link {{ request()->routeIs('grafik-penerima-hibah.index') ? 'active' : '' }}"
+                                href="{{ route('grafik-penerima-hibah.index') }}">
                                 <span class="menu-bullet">
-                                    <i class="align-middle" data-feather="pie-chart"></i>
+                                    <i class="align-middle" data-feather="bar-chart-2"></i>
                                 </span>
-                                <span class="menu-title">Grafik Per Prodi</span>
+                                <span class="menu-title">Grafik Penerima Hibah</span>
                             </a>
                         </div>
-                        {{-- <div class="menu-item">
-                            <a class="menu-link {{ request()->routeIs('laporan-hitungan-usulan.index') ? 'active' : '' }}"
-                                href="{{ route('laporan-hitungan-usulan.index') }}">
-                                <span class="menu-bullet">
-                                    <i class="align-middle" data-feather="file-text"></i>
-                                </span>
-                                <span class="menu-title">Laporan Hitungan Usulan by Dosen</span>
-                            </a>
-                        </div> --}}
+                       
+                         
                     </div>
                 </div>
                 
