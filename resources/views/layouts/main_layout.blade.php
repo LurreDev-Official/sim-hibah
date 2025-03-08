@@ -44,7 +44,7 @@
                 <div class="aside-logo flex-column-auto" id="kt_aside_logo">
                     <!--begin::Logo-->
                     {{-- <img alt="Logo" src="{{ asset('assets/logo.png')}}" class="h-25px logo" /> --}}
-                    <h2 class="text-light"> {{ Auth::user()->role }}</h2>
+                    <h2 class="text-light"> {{ Auth::user()->name }}</h2>
                     <!--end::Logo-->
                     <!--begin::Aside toggler-->
                     <div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-toggle" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="aside-minimize">

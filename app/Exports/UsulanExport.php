@@ -41,12 +41,15 @@ class UsulanExport implements FromCollection, WithHeadings, WithMapping
             'Tahun Pelaksanaan', 
             'Ketua Dosen', 
             'Dokumen Usulan', 
+            'Dokumen Usulan Perbaikan', 
             'Status', 
             'Rumpun Ilmu', 
             'Bidang Fokus', 
             'Tema Penelitian', 
             'Topik Penelitian', 
-            'Lama Kegiatan'
+            'Lama Kegiatan',
+            'created_at',
+            'updated_at',
         ];
     }
 
@@ -57,22 +60,27 @@ class UsulanExport implements FromCollection, WithHeadings, WithMapping
      * @return array
      */
     public function map($usulan): array
-    {
-        return [
-            $usulan->id,
-            $usulan->judul_usulan,
-            $usulan->jenis_skema,
-            $usulan->tahun_pelaksanaan,
-            $usulan->ketuaDosen->name ?? 'N/A', // Assuming 'name' is a field in  dan NIDN
-            
-            $usulan->dokumen_usulan,
-            $usulan->status,
-            $usulan->rumpun_ilmu,
-            $usulan->bidang_fokus,
-            $usulan->tema_penelitian,
-            $usulan->topik_penelitian,
-            $usulan->lama_kegiatan,
-        ];
-    }
+{
+    // Ambil dokumen usulan perbaikan terbaru (jika ada)
+    $dokumenUsulanPerbaikan = $usulan->usulanPerbaikans->last()?->dokumen_usulan ?? null;
+
+    return [
+        $usulan->id,
+        $usulan->judul_usulan,
+        $usulan->jenis_skema,
+        $usulan->tahun_pelaksanaan,
+        $usulan->ketuaDosen?->user?->name ?? 'N/A', // Nama Ketua Dosen
+        'https://srikandi.unhasy.ac.id/storage/' . $usulan->dokumen_usulan, // Dokumen Usulan
+        $dokumenUsulanPerbaikan ? 'https://srikandi.unhasy.ac.id/storage/' . $dokumenUsulanPerbaikan : 'N/A', // Dokumen Usulan Perbaikan
+        $usulan->status,
+        $usulan->rumpun_ilmu,
+        $usulan->bidang_fokus,
+        $usulan->tema_penelitian,
+        $usulan->topik_penelitian,
+        $usulan->lama_kegiatan,
+        $usulan->created_at,
+        $usulan->updated_at,
+    ];
+}
 }
 

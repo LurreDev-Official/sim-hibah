@@ -165,12 +165,12 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
         
         // Jika sudah ada penilaian dengan status 'sudah dinilai'
         if ($penilaianReviewerDinilai) {
-            return redirect()->route('review-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah dinilai');
+            return redirect()->route('review-usulan.index')->with('success', 'Penilaian untuk usulan ini sudah dinilai');
         }
     
         // Jika sudah ada penilaian dengan status 'sudah diperbaiki'
         if ($penilaianReviewerDiperbaiki) {
-            return redirect()->route('review-usulan.index')->with('error', 'Penilaian untuk usulan ini sudah diperbaiki');
+            return redirect()->route('review-usulan.index')->with('success', 'Penilaian untuk usulan ini sudah diperbaiki');
         }
     
         // Ambil data Usulan berdasarkan ID
@@ -187,7 +187,7 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
     
         // Ambil KriteriaPenilaian yang sesuai dengan jenis dan proses dari Usulan
         $matchingKriteria = KriteriaPenilaian::where('jenis', $jenis_skema)
-            ->where('proses', 'usulan')
+            ->where('proses', 'Usulan')
             ->pluck('id');
     
         // Ambil IndikatorPenilaian yang sesuai dengan KriteriaPenilaian yang telah difilter

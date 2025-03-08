@@ -25,10 +25,10 @@
         <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
             <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                 <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">
-                    Dashboard
+                    Grafik Penerima Hibah Berdasarkan Prodi
                     <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
                     <small class="text-muted fs-7 fw-bold my-1 ms-1">
-                        {{ Auth::user()->name }}
+                       List
                     </small>
                 </h1>
             </div>
@@ -51,7 +51,7 @@
                                     <select name="tahun" id="tahun" class="form-control w-25">
                                         @php
                                             $currentYear = date('Y');
-                                            $startYear = $currentYear - 2;  // Start year: 2 years before the current year
+                                            $startYear = $currentYear - 1;  // Start year: 2 years before the current year
                                             $endYear = $currentYear + 2;    // End year: 2 years after the current year
                                         @endphp
                                         
@@ -71,6 +71,16 @@
                                 <div id="usulanByProdiChartWrapper">
                                     <canvas id="usulanByProdiChart"></canvas>
                                 </div>
+                                <div class="row mt-5">
+                                    @foreach ($countByFaculty as $faculty)
+                                        <div class="col-md-3">
+                                            <div class="card card-body mb-3" style="background-color: {{ $faculty->color }};">
+                                                <h4 class="text-center">{{ $faculty->nama_fakultas }}</h4>
+                                                <h1 class="text-center">{{ $faculty->total }}</h1>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -85,6 +95,7 @@
     // Data dari controller
     const labels = {!! json_encode($labels) !!};
     const totals = {!! json_encode($totals) !!};
+    const backgroundColors = {!! json_encode($backgroundColors) !!};
 
     // Inisialisasi grafik
     const ctx = document.getElementById('usulanByProdiChart').getContext('2d');
@@ -95,8 +106,8 @@
             datasets: [{
                 label: 'Jumlah Usulan',
                 data: totals,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: backgroundColors, // Gunakan warna berdasarkan fakultas
+                borderColor: backgroundColors,      // Border sesuai dengan background
                 borderWidth: 1
             }]
         },

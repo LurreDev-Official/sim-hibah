@@ -165,11 +165,11 @@ class UsulanController extends Controller
          }
 
 
-        // $validation = $this->validasiUsulanBaru($jenis);
+        $validation = $this->validasiUsulanBaru($jenis);
 
-        // if ($validation instanceof \Illuminate\Http\RedirectResponse) {
-        //     return $validation; // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
-        // }
+        if ($validation instanceof \Illuminate\Http\RedirectResponse) {
+            return $validation; // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
+        }
     
         $dosen = Dosen::where('user_id', Auth::user()->id)->first();
         if ($dosen->sinta_score >= 200) {
@@ -775,57 +775,140 @@ public function filterByYear(Request $request)
     return response()->json(['dosens' => $dosens]);
 }
 
-public function grafikUsulan(Request $request)
-{
-    // Ambil tahun dari request (opsional)
-    $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
-
-    // Ambil list nama prodi
-    $prodis = Prodi::all(); // Mengambil semua data prodi
-
-    // Query untuk menghitung usulan berdasarkan prodi
-    $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
-        ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')->where('tahun_pelaksanaan', '=',$tahun)
-        ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan');
-    // Eksekusi query
-    $data = $query->groupBy('prodis.name')->get();
-
-    // Format data untuk grafik
-    $labels = $prodis->pluck('name'); // Nama prodi sebagai label
-    $totals = $prodis->map(function ($prodi) use ($data) {
-        $item = $data->firstWhere('prodi_name', $prodi->name);
-        return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
-    });
-
-    // Kirim data ke view
-    return view('grafik.grafik_usulan', compact('labels', 'totals', 'tahun'));
-}
-
-public function grafikPenerimaHibah(Request $request)
-{
-     // Ambil tahun dari request (opsional)
-     $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
-
-     // Ambil list nama prodi
-     $prodis = Prodi::all(); // Mengambil semua data prodi
  
-     // Query untuk menghitung usulan berdasarkan prodi
-     $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
-         ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')->where('tahun_pelaksanaan', '=',$tahun) ->where('usulans.status', '=', 'approved')
-         ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan');
-     // Eksekusi query
-     $data = $query->groupBy('prodis.name')->get();
+    public function grafikUsulan(Request $request)
+    {
+        // Ambil tahun dari request (opsional)
+        $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
+
+        if (!$tahun) {
+            $tahun = date('Y'); // Jika tidak ada tahun, gunakan tahun saat ini
+        }
+
+        // Ambil list nama prodi beserta fakultasnya
+        $prodis = Prodi::with('fakultas')->get();
+
+        // Query untuk menghitung usulan berdasarkan prodi
+        $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
+            ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')
+            ->where('tahun_pelaksanaan', '=', $tahun)
+            ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan')
+            ->groupBy('prodis.name');
+
+        // Eksekusi query
+        $data = $query->get();
+
+        // Format data untuk grafik
+        $labels = $prodis->pluck('name'); // Nama prodi sebagai label
+        $totals = $prodis->map(function ($prodi) use ($data) {
+            $item = $data->firstWhere('prodi_name', $prodi->name);
+            return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
+        });
+
+        // Warna berdasarkan fakultas
+        $warnaFakultas = [
+            'Fakultas Agama Islam' => '#FFFFFF', // Putih
+            'Fakultas Teknik' => '#FFFF00',      // Kuning
+            'Fakultas Teknologi Informasi' => '#0478DD', // Biru tua
+            'Fakultas Ekonomi' => '#A52A2A',    // Coklat
+            'Fakultas Ilmu Pendidikan' => '#0000FF', // Biru
+        ];
+
+        // Generate warna berdasarkan fakultas
+        $backgroundColors = $prodis->map(function ($prodi) use ($warnaFakultas) {
+            return $warnaFakultas[$prodi->fakultas->name] ?? '#CCCCCC'; // Default abu-abu jika tidak ditemukan
+        });
+
+         // Query untuk menghitung total usulan berdasarkan fakultas
+         $countByFaculty = Fakultas::select('fakultas.name as nama_fakultas')
+         ->join('prodis', 'fakultas.id', '=', 'prodis.fakultas_id')
+         ->join('dosens', 'prodis.id', '=', 'dosens.prodi_id')
+         ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
+         ->where('usulans.tahun_pelaksanaan', '=', $tahun)
+         ->selectRaw('COUNT(usulans.id) as total')
+         ->groupBy('fakultas.name')
+         ->get();
+
+          // Tambahkan warna ke setiap fakultas
+        $countByFaculty = $countByFaculty->map(function ($faculty) use ($warnaFakultas) {
+            $faculty->color = $warnaFakultas[$faculty->nama_fakultas] ?? '#CCCCCC'; // Default abu-abu jika tidak ditemukan
+            return $faculty;
+        });
+
+
+        // Kirim data ke view
+        return view('grafik.grafik_usulan', compact('labels', 'totals', 'backgroundColors', 'tahun', 'countByFaculty'));
+    }
+
+
+    public function grafikPenerimaHibah(Request $request)
+    {
+        // Ambil tahun dari request (opsional)
+        $tahun = $request->input('tahun'); // Contoh: ?tahun=2023
+
+        if (!$tahun) {
+            $tahun = date('Y'); // Jika tidak ada tahun, gunakan tahun saat ini
+        }
+
+        // Ambil list nama prodi beserta fakultasnya
+        $prodis = Prodi::with('fakultas')->get();
+
+        // Query untuk menghitung usulan berdasarkan prodi
+        $query = Usulan::join('dosens', 'usulans.ketua_dosen_id', '=', 'dosens.id')
+            ->join('prodis', 'dosens.prodi_id', '=', 'prodis.id')
+            ->where('tahun_pelaksanaan', '=', $tahun)
+            ->where('usulans.status', '=', 'approved')
+            ->selectRaw('prodis.name as prodi_name, COUNT(usulans.id) as total_usulan')
+            ->groupBy('prodis.name');
+
+        // Eksekusi query
+        $data = $query->get();
+
+        // Format data untuk grafik
+        $labels = $prodis->pluck('name'); // Nama prodi sebagai label
+        $totals = $prodis->map(function ($prodi) use ($data) {
+            $item = $data->firstWhere('prodi_name', $prodi->name);
+            return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
+        });
+
+        // Warna berdasarkan fakultas
+        $warnaFakultas = [
+            'Fakultas Agama Islam' => '#FFFFFF', // Putih
+            'Fakultas Teknik' => '#FFFF00',      // Kuning
+            'Fakultas Teknologi Informasi' => '#0478DD', // Biru tua
+            'Fakultas Ekonomi' => '#A52A2A',    // Coklat
+            'Fakultas Ilmu Pendidikan' => '#0000FF', // Biru
+        ];
+
+        // Generate warna berdasarkan fakultas
+        $backgroundColors = $prodis->map(function ($prodi) use ($warnaFakultas) {
+            return $warnaFakultas[$prodi->fakultas->name] ?? '#CCCCCC'; // Default abu-abu jika tidak ditemukan
+        });
+
+         // Query untuk menghitung total usulan berdasarkan fakultas
+         $countByFaculty = Fakultas::select('fakultas.name as nama_fakultas')
+         ->join('prodis', 'fakultas.id', '=', 'prodis.fakultas_id')
+         ->join('dosens', 'prodis.id', '=', 'dosens.prodi_id')
+         ->join('usulans', 'dosens.id', '=', 'usulans.ketua_dosen_id')
+         ->where('usulans.tahun_pelaksanaan', '=', $tahun)
+         ->selectRaw('COUNT(usulans.id) as total')
+         ->groupBy('fakultas.name')
+         ->get();
+
+          // Tambahkan warna ke setiap fakultas
+        $countByFaculty = $countByFaculty->map(function ($faculty) use ($warnaFakultas) {
+            $faculty->color = $warnaFakultas[$faculty->nama_fakultas] ?? '#CCCCCC'; // Default abu-abu jika tidak ditemukan
+            return $faculty;
+        });
+        
+
+
+        // Kirim data ke view
+        return view('grafik.grafik_penerima_hibah', compact('labels', 'totals', 'backgroundColors', 'tahun', 'countByFaculty'));
+    }
+
+
  
-     // Format data untuk grafik
-     $labels = $prodis->pluck('name'); // Nama prodi sebagai label
-     $totals = $prodis->map(function ($prodi) use ($data) {
-         $item = $data->firstWhere('prodi_name', $prodi->name);
-         return $item ? $item->total_usulan : 0; // Jika tidak ada usulan, kembalikan 0
-     });
- 
-     // Kirim data ke view
-     return view('grafik.grafik_penerima_hibah', compact('labels', 'totals', 'tahun'));
-}
 
 
 

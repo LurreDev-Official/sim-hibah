@@ -65,7 +65,9 @@ class LaporanKemajuanExport implements FromCollection, WithHeadings, WithMapping
             'Usulan ID',
             'Dokumen Laporan Kemajuan',
             'Status',
-            'Jenis'
+            'Jenis',
+            'created_at',
+            'updated_at',
         ];
     }
 
@@ -79,11 +81,13 @@ class LaporanKemajuanExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $laporanKemajuan->id,
-            $laporanKemajuan->dosen->name ?? 'N/A', // Ketua Dosen
+            $laporanKemajuan->usulan->ketuaDosen?->user?->name ?? 'N/A', // Nama Ketua Dosen
             $laporanKemajuan->usulan_id,
-            $laporanKemajuan->dokumen_laporan_kemajuan,
+            'https://srikandi.unhasy.ac.id/storage/' . $laporanKemajuan->dokumen_laporan_kemajuan,
             $laporanKemajuan->status,
             $laporanKemajuan->jenis,
+            $laporanKemajuan->created_at,
+            $laporanKemajuan->updated_at,
         ];
     }
 }

@@ -111,8 +111,8 @@
                                         <th class="min-w-125px">Status</th>
                                         <th class="min-w-150px">Rumpun Ilmu</th>
                                         <th class="min-w-150px">Bidang Fokus</th>
-                                        <th class="min-w-150px">Tema Penelitian</th>
-                                        <th class="min-w-150px">Topik Penelitian</th>
+                                        {{-- <th class="min-w-150px">Tema Penelitian</th> --}}
+                                        {{-- <th class="min-w-150px">Topik Penelitian</th> --}}
                                         <th class="min-w-150px">Lama Kegiatan</th>
                                         <th class="min-w-150px">Ketua Dosen</th>
                                         <th class="min-w-150px">Dokumen Usulan</th>
@@ -166,8 +166,8 @@
 
                                             <td>{{ $usulan->rumpun_ilmu }}</td>
                                             <td>{{ $usulan->bidang_fokus }}</td>
-                                            <td>{{ $usulan->tema_penelitian }}</td>
-                                            <td>{{ $usulan->topik_penelitian }}</td>
+                                            {{-- <td>{{ $usulan->tema_penelitian }}</td> --}}
+                                            {{-- <td>{{ $usulan->topik_penelitian }}</td> --}}
                                             <td>{{ $usulan->lama_kegiatan }} tahun</td>
                                             <td>{{ $usulan->ketuaDosen->user->name }}</td>
                                             <td>

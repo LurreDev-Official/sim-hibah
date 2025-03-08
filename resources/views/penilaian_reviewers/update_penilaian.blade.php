@@ -86,12 +86,13 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="fw-bold mb-4">Lihat Penilaian</h4>
-                
+
                         <!-- Penilaian Details Grouped by Kriteria -->
                         <div class="mb-4">
                             @foreach ($indikatorPenilaians->groupBy('kriteria_id') as $kriteriaId => $indikators)
                                 <div class="mb-4">
-                                    <h5 class="text-primary"><strong>Kriteria: {{ $indikators->first()->kriteriaPenilaian->nama }}</strong></h5>
+                                    <h5 class="text-primary"><strong>Kriteria:
+                                            {{ $indikators->first()->kriteriaPenilaian->nama }}</strong></h5>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-bordered">
                                             <thead class="table-light">
@@ -104,10 +105,13 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($indikators as $indikator)
-                                                @php
-                                                                // Find the 'formPenilaian' record for the specific indikator
-                                                                $formPenilaian = $penilaianReviewer->formPenilaians->firstWhere('id_indikator', $indikator->id);
-                                                            @endphp
+                                                    @php
+                                                        // Find the 'formPenilaian' record for the specific indikator
+                                                        $formPenilaian = $penilaianReviewer->formPenilaians->firstWhere(
+                                                            'id_indikator',
+                                                            $indikator->id,
+                                                        );
+                                                    @endphp
                                                     <tr>
                                                         <td class="text-center">{{ $loop->iteration }}</td>
                                                         <td>{{ $indikator->nama_indikator }}</td>
@@ -115,19 +119,19 @@
                                                             {{ $formPenilaian->nilai ?? '0' }}
                                                         </td>
                                                         <td>
-                                                            
+
                                                             {{ $formPenilaian->catatan ?? '-' }}
                                                         </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
-                                            
+
                                         </table>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
-                
+
                         <!-- Total Nilai -->
                         <div class="bg-light p-3 rounded">
                             <h5 class="mb-2">Total Nilai</h5>
@@ -135,12 +139,11 @@
                         </div>
                     </div>
                 </div>
-                
-                        </div>
-                    </div>
-                </div>
 
+
+                <br>
             </div>
+            <!--end::Container-->
         </div>
     </div>
 @endsection

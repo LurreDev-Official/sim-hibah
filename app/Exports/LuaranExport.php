@@ -45,7 +45,9 @@ class LuaranExport implements FromCollection, WithHeadings, WithMapping
             'Tipe',
             'URL',
             'Status',
-            'File LOA'
+            'File LOA',
+            'Created At',
+            'Updated At',
         ];
     }
 
@@ -68,6 +70,8 @@ class LuaranExport implements FromCollection, WithHeadings, WithMapping
             $luaran->url,
             $luaran->status,
             $luaran->file_loa,
+            $luaran->created_at,
+            $luaran->updated_at,
         ];
     }
 }

@@ -40,8 +40,9 @@ class LaporanAkhirExport implements FromCollection, WithHeadings, WithMapping
             'Dokumen Laporan Akhir',
             'Jenis',
             'Status',
-            'Dosen Name',
-            'Usulan Name'
+            'Usulan Name',
+            'Created At',
+            'Updated At',
         ];
     }
 
@@ -55,13 +56,14 @@ class LaporanAkhirExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $laporanAkhir->id,
-            $laporanAkhir->ketua_dosen_id,
+            $laporanAkhir->usulan?->ketuaDosen?->user?->name ?? 'N/A', // Mengambil Nama Ketua Dosen
             $laporanAkhir->usulan_id,
-            $laporanAkhir->dokumen_laporan_akhir,
+           'https://srikandi.unhasy.ac.id/storage/' . $laporanAkhir->dokumen_laporan_akhir,
             $laporanAkhir->jenis,
             $laporanAkhir->status,
-            $laporanAkhir->dosen ? $laporanAkhir->dosen->name : 'N/A',
-            $laporanAkhir->usulan ? $laporanAkhir->usulan->name : 'N/A',
+            $laporanAkhir->usulan ? $laporanAkhir->usulan->judul_usulan : 'N/A',
+            $laporanAkhir->created_at,
+            $laporanAkhir->updated_at,
         ];
     }
 }
