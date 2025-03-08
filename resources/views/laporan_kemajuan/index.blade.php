@@ -40,22 +40,25 @@
                                     placeholder="Search Laporan" name="search" />
                             </div>
                         </div>
-                        
+
                         <!-- Tombol Tambah Laporan Kemajuan -->
                         <div class="d-flex justify-content-end mb-4 p-2">
                             <div class="d-flex justify-content-end mb-4">
                                 @if (isset($dosen) && $usulans->isNotEmpty())
                                     @foreach ($usulans as $usulan)
                                         @if ($usulan->ketua_dosen_id == $dosen->id)
-                                            <a href="{{ route('laporan-kemajuan.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary">
+                                            <a href="{{ route('laporan-kemajuan.create', ['jenis' => 'penelitian']) }}"
+                                                class="btn btn-primary">
                                                 <i class="fas fa-plus"></i> Tambah Laporan Kemajuan
                                             </a>
-                                            @break <!-- Hentikan loop jika kondisi terpenuhi -->
+                                            @break
+
+                                            <!-- Hentikan loop jika kondisi terpenuhi -->
                                         @endif
                                     @endforeach
                                 @endif
                             </div>
-                            
+
                             <a href="{{ url('laporan-kemajuan/export/' . $jenis) }}" class="btn btn-success ml-2">
                                 <i class="fa fa-download"></i> Export Data
                             </a>
@@ -390,13 +393,7 @@
                                                 }
                                             </script>
                                         @endrole
-
-
-
-
                                         </td>
-
-
                                     </tr>
                                 @endforeach
                             </tbody>

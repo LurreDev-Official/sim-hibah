@@ -44,7 +44,7 @@
                 <div class="aside-logo flex-column-auto" id="kt_aside_logo">
                     <!--begin::Logo-->
                     {{-- <img alt="Logo" src="{{ asset('assets/logo.png')}}" class="h-25px logo" /> --}}
-                    <h2 class="text-light"> {{ Auth::user()->name }}</h2>
+                    {{-- <h2 class="text-light"> {{ Auth::user()->name }}</h2> --}}
                     <!--end::Logo-->
                     <!--begin::Aside toggler-->
                     <div id="kt_aside_toggle" class="btn btn-icon w-auto px-0 btn-active-color-primary aside-toggle" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="aside-minimize">
@@ -103,7 +103,7 @@
                         <!--begin::Mobile logo-->
                         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
                             <a href="#" class="d-lg-none">
-                                <h2> {{ Auth::user()->role }}</h2>
+                                <h2> {{ Auth::user()->name }}</h2>
                             </a>
                         </div>
                         <!--end::Mobile logo-->
@@ -282,7 +282,7 @@
                                                             <span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">Online</span>
                                                         </div>
                                                         <h6 class="fw-bold text-muted text-hover-primary fs-7">{{ Auth::user()->email }}</h6>
-                                                        <p>Akses {{ Auth::user()->role }}</p>
+                                                        <p>Akses {{ Auth::user()->name }}</p>
 
                                                     </div>
                                                     <!--end::Username-->
