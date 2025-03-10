@@ -56,11 +56,12 @@ public function update(Request $request,$id)
 {
     // Validasi data yang diterima dari form
     $request->validate([
-        'password' => 'required' // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
+        'password' => 'required' ,
+        'user_id'=> 'required',
+        // Password opsional, tetapi jika diisi harus minimal 6 karakter dan cocok dengan konfirmasi
     ]);
-    try {
         // Ambil user berdasarkan user_id
-        $user = User::findOrFail($id);
+        $user = User::findOrFail($request->user_id);
 
         // Jika ada password yang diisi, perbarui password
         if ($request->filled('password')) {
@@ -72,10 +73,6 @@ public function update(Request $request,$id)
 
         // Tambahkan notifikasi sukses ke session
         return redirect()->back()->with('success', 'Data pengguna berhasil diperbarui!');
-    } catch (\Exception $e) {
-        // Tambahkan notifikasi error ke session jika terjadi kesalahan
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data pengguna: ' . $e->getMessage());
-    }
 }
 
     

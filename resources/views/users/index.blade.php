@@ -75,14 +75,14 @@
                                 <!--end::Table head-->
                                 <!--begin::Table body-->
                                 <tbody class="text-gray-600 fw-bold" id="myTable">
-                                    @foreach ($data as $key => $user)
+                                    @foreach ($data as $key => $data)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $user->name }}</td>
-                                            <td>{{ $user->email }}</td>
+                                            <td>{{ $data->name }}</td>
+                                            <td>{{ $data->email }}</td>
                                             <td>
-                                                @if ($user->roles->isNotEmpty())
-                                                    @foreach ($user->roles as $role)
+                                                @if ($data->roles->isNotEmpty())
+                                                    @foreach ($data->roles as $role)
                                                         <span class="badge badge-light-primary">{{ $role->name }}</span>
                                                     @endforeach
                                                 @else
@@ -92,12 +92,12 @@
                                             <td class="text-end">
                                                 <button class="btn btn-light btn-active-light-primary btn-sm"
                                                     data-bs-toggle="modal"
-                                                    data-bs-target="#editUserModal{{ $user->id }}">Edit</button>
+                                                    data-bs-target="#editUserModal{{ $data->id }}">Edit</button>
                                             </td>
                                         </tr>
 
                                         <!--begin::Modal - Edit Email and Password-->
-                                        <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1"
+                                        <div class="modal fade" id="editUserModal{{ $data->id }}" tabindex="-1"
                                             aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered mw-650px">
                                                 <div class="modal-content">
@@ -108,16 +108,15 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <form method="POST"
-                                                            action="{{ route('users.update', $user->id) }}">
+                                                            action="{{ route('users.update', $data->id) }}">
                                                             @csrf
                                                             @method('PUT')
-                                                            <input type="hidden" name="user_id"
-                                                            value="{{ $user->id }}">
+                                                            <input type="hidden" name="user_id" value="{{ $data->id }}">
                                                             <!-- Email Field -->
                                                             <div class="mb-3">
                                                                 <label for="email" class="form-label">Email</label>
                                                                 <input type="email" class="form-control" name="email"
-                                                                    value="{{ $user->email }}" required>
+                                                                    value="{{ $data->email }}" required>
                                                             </div>
 
                                                             <!-- Password Field -->

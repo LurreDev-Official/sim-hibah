@@ -37,10 +37,22 @@ class AnggotaDosenController extends Controller
                        
         ]);
 
-        
+        $usulanAnggota = AnggotaDosen::where('dosen_id', $request->dosen_id)
+        ->whereIn('usulan_id', $usulan_id) // Filter berdasarkan usulan_id yang sudah diambil
+        ->where('status', 'approved') // Status usulan harus approved
+        ->where('status_anggota', 'anggota') // Hanya hitung sebagai anggota
+        ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
+        ->count();
+
+        // Validasi: Batasi maksimal 1 usulan sebagai anggota per skema
+        if ($usulanAnggota >= 1) {
+            return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $jenis pada tahun ini.");
+        }
+
         // Cek apakah dosen sudah terdaftar sebagai anggota
-                                $count = AnggotaDosen::where('usulan_id', $request->usulan_id)
-                                ->where('dosen_id', $request->dosen_id)
+                                $count = AnggotaDosen::
+                                where('dosen_id', $request->dosen_id)
+                                ->where('usulan_id', $usulan_id)
                                 ->where('jenis_skema', $request->jenis)
                                 ->count();
 

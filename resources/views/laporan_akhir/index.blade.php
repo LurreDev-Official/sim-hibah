@@ -12,7 +12,8 @@
                 <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
                     <h1 class="d-flex align-items-center text-dark fw-bolder fs-3 my-1">Laporan Akhir
                         <span class="h-20px border-gray-200 border-start ms-3 mx-2"></span>
-                        <small class="text-muted fs-7 fw-bold my-1 ms-1">List</small>
+                        <small class="text-muted fs-7 fw-bold my-1 ms-1">List {{ $jenis }}</small>
+
                     </h1>
                 </div>
             </div>
@@ -47,7 +48,7 @@
                                 @if (isset($dosen) && $usulans->isNotEmpty())
                                     @foreach ($usulans as $usulan)
                                         @if ($usulan->ketua_dosen_id == $dosen->id)
-                                            <a href="{{ route('laporan-akhir.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary me-2">
+                                            <a href="{{ route('laporan-akhir.create', ['jenis' => $jenis]) }}" class="btn btn-primary me-2">
                                                 <i class="fas fa-plus"></i> Tambah Laporan Akhir
                                             </a>
                                             @break <!-- Hentikan loop jika kondisi terpenuhi -->
@@ -180,7 +181,7 @@
                                         <td class="text-end">
                                             @role('Dosen')
                                             <td>
-                                                @if ($laporan->status == 'submitted')
+                                                @if ($anggotaDosencek->status_anggota == 'ketua'  && $laporan->status == 'submitted')
                                                 <!-- Tombol Edit -->
                                                 <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
                                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">

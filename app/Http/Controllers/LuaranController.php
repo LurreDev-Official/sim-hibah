@@ -37,27 +37,23 @@ class LuaranController extends Controller
 {
     // Mengambil data Usulan berdasarkan ID
     $usulan = Usulan::findOrFail($id); // Lebih efisien daripada where()->first()
-    
+
     // Mengambil data Luaran terkait usulan
-    $luarans = Luaran::where('usulan_id', $id)->pluck('jenis_luaran')->toArray(); // Mengambil jenis_luaran yang sudah ada
-    
+    $luarans = Luaran::where('usulan_id', $id)->pluck('type')->toArray(); // Mengambil jenis luaran yang sudah ada
+
     // Mengambil laporan akhir terkait usulan
     $laporanakhir = LaporanAkhir::where('usulan_id', $id)->first();
 
     // Mengambil dokumen laporan akhir jika ada
-    if ($laporanakhir) {
-        $dokumenLaporanAkhir = $laporanakhir->dokumen_laporan_akhir;
-    } else {
-        $dokumenLaporanAkhir = null;  // Atur menjadi null jika tidak ada
-    }
+    $dokumenLaporanAkhir = $laporanakhir ? $laporanakhir->dokumen_laporan_akhir : null;
 
     // Jenis-jenis luaran yang wajib
     $jenisLuarans = [
-        'Laporan akhir penelitian',
-        'Artikel ilmiah di jurnal terakreditasi minimal SINTA 3 atau SINTA 4',
+        'Laporan akhir',
+        'Artikel ilmiah di jurnal terakreditasi minimal',
         'Artikel ilmiah di prosiding SAINSTEKNOPAK'
     ];
-    
+
     // Filter jenisLuarans yang belum ada di database
     $missingLuarans = array_diff($jenisLuarans, $luarans);
 
@@ -65,7 +61,7 @@ class LuaranController extends Controller
     foreach ($missingLuarans as $jenisLuaran) {
         // Cek jika luaran dengan jenis ini dan usulan_id sudah ada
         $existingLuaran = Luaran::where('usulan_id', $usulan->id)
-                                ->where('type', $jenisLuaran)
+                                ->where('type', $jenisLuaran . $usulan->jenis_skema) // Pastikan type unik
                                 ->first();
 
         // Jika luaran dengan jenis ini belum ada, buat yang baru
@@ -74,37 +70,51 @@ class LuaranController extends Controller
             $judul = '';
             $status = '';
 
-            // Jika jenis luaran adalah 'Laporan akhir penelitian', tentukan URL otomatis
-            if ($jenisLuaran == 'Laporan akhir penelitian') {
+            // Jika jenis luaran adalah 'Laporan akhir', tentukan URL otomatis
+            if ($jenisLuaran == 'Laporan akhir') {
                 $judul = $usulan->judul_usulan;
-                $status= 'Terpenuhi';
-                $url = $dokumenLaporanAkhir ? url('storage/' . $dokumenLaporanAkhir) : '';  // Jika ada dokumen, ambil URL-nya
+                $status = 'Terpenuhi';
+                $url = $dokumenLaporanAkhir ? url('storage/' . $dokumenLaporanAkhir) : ''; // Jika ada dokumen, ambil URL-nya
+            }
+
+            // Jika jenis luaran adalah 'Artikel ilmiah di jurnal terakreditasi minimal'
+            if ($jenisLuaran == 'Artikel ilmiah di jurnal terakreditasi minimal') {
+                if ($usulan->jenis_skema == 'penelitian') {
+                    $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 4';
+                } else {
+                    $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 5';
+                }
+                $status = 'Belum terpenuhi';
+                $url = '';
+            }
+
+            // Jika jenis luaran adalah 'Artikel ilmiah di prosiding SAINSTEKNOPAK'
+            if ($jenisLuaran == 'Artikel ilmiah di prosiding SAINSTEKNOPAK') {
+                $judul = 'Artikel ilmiah di prosiding SAINSTEKNOPAK';
+                $status = 'Belum terpenuhi';
+                $url = '';
             }
 
             // Membuat Luaran baru dengan URL yang sesuai
             Luaran::create([
-                'laporankemajuan_id' => 0,   // Nilai default
-                'laporanakhir_id' => $laporanakhir ? $laporanakhir->id : 0,  // Ambil ID laporan akhir jika ada
-                'usulan_id' => $usulan->id,  // Menghubungkan dengan usulan
-                'jenis_luaran' => 'wajib',   // Nilai default
-                'judul' => $judul,                // Nilai default
-                'type' => $jenisLuaran,      // Jenis luaran yang hilang
-                'url' => $url,               // URL yang telah diisi
+                'laporankemajuan_id' => 0, // Nilai default
+                'laporanakhir_id' => $laporanakhir ? $laporanakhir->id : 0, // Ambil ID laporan akhir jika ada
+                'usulan_id' => $usulan->id, // Menghubungkan dengan usulan
+                'jenis_luaran' => 'wajib', // Nilai default
+                'judul' => $judul, // Judul yang telah ditentukan
+                'type' => $jenisLuaran . $usulan->jenis_skema, // Jenis luaran yang hilang
+                'url' => $url, // URL yang telah diisi
                 'status' => $status, // Status default
-                'file_loa' => 0,             // Nilai default
+                'file_loa' => 0, // Nilai default
+                'jenis_skema' => $usulan->jenis_skema, // Jenis skema usulan
             ]);
         }
     }
 
-    // Optional: Mengembalikan response atau render view sesuai kebutuhan
-    // return response()->json([
-    //     'message' => 'Luaran berhasil diproses.',
-    //     'laporan_akhir_dokumen' => $dokumenLaporanAkhir
-    // ]);
-
-    // Retrieve the most recent 'luaran' data
+    // Mengambil semua luaran setelah penambahan
     $luarans = Luaran::where('usulan_id', $id)->get();
-    
+
+    // Kirim data ke view
     $jenis = $usulan->jenis_skema;
     return view('luaran.create', compact('luarans', 'usulan', 'jenis'));
 }

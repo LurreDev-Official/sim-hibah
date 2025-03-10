@@ -743,20 +743,18 @@ public function validasiUsulanBaru($jenis)
     $usulanKetuaPenelitian = Usulan::where('ketua_dosen_id', $dosen->id)
         ->where('tahun_pelaksanaan', Carbon::now()->year)
         ->where('jenis_skema', 'penelitian')
-        ->where('status', 'approved')
+        // ->where('status', 'approved')
         ->count();
 
     $usulanKetuaPengabdian = Usulan::where('ketua_dosen_id', $dosen->id)
         ->where('tahun_pelaksanaan', Carbon::now()->year)
         ->where('jenis_skema', 'pengabdian')
-        ->where('status', 'approved')
+        // ->where('status', 'approved')
         ->count();
 
     if ($usulanKetuaPenelitian + $usulanKetuaPengabdian >= 2) {
         return back()->with('error', 'Anda sudah menjadi ketua di 2 usulan proposal pada tahun ini di');
-    }else{
-        return back()->with('error', 'Anda berkesempatan menjadi ketua di 1 usulan proposal pada tahun ini di');
-    }
+    } 
 
       // Ambil semua usulan_id dari model Usulan berdasarkan tahun dan status approved
       $usulanIds = Usulan::where('status', 'approved') // Filter berdasarkan status approved

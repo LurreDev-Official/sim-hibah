@@ -47,7 +47,7 @@
                                 @if (isset($dosen) && $usulans->isNotEmpty())
                                     @foreach ($usulans as $usulan)
                                         @if ($usulan->ketua_dosen_id == $dosen->id)
-                                            <a href="{{ route('laporan-kemajuan.create', ['jenis' => 'penelitian']) }}"
+                                            <a href="{{ route('laporan-kemajuan.create', ['jenis' => $jenis]) }}"
                                                 class="btn btn-primary">
                                                 <i class="fas fa-plus"></i> Tambah Laporan Kemajuan
                                             </a>
@@ -182,7 +182,7 @@
                                         <td class="text-end">
                                             @role('Dosen')
                                             <td>
-                                                @if ($laporan->status == 'submitted')
+                                                @if ($laporan->status == 'submitted' && $anggotaDosencek->status_anggota == 'ketua')
                                                     <!-- Tombol Edit -->
                                                     <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
                                                         data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
@@ -226,172 +226,103 @@
 
 
                                         @role('Kepala LPPM')
-                                            <td>
-                                                <!-- Tombol Pilih/Kirim Ke Reviewer -->
-                                                <div class="col p-2">
-                                                    @if ($laporan->status == 'draft' || $laporan->status == 'submitted')
-                                                        <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                                            data-bs-target="#pilihKirimReviewerModal-{{ $laporan->id }}">
-                                                            <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
-                                                        </button>
-                                                    @endif
+                                        <td>
+                                            <!-- Tombol Pilih/Kirim Ke Reviewer -->
+                                            <div class="col p-2">
+                                                @if ($laporan->status == 'draft' || $laporan->status == 'submitted')
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#pilihKirimReviewerModal-{{ $laporan->id }}">
+                                                        <i class="fas fa-paper-plane"></i> Pilih/Kirim Ke Reviewer
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        
+                                            <!-- Modal Pilih/Kirim Ke Reviewer -->
+                                            <div class="modal fade" id="pilihKirimReviewerModal-{{ $laporan->id }}" tabindex="-1" aria-labelledby="pilihKirimReviewerModalLabel-{{ $laporan->id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="pilihKirimReviewerModalLabel-{{ $laporan->id }}">Kirim ke Reviewer</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Silakan pilih reviewer untuk mengirim atau mengirim ulang usulan ini.</p>
+                                                            <form id="pilihKirimReviewerForm-{{ $laporan->id }}" action="{{ route('laporan-kemajuan.kirim', ['jenis' => $jenis]) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="laporankemajuan_id" value="{{ $laporan->id }}">
+                                                                <input type="hidden" name="jenis" value="{{ $jenis }}">
+                                                                <input type="hidden" name="action" id="action-{{ $laporan->id }}" value="">
+                                                                <!-- Dropdown Reviewer -->
+                                                                <div class="mb-3">
+                                                                    <label for="reviewer_id-{{ $laporan->id }}" class="form-label">Pilih Reviewer</label>
+                                                                    <select name="reviewer_id[]" id="reviewer_id-{{ $laporan->id }}" class="form-select" multiple required>
+                                                                        <option value="" disabled selected>Pilih Reviewer</option>
+                                                                        @foreach ($reviewers as $reviewer)
+                                                                            <option value="{{ $reviewer->id }}">{{ $reviewer->user->name }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                            <button type="button" class="btn btn-primary" onclick="submitForm('{{ $laporan->id }}', 'kirim')">Kirim</button>
+                                                            <button type="button" class="btn btn-warning" onclick="submitForm('{{ $laporan->id }}', 'kirim_ulang')">Kirim Ulang</button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-
-                                                <!-- Modal Pilih/Kirim Ke Reviewer -->
-                                                <div class="modal fade" id="pilihKirimReviewerModal-{{ $laporan->id }}"
-                                                    tabindex="-1"
-                                                    aria-labelledby="pilihKirimReviewerModalLabel-{{ $laporan->id }}"
-                                                    aria-hidden="true">
-                                                    <div class="modal-dialog">
+                                            </div>
+                                        
+                                            <script>
+                                                function submitForm(usulanId, action) {
+                                                    document.getElementById('action-' + usulanId).value = action;
+                                                    document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
+                                                }
+                                            </script>
+                                        
+                                            <!-- Tombol Approve/Reject Usulan -->
+                                            @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved')
+                                                <div class="col p-2">
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approveRejectModal{{ $laporan->id }}">
+                                                        Diterima
+                                                    </button>
+                                                </div>
+                                        
+                                                <!-- Modal untuk Approve/Reject Usulan -->
+                                                <div class="modal fade" id="approveRejectModal{{ $laporan->id }}" tabindex="-1" aria-labelledby="approveRejectModalLabel{{ $laporan->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h5 class="modal-title"
-                                                                    id="pilihKirimReviewerModalLabel-{{ $laporan->id }}">
-                                                                    Kirim ke Reviewer
-                                                                </h5>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                <h5 class="modal-title" id="approveRejectModalLabel{{ $laporan->id }}">Diterima</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <p>Silakan pilih reviewer untuk mengirim atau mengirim ulang
-                                                                    usulan ini.</p>
-                                                                <form id="pilihKirimReviewerForm-{{ $laporan->id }}"
-                                                                    action="{{ route('laporan-kemajuan.kirim', ['jenis' => $jenis]) }}"
+                                                                <form
+                                                                    action="{{ route('laporan-kemajuan.updateStatus', $laporan->id) }}"
                                                                     method="POST">
                                                                     @csrf
-                                                                    <input type="hidden" name="laporankemajuan_id"
-                                                                        value="{{ $laporan->id }}">
-                                                                    <input type="hidden" name="jenis"
-                                                                        value="{{ $jenis }}">
-                                                                    <input type="hidden" name="action"
-                                                                        id="action-{{ $laporan->id }}" value="">
-                                                                    <!-- Dropdown Reviewer -->
-                                                                    <div class="mb-3">
-                                                                        <label for="reviewer_id-{{ $laporan->id }}"
-                                                                            class="form-label">Pilih Reviewer</label>
-                                                                        <select name="reviewer_id[]"
-                                                                            id="reviewer_id-{{ $laporan->id }}"
-                                                                            class="form-select" multiple required>
-                                                                            <option value="" disabled selected>Pilih
-                                                                                Reviewer</option>
-                                                                            @foreach ($reviewers as $reviewer)
-                                                                                <option value="{{ $reviewer->id }}">
-                                                                                    {{ $reviewer->user->name }}</option>
-                                                                            @endforeach
+                                                                    @method('PUT')
+                                                                    <div class="form-group">
+                                                                        <label for="status">Select Status:</label>
+                                                                        <select name="status" id="status"
+                                                                            class="form-select" required>
+                                                                            <option value="approved">Diterima</option>
+                                                                            <option value="rejected">Ditolak</option>
                                                                         </select>
                                                                     </div>
-                                                                </form>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Tutup</button>
-                                                                <button type="button" class="btn btn-primary"
-                                                                    onclick="submitForm('{{ $laporan->id }}', 'kirim')">Kirim</button>
-                                                                <button type="button" class="btn btn-warning"
-                                                                    onclick="submitForm('{{ $laporan->id }}', 'kirim_ulang')">Kirim
-                                                                    Ulang</button>
+                                                                <button type="submit"
+                                                                    class="btn btn-primary">Simpan</button>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <script>
-                                                    function submitForm(usulanId, action) {
-                                                        document.getElementById('action-' + usulanId).value = action;
-                                                        document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
-                                                    }
-                                                </script>
-
-                                                <!-- Tombol Approve/Reject Usulan -->
-                                                @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved')
-                                                    <div class="col p-2">
-                                                        <button class="btn btn-primary" data-bs-toggle="modal"
-                                                            data-bs-target="#approveRejectModal{{ $laporan->id }}">
-                                                            Diterima
-                                                        </button>
-                                                    </div>
-
-                                                    <!-- Modal untuk Approve/Reject Usulan -->
-                                                    <div class="modal fade" id="approveRejectModal{{ $laporan->id }}"
-                                                        tabindex="-1"
-                                                        aria-labelledby="approveRejectModalLabel{{ $laporan->id }}"
-                                                        aria-hidden="true">
-                                                        <div class="modal-dialog modal-dialog-centered">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title"
-                                                                        id="approveRejectModalLabel{{ $laporan->id }}">
-                                                                        Diterima</h5>
-                                                                    <button type="button" class="btn-close"
-                                                                        data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form
-                                                                        action="{{ route('laporan-kemajuan.updateStatus', $laporan->id) }}"
-                                                                        method="POST">
-                                                                        @csrf
-                                                                        @method('PUT')
-                                                                        <div class="form-group">
-                                                                            <label for="status">Select Status:</label>
-                                                                            <select name="status" id="status"
-                                                                                class="form-select" required>
-                                                                                <option value="approved">Diterima</option>
-                                                                                <option value="rejected">Ditolak</option>
-                                                                            </select>
-                                                                        </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Tutup</button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary">Simpan</button>
-                                                                </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    tidak ada aksi
-                                                @endif
-
-                                            </td>
-
-                                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                                            <script>
-                                                function deleteUsulan(jenis, id) {
-                                                    Swal.fire({
-                                                        title: 'Apakah Anda yakin?',
-                                                        text: "Usulan ini akan dihapus secara permanen!",
-                                                        icon: 'warning',
-                                                        showCancelButton: true,
-                                                        confirmButtonColor: '#3085d6',
-                                                        cancelButtonColor: '#d33',
-                                                        confirmButtonText: 'Ya, hapus!',
-                                                        cancelButtonText: 'Batal'
-                                                    }).then((result) => {
-                                                        if (result.isConfirmed) {
-                                                            $.ajax({
-                                                                url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus',
-                                                                type: 'DELETE',
-                                                                data: {
-                                                                    "_token": "{{ csrf_token() }}",
-                                                                },
-                                                                success: function(response) {
-                                                                    Swal.fire('Dihapus!', response.success, 'success').then(() => {
-                                                                        location.reload();
-                                                                    });
-                                                                },
-                                                                error: function(xhr) {
-                                                                    let errorMessage = (xhr.status === 404) ?
-                                                                        xhr.responseJSON.error :
-                                                                        'Terjadi kesalahan: ' + xhr.responseJSON.error;
-                                                                    Swal.fire('Error!', errorMessage, 'error');
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            </script>
+                                            @else
+                                                tidak ada aksi
+                                            @endif
+                                        </td>
                                         @endrole
                                         </td>
                                     </tr>

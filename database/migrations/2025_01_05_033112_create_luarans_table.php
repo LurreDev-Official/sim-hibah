@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('jenis_luaran', ['wajib', 'tambahan']);
             $table->string('url')->nullable(); // Assuming url can be nullable
             $table->string('status');
+            $table->string('jenis_skema');
             $table->string('file_loa')->nullable(); // Assuming file_loa can be nullable
             $table->timestamps();
             // If you want to add a foreign key constraint

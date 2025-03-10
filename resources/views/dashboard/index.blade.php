@@ -260,7 +260,7 @@
                                                         </g>
                                                     </svg>
                                                 </span>
-                                                Aturan Penelitian
+                                                Ketentuan
                                             </button>
                                         </div>
                                     </div>
@@ -305,7 +305,8 @@
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="modalAturanLabel">Ketentuan Umum Penelitian Mono Tahun
+                                            <h5 class="modal-title" id="modalAturanLabel">Perhatikan Point Berikut
+                                                Sebelum Mengajukan Proposal
                                             </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
@@ -313,10 +314,9 @@
                                         <div class="modal-body">
                                             <h6>1. Biodata Dosen (NIDN):</h6>
                                             <ul>
-                                                dalam 1 jenis_skema
+                                                <li>Nama Lengkap dan Gelar</li>
                                                 <li>boleh menjadi ketua 1x judul usulan proposal</li>
                                                 <li>boleh anggota 1x judul usulan </li>
-                                                dan jika dibawah score 200
                                                 <li>boleh menjadi   2x menjadi anggota judul usulan proposal</li>
                                             </ul>
 
