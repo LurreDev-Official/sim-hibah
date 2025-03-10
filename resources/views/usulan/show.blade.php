@@ -96,54 +96,45 @@
                             </thead>
                             <tbody>
                                 @foreach ($anggotaDosen as $index => $dosen)
-                                    <tr>
-                                        <td>{{ $dosen->dosen->user->name }}</td>
-                                        <td>{{ $dosen->dosen->user->name }}</td>
-                                        <td>{{ $dosen->status_anggota }}</td>
-                                        <td>{{ $dosen->status }}</td>
-                                        <td>
-                                            <!-- Jika dosen ini adalah ketua, munculkan tombol hapus -->
-
-                                            @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
-                                                <form
-                                                    action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}"
-                                                    method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        @if ($usulan->status == 'draft')  @endif
-                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
-                                                </form>
-                                            @endif
-
-
-                                            <!-- Jika status dosen adalah 'pending', munculkan tombol Setuju dan Tolak -->
-                                            {{-- @if (Auth::check() && Auth::user()->dosen_id == $dosen->id) --}}
-                                                {{-- Hanya tampilkan jika pengguna yang login adalah dosen yang bersangkutan --}}
-                                                @if ($dosen->status == 'belum disetujui' && $anggotaDosencek->status_anggota == 'anggota')
-                                                    <form
-                                                        action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit"
-                                                            class="btn btn-success btn-sm">Setuju</button>
-                                                    </form>
-                                                    <form
-                                                        action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
-                                                    </form>
-                                                @endif
-                                            {{-- @endif --}}
-
-
-                                        </td>
-
-                                    </tr>
-                                @endforeach
+                                <tr>
+                                    <td>{{ $dosen->dosen->user->id }}</td>
+                                    <td>{{ $dosen->dosen->user->name }}</td>
+                                    <td>{{ $dosen->status_anggota }}</td>
+                                    <td>{{ $dosen->status }}</td>
+                                    <td>
+                                        <!-- Jika dosen ini adalah ketua, munculkan tombol hapus -->
+                                        @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                            <form action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
+                                            </form>
+                                        @endif
+                            
+                                        <!-- Jika status dosen adalah 'belum disetujui' dan pengguna yang login adalah dosen yang bersangkutan -->
+                                        @if (
+                                            $dosen->status == 'belum disetujui' &&
+                                            $dosen->status_anggota == 'anggota' &&
+                                            auth()->user()->id == $dosen->dosen->user->id
+                                        )
+                                            <!-- Tombol Setuju -->
+                                            <form action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-success btn-sm">Setuju</button>
+                                            </form>
+                            
+                                            <!-- Tombol Tolak -->
+                                            <form action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
                             </tbody>
                         </table>
 

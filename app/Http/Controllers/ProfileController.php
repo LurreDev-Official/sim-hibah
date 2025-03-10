@@ -87,8 +87,6 @@ class ProfileController extends Controller
         $user = User::findOrFail($id);
 
         // Handle the validation and updating of the user here
-        // Example for Kepala LPPM
-        if (Auth::user()->hasRole('Kepala LPPM')) {
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -103,7 +101,6 @@ class ProfileController extends Controller
             }
 
             $user->save();
-        }
         if (Auth::user()->hasRole('Dosen')) {
             // Check if Dosen exists by user_id
                 $dosen = Dosen::find($id);
