@@ -740,25 +740,42 @@ public function validasiUsulanBaru($jenis)
     $user_id = auth()->user()->id;
     $dosen = Dosen::where('user_id', $user_id)->first();
 
-    $usulanKetua = Usulan::where('ketua_dosen_id', $dosen->id)
+    $usulanKetuaPenelitian = Usulan::where('ketua_dosen_id', $dosen->id)
         ->where('tahun_pelaksanaan', Carbon::now()->year)
-        ->where('jenis_skema', $jenis)
+        ->where('jenis_skema', 'penelitian')
+        ->where('status', 'approved')
         ->count();
 
-    if ($usulanKetua >= 1) {
-        return back()->with('error', 'Anda sudah menjadi ketua di 1 usulan proposal pada tahun ini.');
+    $usulanKetuaPengabdian = Usulan::where('ketua_dosen_id', $dosen->id)
+        ->where('tahun_pelaksanaan', Carbon::now()->year)
+        ->where('jenis_skema', 'pengabdian')
+        ->where('status', 'approved')
+        ->count();
+
+    if ($usulanKetuaPenelitian + $usulanKetuaPengabdian >= 2) {
+        return back()->with('error', 'Anda sudah menjadi ketua di 2 usulan proposal pada tahun ini di');
+    }else{
+        return back()->with('error', 'Anda berkesempatan menjadi ketua di 1 usulan proposal pada tahun ini di');
     }
 
+      // Ambil semua usulan_id dari model Usulan berdasarkan tahun dan status approved
+      $usulanIds = Usulan::where('status', 'approved') // Filter berdasarkan status approved
+      ->whereYear('tahun_pelaksanaan', Carbon::now()->year)
+      ->where('status', 'approved')
+      ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
+      ->pluck('id'); // Ambil hanya kolom id
+
+    // Hitung jumlah usulan sebagai anggota dengan status approved untuk skema tertentu di tahun ini
     $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
-        ->where('status_anggota', 'anggota')
-        ->where('jenis_skema', $jenis)
-        ->whereHas('proposal', function($query) {
-            $query->whereYear('tahun_pelaksanaan', Carbon::now()->year);
-        })
+        ->whereIn('usulan_id', $usulanIds) // Filter berdasarkan usulan_id yang sudah diambil
+        ->where('status', 'approved') // Status usulan harus approved
+        ->where('status_anggota', 'anggota') // Hanya hitung sebagai anggota
+        ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
         ->count();
 
+    // Validasi: Batasi maksimal 1 usulan sebagai anggota per skema
     if ($usulanAnggota >= 1) {
-        return back()->with('error', 'Anda sudah menjadi anggota di 1 usulan proposal pada skema '.$jenis);
+        return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $jenis pada tahun ini.");
     }
 }
 
@@ -901,7 +918,7 @@ public function filterByYear(Request $request)
             return $faculty;
         });
         
-
+        
 
         // Kirim data ke view
         return view('grafik.grafik_penerima_hibah', compact('labels', 'totals', 'backgroundColors', 'tahun', 'countByFaculty'));

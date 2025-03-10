@@ -55,7 +55,7 @@ class LaporanAkhirController extends Controller
         // Check if the user has the 'Dosen' role
         if ($user->hasRole('Dosen')) {
             // Filter Usulan based on ketua_dosen_id and optionally the 'jenis' if provided
-            $laporakemajuans = LaporanAkhir::where('ketua_dosen_id', $user->dosen->id)
+            $laporakemajuans = LaporanKemajuan::where('ketua_dosen_id', $user->dosen->id)
             ->when($jenis, function($query, $jenis) {
                 return $query->where('jenis', $jenis);  // Filtering by jenis
             })
@@ -286,11 +286,10 @@ public function kirim(Request $request)
                     // ->with('info', 'Laporan kemajuan baru telah dibuat untuk usulan yang belum ada laporan kemajuannya.');
             }else{
                 // dd($usulanIds);
-                $laporakemajuans = LaporanKemajuan::with('usulan')
-                ->where('jenis', $jenis)
+                $laporakemajuans = LaporanKemajuan::with('usulan')->whereIn('usulan_id', $usulanIds)
                 ->where('status', 'approved')
+                ->where('jenis', $jenis)
                 ->get();
-                // dd($laporakemajuans);
                 // Ambil template laporan kemajuan (opsional)
                 $getTemplate = TemplateDokumen::where('skema', $jenis)->first();
                 return view('laporan_akhir.create', compact('laporakemajuans', 'jenis', 'getTemplate'));

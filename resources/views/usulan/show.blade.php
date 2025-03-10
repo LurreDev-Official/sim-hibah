@@ -45,7 +45,7 @@
                         <!--begin::Card toolbar-->
                         <div class="card-toolbar">
                             <div class="d-flex justify-content-end">
-                                <a class="btn btn-primary" href="{{ url('usulan/penelitian') }}">Kembali</a>
+                                <a class="btn btn-primary" href="{{ url('usulan/' . $jenis) }}">Kembali</a>
                             </div>
                         </div>
                         <!--end::Card toolbar-->

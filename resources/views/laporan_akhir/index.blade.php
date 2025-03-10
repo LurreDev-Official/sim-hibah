@@ -43,20 +43,20 @@
                         
                             
                             <div class="d-flex justify-content-end mb-4 p-2">
-                                <div class="d-flex justify-content-end mb-4">
-                                    @if (isset($dosen) && $usulans->isNotEmpty())
-                                        @foreach ($usulans as $usulan)
-                                            @if ($usulan->ketua_dosen_id == $dosen->id)
-                                                <a href="{{ route('laporan-akhir.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary">
-                                                    <i class="fas fa-plus"></i> Tambah Laporan Akhir
-                                                </a>
-                                                @break <!-- Hentikan loop jika kondisi terpenuhi -->
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                </div>
-                                
-                                <a href="{{ url('laporan-akhir/export/' . $jenis) }}" class="btn btn-success ml-2">
+                                <!-- Tombol Tambah Laporan Akhir -->
+                                @if (isset($dosen) && $usulans->isNotEmpty())
+                                    @foreach ($usulans as $usulan)
+                                        @if ($usulan->ketua_dosen_id == $dosen->id)
+                                            <a href="{{ route('laporan-akhir.create', ['jenis' => 'penelitian']) }}" class="btn btn-primary me-2">
+                                                <i class="fas fa-plus"></i> Tambah Laporan Akhir
+                                            </a>
+                                            @break <!-- Hentikan loop jika kondisi terpenuhi -->
+                                        @endif
+                                    @endforeach
+                                @endif
+                            
+                                <!-- Tombol Export Data -->
+                                <a href="{{ url('laporan-akhir/export/' . $jenis) }}" class="btn btn-success">
                                     <i class="fa fa-download"></i> Export Data
                                 </a>
                             </div>
@@ -340,9 +340,9 @@
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
+                                                                        data-bs-dismiss="modal">Tutup</button>
                                                                     <button type="submit"
-                                                                        class="btn btn-primary">Submit</button>
+                                                                        class="btn btn-primary">Simpan</button>
                                                                 </div>
                                                                 </form>
                                                             </div>
