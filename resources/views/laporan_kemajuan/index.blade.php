@@ -91,7 +91,9 @@
                                             $anggotaDosencek = \App\Models\AnggotaDosen::where(
                                                 'dosen_id',
                                                 $dosen->id,
-                                            )->first();
+                                            )
+                                            ->where('usulan_id', $laporan->usulan_id)
+                                            ->first();
                                         }
                                     @endphp
 
@@ -203,7 +205,7 @@
 
 
                                                 <!-- Tombol Perbaiki Revisi -->
-                                                @if ($laporan->status == 'revision')
+                                                @if ($laporan->status == 'revision' &&  $anggotaDosencek->status_anggota == 'ketua')
                                                     <div class="d-flex justify-content-end mt-4">
                                                         <a href="{{ route('laporan-kemajuan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $laporan->id]) }}"
                                                             class="btn btn-secondary">

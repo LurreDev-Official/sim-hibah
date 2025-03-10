@@ -50,8 +50,8 @@ class LuaranController extends Controller
     // Jenis-jenis luaran yang wajib
     $jenisLuarans = [
         'Laporan akhir',
-        'Artikel ilmiah di jurnal terakreditasi minimal',
-        'Artikel ilmiah di prosiding SAINSTEKNOPAK'
+        'Artikel ilmiah',
+        'Prosiding'
     ];
 
     // Filter jenisLuarans yang belum ada di database
@@ -78,7 +78,7 @@ class LuaranController extends Controller
             }
 
             // Jika jenis luaran adalah 'Artikel ilmiah di jurnal terakreditasi minimal'
-            if ($jenisLuaran == 'Artikel ilmiah di jurnal terakreditasi minimal') {
+            if ($jenisLuaran == 'Artikel ilmiah') {
                 if ($usulan->jenis_skema == 'penelitian') {
                     $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 4';
                 } else {
@@ -89,8 +89,8 @@ class LuaranController extends Controller
             }
 
             // Jika jenis luaran adalah 'Artikel ilmiah di prosiding SAINSTEKNOPAK'
-            if ($jenisLuaran == 'Artikel ilmiah di prosiding SAINSTEKNOPAK') {
-                $judul = 'Artikel ilmiah di prosiding SAINSTEKNOPAK';
+            if ($jenisLuaran == 'Prosiding') {
+                $judul = 'Artikel ilmiah di prosiding SAINSTEKNOPA Sinta 5';
                 $status = 'Belum terpenuhi';
                 $url = '';
             }
@@ -102,7 +102,7 @@ class LuaranController extends Controller
                 'usulan_id' => $usulan->id, // Menghubungkan dengan usulan
                 'jenis_luaran' => 'wajib', // Nilai default
                 'judul' => $judul, // Judul yang telah ditentukan
-                'type' => $jenisLuaran . $usulan->jenis_skema, // Jenis luaran yang hilang
+                'type' => $jenisLuaran, // Jenis luaran yang hilang
                 'url' => $url, // URL yang telah diisi
                 'status' => $status, // Status default
                 'file_loa' => 0, // Nilai default

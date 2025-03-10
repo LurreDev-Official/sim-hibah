@@ -38,29 +38,18 @@ class AnggotaDosenController extends Controller
         ]);
 
         $usulanAnggota = AnggotaDosen::where('dosen_id', $request->dosen_id)
-        ->whereIn('usulan_id', $usulan_id) // Filter berdasarkan usulan_id yang sudah diambil
-        ->where('status', 'approved') // Status usulan harus approved
+        ->where('status', 'terima') // Status usulan harus approved
         ->where('status_anggota', 'anggota') // Hanya hitung sebagai anggota
-        ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
+        ->where('jenis_skema', $request->jenis) // Filter berdasarkan jenis skema
         ->count();
 
+        // dd($usulanAnggota);
+
         // Validasi: Batasi maksimal 1 usulan sebagai anggota per skema
-        if ($usulanAnggota >= 1) {
-            return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $jenis pada tahun ini.");
-        }
-
-        // Cek apakah dosen sudah terdaftar sebagai anggota
-                                $count = AnggotaDosen::
-                                where('dosen_id', $request->dosen_id)
-                                ->where('usulan_id', $usulan_id)
-                                ->where('jenis_skema', $request->jenis)
-                                ->count();
-
-                                if ($count >= 1) {
-                                    return redirect()->back()->with('error', 'Dosen hanya memiliki 1 kuota sebagai anggota.');
-                                }
-
-        // Simpan data ke dalam database
+        if ($usulanAnggota ==1) {
+            return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $request->jenis pada tahun ini.");
+        }else{
+            // Simpan data ke dalam database
         AnggotaDosen::create([
             'usulan_id' => $request->usulan_id,
             'jenis_skema' => $request->jenis,
@@ -69,8 +58,22 @@ class AnggotaDosenController extends Controller
             'status' => 'belum disetujui',
         ]);
 
-        // Redirect kembali dengan pesan sukses
         return redirect()->back()->with('success', 'Data dosen berhasil ditambahkan');
+
+        }
+
+        // // Cek apakah dosen sudah terdaftar sebagai anggota
+        //                         $count = AnggotaDosen::
+        //                        where('usulan_id',  $request->usulan_id)->
+        //                         where('dosen_id', $request->dosen_id)
+        //                         ->where('usulan_id',  $request->usulan_id)
+        //                         ->where('jenis_skema', $request->jenis)
+        //                         ->count();
+
+        //                         if ($count >= 1) {
+        //                             return redirect()->back()->with('error', 'Dosen hanya memiliki 1 kuota sebagai anggota.');
+        //                         }
+        // // Redirect kembali dengan pesan sukses
     }
 
     

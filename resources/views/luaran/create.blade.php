@@ -66,7 +66,10 @@
                                         $anggotaDosencek = \App\Models\AnggotaDosen::where(
                                             'dosen_id',
                                             $dosen->id,
-                                        )->first();
+                                        
+                                        )
+                                        ->where('usulan_id', $laporan->usulan_id)
+                                        ->first();
                                     }
                                 @endphp
                                 
