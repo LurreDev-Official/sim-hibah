@@ -1,7 +1,12 @@
 @extends('layouts.main_layout')
-<!-- Sertakan Bootstrap CSS dari CDN -->
-<!-- Sertakan Select2 CSS -->
+<!-- Include Select2 CSS for Bootstrap 3 -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<!-- Include jQuery (required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 
 <!-- Sertakan Select2 Bootstrap Theme CSS -->
@@ -76,7 +81,9 @@
                         @endphp
 
                         @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
-                            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalTambahDosen"
+                             <p id="anggotaCountMessage" class="text-danger"></p>
+
+                            <button class="btn btn-success mb-3" data-bs-toggle="modal" id="tambahanggotadosen" data-bs-target="#modalTambahDosen"
                                 @if ($usulan->status === 'submitted') disabled @endif>Tambah Anggota Dosen</button>
                         @endif
 
@@ -96,45 +103,50 @@
                             </thead>
                             <tbody>
                                 @foreach ($anggotaDosen as $index => $dosen)
-                                <tr>
-                                    <td>{{ $dosen->dosen->user->id }}</td>
-                                    <td>{{ $dosen->dosen->user->name }}</td>
-                                    <td>{{ $dosen->status_anggota }}</td>
-                                    <td>{{ $dosen->status }}</td>
-                                    <td>
-                                        <!-- Jika dosen ini adalah ketua, munculkan tombol hapus -->
-                                        @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
-                                            <form action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
-                                            </form>
-                                        @endif
-                            
-                                        <!-- Jika status dosen adalah 'belum disetujui' dan pengguna yang login adalah dosen yang bersangkutan -->
-                                        @if (
-                                            $dosen->status == 'belum disetujui' &&
-                                            $dosen->status_anggota == 'anggota' &&
-                                            auth()->user()->id == $dosen->dosen->user->id
-                                        )
-                                            <!-- Tombol Setuju -->
-                                            <form action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-success btn-sm">Setuju</button>
-                                            </form>
-                            
-                                            <!-- Tombol Tolak -->
-                                            <form action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
+                                    <tr>
+                                        <td>{{ $dosen->dosen->user->id }}</td>
+                                        <td>{{ $dosen->dosen->user->name }}</td>
+                                        <td>{{ $dosen->status_anggota }}</td>
+                                        <td>{{ $dosen->status }}</td>
+                                        <td>
+                                            <!-- Jika dosen ini adalah ketua, munculkan tombol hapus -->
+                                            @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                                <form
+                                                    action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}"
+                                                    method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
+                                                </form>
+                                            @endif
+
+                                            <!-- Jika status dosen adalah 'belum disetujui' dan pengguna yang login adalah dosen yang bersangkutan -->
+                                            @if (
+                                                $dosen->status == 'belum disetujui' &&
+                                                    $dosen->status_anggota == 'anggota' &&
+                                                    auth()->user()->id == $dosen->dosen->user->id)
+                                                <!-- Tombol Setuju -->
+                                                <form
+                                                    action="{{ route('anggota-dosen.approve', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
+                                                    method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-success btn-sm">Setuju</button>
+                                                </form>
+
+                                                <!-- Tombol Tolak -->
+                                                <form
+                                                    action="{{ route('anggota-dosen.reject', ['usulan_id' => $usulan->id, 'anggota_dosen' => $dosen->id]) }}"
+                                                    method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-warning btn-sm">Tolak</button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
 
@@ -143,6 +155,7 @@
                             aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
+                                    <!-- Message if there are less than 6 members -->
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="modalTambahDosenLabel">Tambah Anggota Dosen</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -159,7 +172,7 @@
                                                 <label class="col-lg-4 fw-bold">Pilih Dosen:</label>
                                                 <div class="col-lg-8">
                                                     <!-- Dropdown Select2 -->
-                                                    <select class="form-control select2" name="dosen_id">
+                                                    <select class="form-control select2" name="dosen_id" id="select_dosen">
                                                         <option value="" disabled selected>Pilih Dosen</option>
                                                         @foreach ($dosens as $dosen)
                                                             <option value="{{ $dosen->id }}">
@@ -168,13 +181,15 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                            
                                         </div>
 
                                         <!-- Tombol di bagian bawah modal -->
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Tutup</button>
-                                            <button type="submit" class="btn btn-primary">Tambah Anggota Dosen</button>
+                                                <button type="submit" class="btn btn-primary">Tambah Anggota Dosen</button>
+
                                         </div>
                                     </form>
                                 </div>
@@ -254,18 +269,21 @@
                                                     // Data array Fakultas dan Prodi terkait
                                                     const fakultasProdi = {
                                                         "Fakultas Agama Islam": [
-                                                            "S1 Hukum Keluarga",
-                                                            "S1 Hukum Ekonomi Syari'ah",
-                                                            "S1 Manajemen Pendidikan Islam",
-                                                            "S1 Komunikasi dan Penyiaran Islam",
                                                             "S1 Pendidikan Agama Islam",
+                                                            "S1 Hukum Keluarga",
+                                                            "S1 Pendidikan Guru MI",
+                                                            "S1 Hukum Ekonomi Syariah",
+                                                            "S1 Komunikasi & Penyiaran Islam",
                                                             "S1 Pendidikan Bahasa Arab",
-                                                            "S1 Pendidikan Guru MI"
+                                                            "S1 Manajemen Pendidikan Islam",
+                                                            "S2 Hukum Keluarga",
+                                                            "S2 Pendidikan Agama Islam",
+                                                            "S2 Pendidikan Bahasa Arab"
                                                         ],
                                                         "Fakultas Teknik": [
                                                             "S1 Teknik Mesin",
-                                                            "S1 Teknik Elektro",
                                                             "S1 Teknik Sipil",
+                                                            "S1 Teknik Elektro",
                                                             "S1 Teknik Industri"
                                                         ],
                                                         "Fakultas Teknologi Informasi": [
@@ -276,16 +294,17 @@
                                                         "Fakultas Ekonomi": [
                                                             "S1 Manajemen",
                                                             "S1 Akuntansi",
-                                                            "S1 Akuntansi"
+                                                            "S1 Ekonomi Islam"
                                                         ],
                                                         "Fakultas Ilmu Pendidikan": [
-                                                            "S1 Pendidikan Guru Sekolah Dasar",
-                                                            "S1 Pendidikan Bahasa dan Sastra Indonesia",
+                                                            "S1 Pendidikan Guru SD",
+                                                            "S1 Pendidikan Bahasa & Sastra Indonesia",
                                                             "S1 Pendidikan Bahasa Inggris",
                                                             "S1 Pendidikan IPA",
                                                             "S1 Pendidikan Matematika"
                                                         ]
                                                     };
+
 
                                                     // Mengambil fakultas dan prodi yang sudah dipilih jika ada
                                                     const selectedFakultas = "{{ old('fakultas', $dosen->fakultas ?? '') }}";
@@ -410,7 +429,8 @@
                                             document.getElementById('submitUsulanForm_{{ $usulan->id }}').submit();
                                         }
                                     });
-                                ">
+                                "
+                                    >
                                     <i class="fas fa-paper-plane"></i> Ajukan
                                 </button>
                             </div>
@@ -429,15 +449,94 @@
 
 @endsection
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-<!-- Inisialisasi Select2 -->
-<script>
+{{-- <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            theme: 'bootstrap4', // Menggunakan tema Bootstrap 4
+        // Initialize Select2 for the Dosen dropdown with search functionality
+        $('.select').select2({
+            theme: 'bootstrap5', // Optional: Use Bootstrap 5 theme
             placeholder: "Pilih Dosen",
             allowClear: true
+        });
+    });
+</script> --}}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the number of members in your faculty
+        const anggotaDosenCount = {{ count($anggotaDosen) }}; // Get the number of members from PHP
+
+        // Log the number of faculty members to the console
+        console.log('Jumlah anggota dosen: ', anggotaDosenCount);
+
+        // The button elements
+        const ajukanButton = document.getElementById('submitUsulanButton_{{ $usulan->id }}'); // Ajukan button
+        const anggotaCountMessage = document.getElementById('anggotaCountMessage'); // Message element for less than 6 members
+        const tambahanggotadosen = document.getElementById('tambahanggotadosen'); // Message element for less than 6 members
+        
+        if (anggotaDosenCount >= 7) {
+            // Enable both buttons if there are 6 or more members
+            tambahanggotadosen.disabled = true;
+        }
+
+        // Check if the number of members is less than 6
+        if (anggotaDosenCount >= 6) {
+            // Enable both buttons if there are 6 or more members
+            ajukanButton.disabled = false;
+        } else {
+            // Disable both buttons and show the message if there are fewer than 6 members
+            ajukanButton.disabled = true;
+            anggotaCountMessage.textContent = 'Jumlah anggota dosen kurang dari 6. Mohon tambah lebih banyak anggota.';
+        }
+    });
+</script>
+<!-- Tambahkan Library Select2 di bagian head atau sebelum closing body -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Inisialisasi Select2 pada dropdown dosen
+        $('#select_dosen').select2({
+            placeholder: "Pilih Dosen",
+            allowClear: true,
+            width: '100%',
+            // Customisasi tampilan dropdown
+            templateResult: formatDosen,
+            templateSelection: formatDosenSelection
+        });
+        
+        // Fungsi untuk format tampilan dalam dropdown
+        function formatDosen(dosen) {
+            if (!dosen.id) {
+                return dosen.text;
+            }
+            
+            // Membuat tampilan custom dengan icon dan informasi tambahan
+            var $dosen = $(
+                '<div class="d-flex align-items-center">' +
+                    '<div class="symbol symbol-30px me-3">' +
+                        '<div class="symbol-label bg-light-primary">' +
+                            '<i class="ki-duotone ki-profile-circle fs-2x text-primary"></i>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="d-flex flex-column">' +
+                        '<span class="fw-bolder">' + dosen.text + '</span>' +
+                    '</div>' +
+                '</div>'
+            );
+            
+            return $dosen;
+        }
+        
+        // Fungsi untuk format tampilan setelah item dipilih
+        function formatDosenSelection(dosen) {
+            return dosen.text || dosen.id;
+        }
+        
+        // Tambahkan pencarian
+        $('#select_dosen').on('select2:open', function() {
+            document.querySelector('.select2-search__field').focus();
         });
     });
 </script>

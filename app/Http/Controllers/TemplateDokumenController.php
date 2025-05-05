@@ -1,114 +1,117 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\TemplateDokumen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TemplateDokumenController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $templates = TemplateDokumen::all();
         return view('template_dokumen.index', compact('templates'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('template_dokumen.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'proses' => 'required|string|max:255', // Updated field name
-            'skema' => 'required|string|max:255', // Updated field name
+            'proses' => 'required|string|max:255',
+            'skema' => 'required|string|max:255',
             'file' => 'required|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        // Handling file upload
-        $filePath = $request->file('file')->store('templates', 'public');
+        $file = $request->file('file');
 
-        // Creating the new TemplateDokumen
+        // Ganti karakter non-alfanumerik agar aman sebagai nama file
+        $cleanName = preg_replace('/[^A-Za-z0-9\-]/', '_', $request->nama);
+        $filename = $cleanName . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+        $filePath = $file->storeAs('templates', $filename, 'public');
+
         TemplateDokumen::create([
             'nama' => $request->nama,
-            'proses' => $request->proses, // Using the correct field
-            'skema' => $request->skema,   // Using the correct field
+            'proses' => $request->proses,
+            'skema' => $request->skema,
             'file' => $filePath,
         ]);
 
         return redirect()->route('template-dokumen.index')->with('success', 'Template Dokumen berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(TemplateDokumen $templateDokumen)
     {
         return view('template_dokumen.show', compact('templateDokumen'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(TemplateDokumen $templateDokumen)
     {
         return view('template_dokumen.edit', compact('templateDokumen'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, TemplateDokumen $templateDokumen)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'proses' => 'required|string|max:255', // Updated field name
-            'skema' => 'required|string|max:255', // Updated field name
+            'proses' => 'required|string|max:255',
+            'skema' => 'required|string|max:255',
             'file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        // Handling file update
+        // Cek duplikat berdasarkan kombinasi unik
+        $duplicate = TemplateDokumen::where('nama', $request->nama)
+            ->where('proses', $request->proses)
+            ->where('skema', $request->skema)
+            ->where('id', '!=', $templateDokumen->id)
+            ->exists();
+
+        if ($duplicate) {
+            throw ValidationException::withMessages([
+                'nama' => 'Data dengan kombinasi nama, proses, dan skema ini sudah ada.',
+            ]);
+        }
+
         if ($request->hasFile('file')) {
-            // Delete old file if exists (optional but recommended for clean-up)
             if ($templateDokumen->file && file_exists(storage_path('app/public/' . $templateDokumen->file))) {
                 unlink(storage_path('app/public/' . $templateDokumen->file));
             }
 
-            // Store the new file
-            $filePath = $request->file('file')->store('templates', 'public');
+            $file = $request->file('file');
+            $cleanName = preg_replace('/[^A-Za-z0-9\-]/', '_', $request->nama);
+            $filename = $cleanName . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('templates', $filename, 'public');
             $templateDokumen->file = $filePath;
         }
 
-        // Update the rest of the fields
         $templateDokumen->nama = $request->nama;
-        $templateDokumen->proses = $request->proses; // Correct field
-        $templateDokumen->skema = $request->skema;   // Correct field
+        $templateDokumen->proses = $request->proses;
+        $templateDokumen->skema = $request->skema;
         $templateDokumen->save();
 
         return redirect()->route('template-dokumen.index')->with('success', 'Template Dokumen berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        // Delete file before removing record
-        // if ($templateDokumen->file && file_exists(storage_path('app/public/' . $templateDokumen->file))) {
-        //     unlink(storage_path('app/public/' . $templateDokumen->file));
-        // }
         $templateDokumen = TemplateDokumen::findOrFail($id);
+
+        // Hapus file dari storage
+        if ($templateDokumen->file && file_exists(storage_path('app/public/' . $templateDokumen->file))) {
+            unlink(storage_path('app/public/' . $templateDokumen->file));
+        }
+
         $templateDokumen->delete();
+
         return redirect()->route('template-dokumen.index')->with('success', 'Template Dokumen berhasil dihapus.');
     }
 }

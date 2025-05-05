@@ -418,11 +418,11 @@ public function getCabangIlmu(Request $request)
         $currentDosen = Dosen::where('user_id', auth()->id())->first();
 
         // Ambil semua dosen kecuali yang sedang login
-        $dosens = Dosen::where('id', '!=', $currentDosen->id)->get();
+        $dosens = Dosen::where('id', '!=', $currentDosen->id)->where('kuota_proposal','!=',0)->get();
 
 
         // Ambil data anggota dosen dan mahasiswa berdasarkan usulan
-        $anggotaDosen = AnggotaDosen::where('usulan_id', $id)->with('dosen.user')->get();
+        $anggotaDosen = AnggotaDosen::where('usulan_id', $id)->where('jenis_skema', $usulan->jenis_skema)->with('dosen.user')->get();
         $anggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->get();
 
         return view('usulan.show', compact('usulan', 'jenis','dosens', 'anggotaDosen', 'anggotaMahasiswa', 'currentDosen'));

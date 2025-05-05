@@ -138,7 +138,7 @@ class AnggotaDosenController extends Controller
     }
 
 
-    public function approve($usulan_id, $anggota_dosen_id)
+    public function approves($usulan_id, $anggota_dosen_id)
 {
     // Temukan anggota dosen berdasarkan usulan_id dan id anggota_dosen
     $anggotaDosen = AnggotaDosen::where('usulan_id', $usulan_id)
@@ -146,11 +146,83 @@ class AnggotaDosenController extends Controller
                                 ->firstOrFail();
 
     // Update status menjadi 'setuju'
-    $anggotaDosen->status = 'terima';
-    $anggotaDosen->save();
 
+    //hitung AggotaDosen pernah jadi ketua jika pernah maka kesempatan jadi anggota 1 kali
+    $hitungketua = AnggotaDosen::where('dosen_id', $anggotaDosen->dosen_id)
+        ->where('status_anggota', 'ketua')
+        ->where('status', 'terima')
+        ->count();
+
+        $hitungjumlahstatusanggota = AnggotaDosen::where('dosen_id', $anggotaDosen->dosen_id)
+        ->where('status_anggota', 'ketua')
+        ->where('status', 'terima')
+        ->count();
+    // Jika sudah pernah jadi ketua maka kesempatan jadi anggota 1 kali
+    if ($ketua > 0) {
+        $anggotaDosen->status = 'terima';
+        $anggotaDosen->save();
+        return redirect()->back()->with('success', 'Anggota dosen berhasil disetujui.');
+    } else {
+        $anggotaDosen->status_anggota = 'ketua';
+    }
+    // Update status menjadi 'terima'
+   
+}
+
+public function approve($usulan_id, $anggota_dosen_id)
+{
+    //ambil jenis skema dari usulan_id
+    $usulan = Usulan::find($usulan_id);
+    $jenis_skema = $usulan->jenis_skema;
+    // Temukan anggota dosen berdasarkan usulan_id dan id anggota_dosen
+    $anggotaDosen = AnggotaDosen::where('usulan_id', $usulan_id)
+                                ->where('id', $anggota_dosen_id)
+                                ->where('jenis_skema', $jenis_skema)
+                                ->firstOrFail();
+    
+    // Ambil data dosen
+    $dosen = Dosen::find($anggotaDosen->dosen_id);
+    
+    // Cek apakah kuota masih tersedia
+    if ($dosen->kuota_proposal <= 0) {
+        return redirect()->back()->with('error', 'Kuota proposal dosen sudah habis.');
+    }
+
+    // Hitung berapa kali dosen pernah jadi ketua
+    $hitungKetua = AnggotaDosen::where('dosen_id', $anggotaDosen->dosen_id)
+        ->where('status_anggota', 'ketua')
+        ->where('jenis_skema', $jenis_skema)
+        ->where('status', 'terima')
+        ->count();
+    
+    // Hitung berapa kali dosen sudah jadi anggota
+    $hitungAnggota = AnggotaDosen::where('dosen_id', $anggotaDosen->dosen_id)
+        ->where('status_anggota', 'anggota')
+        ->where('jenis_skema', $jenis_skema)
+        ->where('status', 'terima')
+        ->count();
+    
+    // Tentukan status berdasarkan ketentuan
+    if ($anggotaDosen->status_anggota == 'anggota') {
+        // Jika posisinya adalah anggota
+        if ($hitungKetua > 0 && $hitungAnggota < 1) {
+            // Jika pernah jadi ketua dan belum pernah jadi anggota (batas 1 kali)
+            $anggotaDosen->status = 'terima';
+        } else if ($hitungKetua == 0 && $hitungAnggota < 2) {
+            // Jika belum pernah jadi ketua dan belum jadi anggota 2 kali (batas 2 kali)
+            $anggotaDosen->status = 'terima';
+        } else {
+            // Jika sudah melebihi batas
+            return redirect()->back()->with('error', 'Dosen sudah mencapai batas maksimum keterlibatan dalam skema ini. silahkan ditolak');
+        }
+    }
+    // Simpan perubahan
+    $anggotaDosen->save();
     return redirect()->back()->with('success', 'Anggota dosen berhasil disetujui.');
 }
+
+
+
 
 public function reject($usulan_id, $anggota_dosen_id)
 {
