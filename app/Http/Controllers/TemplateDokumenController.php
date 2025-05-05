@@ -101,13 +101,13 @@ class TemplateDokumenController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TemplateDokumen $templateDokumen)
+    public function destroy($id)
     {
         // Delete file before removing record
-        if ($templateDokumen->file && file_exists(storage_path('app/public/' . $templateDokumen->file))) {
-            unlink(storage_path('app/public/' . $templateDokumen->file));
-        }
-
+        // if ($templateDokumen->file && file_exists(storage_path('app/public/' . $templateDokumen->file))) {
+        //     unlink(storage_path('app/public/' . $templateDokumen->file));
+        // }
+        $templateDokumen = TemplateDokumen::findOrFail($id);
         $templateDokumen->delete();
         return redirect()->route('template-dokumen.index')->with('success', 'Template Dokumen berhasil dihapus.');
     }

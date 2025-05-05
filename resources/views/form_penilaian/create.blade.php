@@ -116,35 +116,36 @@
                                                 $currentKriteria = null;
                                             @endphp
                                 
-                                            @foreach ($indikatorPenilaians as $indikator)
-                                                @if ($currentKriteria !== $indikator->kriteriaPenilaian->nama)
-                                                    @php
-                                                        $currentKriteria = $indikator->kriteriaPenilaian->nama;
-                                                    @endphp
-                                                    <!-- Group Header Row for Kriteria -->
-                                                    <tr>
-                                                        <td colspan="4" class="bg-light font-weight-bold text-uppercase text-center">{{ $currentKriteria }}</td>
-                                                    </tr>
-                                                @endif
-                                
-                                                <!-- Display Nama Indikator, Jumlah Bobot, and Catatan -->
-                                                <tr>
-                                                    <td></td>
-                                                    <td>{{ $indikator->nama_indikator }}</td>
-                                                    <td>
-                                                        <select name="indikator[{{ $indikator->id }}][nilai]" class="form-control bobot-selector" required>
-                                                            <option value="1" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 1 ? 'selected' : '' }}>1</option>
-                                                            <option value="2" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 2 ? 'selected' : '' }}>2</option>
-                                                            <option value="3" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 3 ? 'selected' : '' }}>3</option>
-                                                            <option value="4" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 4 ? 'selected' : '' }}>4</option>
-                                                            <option value="5" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 5 ? 'selected' : '' }}>5</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <textarea name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" style="height: 200px;" required>{{ old('indikator.' . $indikator->id . '.catatan', '') }}</textarea>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+                                @foreach ($indikatorPenilaians as $indikator)
+                                @if ($currentKriteria !== $indikator->kriteriaPenilaian->nama)
+                                    @php
+                                        $currentKriteria = $indikator->kriteriaPenilaian->nama;
+                                    @endphp
+                                    <!-- Group Header Row for Kriteria -->
+                                    <tr>
+                                        <td colspan="4" class="bg-light font-weight-bold text-uppercase text-center">{{ $currentKriteria }}</td>
+                                    </tr>
+                                @endif
+                            
+                                <!-- Display Nama Indikator, Jumlah Bobot, and Catatan -->
+                                <tr>
+                                    <td></td>
+                                    <td>{{ $indikator->nama_indikator }}</td>
+                                    <td>
+                                        <select name="indikator[{{ $indikator->id }}][nilai]" class="form-control bobot-selector" required>
+                                            <option value="1" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 1 ? 'selected' : '' }}>1</option>
+                                            <option value="2" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 2 ? 'selected' : '' }}>2</option>
+                                            <option value="3" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 3 ? 'selected' : '' }}>3</option>
+                                            <option value="4" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 4 ? 'selected' : '' }}>4</option>
+                                            <option value="5" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 5 ? 'selected' : '' }}>5</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <textarea name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" style="height: 200px;" required>{{ old('indikator.' . $indikator->id . '.catatan', '') }}</textarea>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            
                                             </tbody>
                                         </table>
                                     

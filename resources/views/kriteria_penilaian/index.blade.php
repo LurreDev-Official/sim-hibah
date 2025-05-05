@@ -26,7 +26,8 @@
                         <div class="card-title">
                             <div class="d-flex align-items-center position-relative my-1">
                                 <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none">
                                         <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2"
                                             rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
                                         <path
@@ -43,6 +44,54 @@
                                 data-bs-target="#createModal">
                                 Tambah Kriteria
                             </button>
+                            <!-- Create Modal -->
+                            <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Tambah Kriteria Penilaian</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('kriteria-penilaian.store') }}" method="POST">
+                                                @csrf
+
+                                                <div class="mb-3">
+                                                    <label for="nama" class="form-label">Nama Kriteria</label>
+                                                    <input type="text" class="form-control" name="nama" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="jenis" class="form-label">Jenis</label>
+                                                    <select name="jenis" class="form-select" required>
+                                                        <option value="">-- Pilih Jenis --</option>
+                                                        <option value="penelitian">Penelitian</option>
+                                                        <option value="pengabdian">Pengabdian</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="proses" class="form-label">Proses</label>
+                                                    <select name="proses" class="form-select" required>
+                                                        <option value="">-- Pilih Proses --</option>
+                                                        <option value="Usulan">Usulan</option>
+                                                        <option value="Laporan Kemajuan">Laporan Kemajuan</option>
+                                                        <option value="Laporan Akhir">Laporan Akhir</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="text-end">
+                                                    <button type="button" class="btn btn-light"
+                                                        data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- End Create Modal -->
                         </div>
                     </div>
                     <!--end::Card header-->
@@ -153,8 +202,10 @@
                 processing: true,
                 paging: true,
                 searching: true,
-                columnDefs: [
-                    { targets: 4, orderable: false } // Disable ordering for Actions column
+                columnDefs: [{
+                        targets: 4,
+                        orderable: false
+                    } // Disable ordering for Actions column
                 ]
             });
         });
@@ -199,7 +250,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
     <script>
         var xin_table = $('#table-kriteria').DataTable({
             searchable: true,

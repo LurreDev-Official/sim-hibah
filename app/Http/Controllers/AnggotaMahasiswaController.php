@@ -84,6 +84,38 @@ class AnggotaMahasiswaController extends Controller
      */
     public function destroy($id)
     {
+        try {
+            $anggotaMahasiswa = AnggotaMahasiswa::findOrFail($id);
+            
+            // Pemeriksaan otorisasi
+            $usulan = $anggotaMahasiswa->usulan;
+            $anggotaDosencek = Auth::user()->anggotaDosen;
+    
+            // Validasi sebelum menghapus
+            if (
+                $anggotaDosencek->status_anggota === 'ketua' && 
+                $usulan->status === 'draft'
+            ) {
+                $anggotaMahasiswa->delete();
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Anggota mahasiswa berhasil dihapus.'
+                ]);
+            }
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menghapus anggota.'
+            ], 403);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+        
         // Cari data anggota mahasiswa berdasarkan id
         $anggotaMahasiswa = AnggotaMahasiswa::findOrFail($id);
     

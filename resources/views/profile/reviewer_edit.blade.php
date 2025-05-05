@@ -34,6 +34,22 @@
                             @csrf
                             @method('PUT')
                             <div class="card-body border-top p-9">
+
+                                <!-- Name -->
+                                <div class="row mb-6">
+                                    <label class="col-lg-4 col-form-label required fw-bold fs-6">Nama</label>
+                                    <div class="col-lg-8 fv-row">
+                                        <input id="name" type="text"
+                                            class="form-control form-control-lg form-control-solid @error('name') is-invalid @enderror"
+                                            name="name" value="{{ old('name', $reviewer->name) }}"
+                                            placeholder="Masukkan Nama Lengkap" required>
+                                        @error('name')
+                                            <span class="invalid-feedback"
+                                                role="alert"><strong>{{ $message }}</strong></span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                
                                 <!-- NIDN -->
                                 <div class="row mb-6">
                                     <label class="col-lg-4 col-form-label required fw-bold fs-6">NIDN</label>

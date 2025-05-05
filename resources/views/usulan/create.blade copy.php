@@ -59,12 +59,12 @@
                         <!--begin::Form-->
                         @if ($getTemplate == null)
                             <div class="alert alert-danger">
-                                <strong>Whoops!</strong> Template usulan {{ $jenis }} belum tersedia.<br><br>
+                                <strong>Whoops!</strong> Template usulan penelitian belum tersedia.<br><br>
                             </div>
                         @else
                             <div class="alert alert-info">
-                                <h3 class="text-center">Template Usulan {{$jenis}}</h3>
-                                <strong>Info!</strong> Silahkan download template usulan {{$jenis}} <a
+                                <h3 class="text-center">Template Usulan Penelitian</h3>
+                                <strong>Info!</strong> Silahkan download template usulan penelitian <a
                                     href="{{ asset('storage/' . $getTemplate->file) }}" class="btn btn-success btn-sm"
                                     download>disini</a>.
                             </div>
@@ -127,7 +127,7 @@
                                             @foreach ($rumpunIlmu as $rumpun)
                                                 <option value="{{ $rumpun['id'] }}"
                                                     {{ old('rumpun_ilmu') == $rumpun['id'] ? 'selected' : '' }}>
-                                                    {{ $rumpun['nama_rumpun_ilmu'] }} 
+                                                    {{ $rumpun['nama_rumpun_ilmu'] }}/var/www/edwin/srikandi/resources/views/template_dokumen
                                                 </option>
                                             @endforeach
                                         </select>
@@ -136,7 +136,6 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <!-- Bidang Fokus = cabang ilmu-->
                                 <!-- Bidang Fokus = cabang ilmu-->
                                 <div class="col-xs-12 col-sm-12 col-md-12 mb-4">
                                     <div class="form-group">
@@ -149,20 +148,9 @@
                                         @enderror
                                     </div>
                                 </div>
-                                
-                                <!-- Tambahkan Library Select2 -->
-                                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
                                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                                <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-                                
                                 <script>
                                     $(document).ready(function () {
-                                        // Inisialisasi Select2 pada dropdown Cabang Ilmu
-                                        $('#cabang_ilmu').select2({
-                                            placeholder: "Pilih Pohon Ilmu", // Placeholder untuk dropdown
-                                            allowClear: true // Memungkinkan pengguna menghapus pilihan
-                                        });
-                                
                                         // Ketika dropdown Rumpun Ilmu berubah
                                         $('#rumpun_ilmu').on('change', function () {
                                             var rumpunId = $(this).val(); // Ambil nilai ID Rumpun Ilmu yang dipilih
@@ -182,9 +170,6 @@
                                                         $.each(response, function (key, value) {
                                                             $('#cabang_ilmu').append('<option value="' + value.nama_cabang + '">' + value.nama_cabang + '</option>');
                                                         });
-                                
-                                                        // Re-inisialisasi Select2 setelah menambahkan opsi baru
-                                                        $('#cabang_ilmu').trigger('change'); // Penting agar Select2 memperbarui tampilan
                                                     },
                                                     error: function (xhr, status, error) {
                                                         console.error('Error fetching cabang ilmu:', error);
@@ -194,12 +179,10 @@
                                                 // Jika tidak ada Rumpun Ilmu yang dipilih, kosongkan dropdown Cabang Ilmu
                                                 $('#cabang_ilmu').empty();
                                                 $('#cabang_ilmu').append('<option value="" disabled selected>Pilih Pohon Ilmu</option>');
-                                                $('#cabang_ilmu').trigger('change'); // Perbarui Select2
                                             }
                                         });
                                     });
                                 </script>
-                                <!-- Tema Penelitian -->
                                 <!-- Tema Penelitian -->
 
                                 <input type="text" value="-" name="tema_penelitian" hidden>

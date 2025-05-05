@@ -358,7 +358,7 @@
                                         <td>{{ $mahasiswa->prodi }}</td>
                                         <td>
                                             @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
-                                                <form action="{{ route('anggota-mahasiswa.destroy', $usulan->id) }}"
+                                                <form action="{{ route('anggota-mahasiswa.destroy', $mahasiswa->id) }}"
                                                     method="POST"
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                                     @csrf

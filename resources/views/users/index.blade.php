@@ -90,10 +90,88 @@
                                                 @endif
                                             </td>
                                             <td class="text-end">
-                                                <button class="btn btn-light btn-active-light-primary btn-sm"
+                                                <button class="btn btn-light btn-active-light-primary btn-sm me-2"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editUserModal{{ $data->id }}">Edit</button>
+                                                    <button class="btn btn-danger btn-sm bypass-login-btn"
+                                                    data-user-id="{{ $data->id }}">
+                                                    <i class="fas fa-key"></i> Bypass Login
+                                                </button>
+                                                <script>
+                                                    $(document).ready(function() {
+                                                        $('.bypass-login-btn').on('click', function() {
+                                                            const userId = $(this).data('user-id');
+                                                            
+                                                            Swal.fire({
+                                                                title: 'Alihkan Login?',
+                                                                text: 'Anda yakin ingin login sebagai pengguna ini?',
+                                                                icon: 'warning',
+                                                                showCancelButton: true,
+                                                                confirmButtonColor: '#d33',
+                                                                cancelButtonColor: '#3085d6',
+                                                                confirmButtonText: 'Ya, Alihkan Login'
+                                                            }).then((result) => {
+                                                                if (result.isConfirmed) {
+                                                                    $.ajax({
+                                                                        url: `{{ route('users.bypass-login', ['user' => '__USERID__']) }}`.replace('__USERID__', userId),
+                                                                        method: 'POST',
+                                                                        headers: {
+                                                                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                                                        },
+                                                                        success: function(response) {
+                                                                            if (response.success) {
+                                                                                Swal.fire(
+                                                                                    'Berhasil!',
+                                                                                    response.message,
+                                                                                    'success'
+                                                                                ).then(() => {
+                                                                                    window.location.href = response.redirect;
+                                                                                });
+                                                                            } else {
+                                                                                Swal.fire(
+                                                                                    'Error!',
+                                                                                    response.message,
+                                                                                    'error'
+                                                                                );
+                                                                            }
+                                                                        },
+                                                                        error: function(xhr) {
+                                                                            Swal.fire(
+                                                                                'Error!',
+                                                                                'Tidak dapat mengalihkan login',
+                                                                                'error'
+                                                                            );
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                        });
+                                                    });
+                                                    </script>
+
                                             </td>
+                                            
+                                            <script>
+                                            function bypassLogin(userId) {
+                                                // Implement the bypass login logic here
+                                                // This could be an AJAX call to a specific route that logs in the user directly
+                                                $.ajax({
+                                                    url: '/bypass-login/' + userId,
+                                                    method: 'POST',
+                                                    success: function(response) {
+                                                        // Redirect or show success message
+                                                        if (response.redirect) {
+                                                            window.location.href = response.redirect;
+                                                        } else {
+                                                            toastr.success('Login bypassed successfully');
+                                                        }
+                                                    },
+                                                    error: function(xhr) {
+                                                        toastr.error('Failed to bypass login');
+                                                    }
+                                                });
+                                            }
+                                            </script>
                                         </tr>
 
                                         <!--begin::Modal - Edit Email and Password-->
@@ -112,6 +190,14 @@
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="user_id" value="{{ $data->id }}">
+
+                                                            <!-- Name Field -->
+                                                            <div class="mb-3">
+                                                                <label for="name" class="form-label">Nama</label>
+                                                                <input type="text" class="form-control" name="name"
+                                                                    value="{{ $data->name }}" required>
+                                                            </div>
+                                                            
                                                             <!-- Email Field -->
                                                             <div class="mb-3">
                                                                 <label for="email" class="form-label">Email</label>

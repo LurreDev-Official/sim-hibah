@@ -72,7 +72,7 @@
     <div class="header">
         <h1>Lembaga Penelitian dan Pengabdian Masyarakat (LPPM)</h1>
         <h2>Universitas Hasyim Asy'ari</h2>
-        <p>Jl. Contoh No. 123, Jombang</p>
+        <p>Tebuireng, Jl. Irian Jaya No.55, Cukir, Kec. Diwek, Kabupaten Jombang, Jawa Timur 61471</p>
         <p>Telp: (0274) 1234567 | Email: lppm@unhasy.ac.id</p>
     </div>
 
@@ -82,7 +82,6 @@
         <tr>
             <th>Judul Laporan Akhir</th>
             <td>{{ $laporanAkhir->usulan->judul_usulan }}- {{ $laporanAkhir->usulan->ketuaDosen->user->name }} </td>
-            
         </tr>
         <tr>
             <td colspan="2">

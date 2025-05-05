@@ -57,14 +57,14 @@
                                         $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
                                         $scoreSinta = $dosen->score_sinta;
                                     @endphp
-                                    @if ($scoreSinta > 200 && $isButtonActive)
+                                    {{-- @if ($isButtonActive) --}}
                                         <!-- Tombol aktif jika skor Sinta lebih dari 200 -->
                                         <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}"
                                             class="btn btn-primary mr-3">Tambah Usulan</a>
-                                    @else
+                                    {{-- @else  --}}
                                         <!-- Tombol dinonaktifkan jika skor Sinta kurang dari atau sama dengan 200 -->
-                                        <button class="btn btn-primary mr-3" disabled>Tambah Usulan</button>
-                                    @endif
+                                        {{-- <button class="btn btn-primary mr-3" disabled>Tambah Usulan</button> --}}
+                                    {{-- @endif --}}
                                 @endrole
                                 <!-- Export Button -->
                                 <a href="{{ route('usulan.export', ['jenis' => $jenis]) }}" class="btn btn-success">
@@ -294,7 +294,7 @@
                                                         }
                                                     </script>
 
-                                                    @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                                    @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft' $usulan->status == 'submitted')
                                                         <div class="col p-2">
                                                             <button class="btn btn-danger btn-sm"
                                                                 onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})">
@@ -499,61 +499,10 @@
                             @else
                                 <span class="text-danger">Waiting for approval from all reviewers.</span>
                             @endif
-                            <div class="col p-2">
-                                <button class="btn btn-danger btn-sm"
-                                    onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }}, this)">
-                                    <i class="fas fa-trash-alt"></i> Hapus
-                                </button>
-
-                                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-                                <script>
-                                    function deleteUsulan(jenis, id, button) {
-                                        Swal.fire({
-                                            title: 'Apakah Anda yakin?',
-                                            text: "Usulan ini akan dihapus secara permanen!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#3085d6',
-                                            cancelButtonColor: '#d33',
-                                            confirmButtonText: 'Ya, hapus!',
-                                            cancelButtonText: 'Batal'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                $.ajax({
-                                                    url: `/usulan/${jenis}/${id}/hapus`, // Sesuai dengan Route::delete
-                                                    type: 'DELETE',
-                                                    headers: {
-                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // CSRF Token harus dikirim di HEADER
-                                                    },
-                                                    success: function(response) {
-                                                        Swal.fire(
-                                                            'Dihapus!',
-                                                            response.success,
-                                                            'success'
-                                                        ).then(() => {
-                                                            $(button).closest('.col').remove();
-                                                        });
-                                                    },
-                                                    error: function(xhr) {
-                                                        let errorMsg = 'Terjadi kesalahan saat menghapus data.';
-                                                        if (xhr.status === 403) {
-                                                            errorMsg = 'Akses ditolak! Anda tidak memiliki izin untuk menghapus.';
-                                                        } else if (xhr.status === 404) {
-                                                            errorMsg = 'Usulan tidak ditemukan.';
-                                                        } else if (xhr.responseJSON && xhr.responseJSON.error) {
-                                                            errorMsg = xhr.responseJSON.error;
-                                                        }
-                                                        Swal.fire('Error!', errorMsg, 'error');
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                </script>
-                            </div>
-
+                            {{-- <div class="col p-2">
+                                <!-- Tombol Batal Usulan -->
+                                <a href="{{ route('usulan.batal', ['id' => $usulan->id, 'jenis' => $usulan->jenis_skema]) }}" class="btn btn-danger">Batal</a>
+                            </div> --}}
 
                             </td>
                         @endrole

@@ -28,6 +28,11 @@
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
     <!--end::Global Stylesheets Bundle-->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+    <!-- Tambahkan ini di bagian head -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+
 </head>
 
 
@@ -282,7 +287,24 @@
                                                             <span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">Online</span>
                                                         </div>
                                                         <h6 class="fw-bold text-muted text-hover-primary fs-7">{{ Auth::user()->email }}</h6>
-                                                        <p>Akses {{ Auth::user()->name }}</p>
+                                                        <p>
+                                                            Akses: 
+                                                            @role('Kepala LPPM')
+                                                                Kepala LPPM
+                                                            @endrole
+                                                    
+                                                            @role('Dosen')
+                                                                Dosen
+                                                            @endrole
+                                                    
+                                                            @role('Reviewer')
+                                                                Reviewer
+                                                            @endrole
+                                                    
+                                                            @role('Admin') {{-- Jika ada role Admin, bisa ditambahkan disini --}}
+                                                                Admin
+                                                            @endrole
+                                                        </p>
 
                                                     </div>
                                                     <!--end::Username-->
@@ -343,7 +365,7 @@
                         <!--begin::Copyright-->
                         <div class="text-dark order-2 order-md-1">
                             <span class="text-muted fw-bold me-1">{{ date('Y') }}©</span>
-                            <a href="www.lurredev.com" target="_blank" class="text-gray-800 text-hover-primary">DI BUAT OLEH Edwin Hap</a>
+                            <a href="https://lurredev.com" target="_blank" class="text-gray-800 text-hover-primary">DI BUAT OLEH Edwin Hap</a>
                             <span class="text-muted fw-bold me-1">LLTI UNHASY</span>
                         </div>
                         <!--end::Copyright-->
@@ -514,7 +536,8 @@
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
- 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 </body>
 <!--end::Body-->
 

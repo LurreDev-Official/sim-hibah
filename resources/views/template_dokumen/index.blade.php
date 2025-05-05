@@ -83,12 +83,20 @@
 
                                                         <div class="mb-3">
                                                             <label for="proses" class="form-label">Proses</label>
-                                                            <input type="text" class="form-control" name="proses" value="{{ $template->proses }}" required>
+                                                            <select name="proses" class="form-select" required>
+                                                                <option value="" disabled>Pilih Proses</option>
+                                                                <option value="Usulan" {{ $template->proses == 'Usulan' ? 'selected' : '' }}>Usulan</option>
+                                                                <option value="Laporan Akhir" {{ $template->proses == 'Laporan Akhir' ? 'selected' : '' }}>Laporan Akhir</option>
+                                                                <option value="Laporan Kemajuan" {{ $template->proses == 'Laporan Kemajuan' ? 'selected' : '' }}>Laporan Kemajuan</option>
+                                                            </select>
                                                         </div>
-
+                                                        
                                                         <div class="mb-3">
                                                             <label for="skema" class="form-label">Skema</label>
-                                                            <input type="text" class="form-control" name="skema" value="{{ $template->skema }}" required>
+                                                            <select name="skema" class="form-select" required>
+                                                                <option value="Penelitian" {{ $template->skema == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
+                                                                <option value="Pengabdian" {{ $template->skema == 'Pengabdian' ? 'selected' : '' }}>Pengabdian</option>
+                                                            </select>
                                                         </div>
 
                                                         <div class="mb-3">
@@ -148,7 +156,7 @@
                                 <label for="skema" class="form-label">Skema</label>
                                 <select name="skema" class="form-select" required>
                                     <option value="Penelitian" selected>Penelitian</option>
-                                    <option value="Pengabdian" disabled>Pengabdian</option>
+                                    <option value="Pengabdian">Pengabdian</option>
                                 </select>
                             </div>
 

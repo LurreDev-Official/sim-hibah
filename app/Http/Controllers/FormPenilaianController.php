@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 use App\Models\Reviewer;
 use Illuminate\Support\Facades\Validator;
 
+
+use Illuminate\Support\Facades\DB;
+
 class FormPenilaianController extends Controller
 {
     /**
@@ -209,86 +212,113 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
      */
   
 
-    public function store(Request $request)
-{
-    // Validasi data yang diterima
-    $validator = Validator::make($request->all(), [
-        'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
-        'indikator' => 'required|array', // Pastikan indikator adalah array
-        'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
-        'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
-    ]);
-
-    // Jika validasi gagal, kembalikan ke view dengan pesan error
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator) // Kirim error ke view
-            ->withInput(); // Kirim input yang sudah diisi kembali ke view
-    }
-
-    // Inisialisasi array untuk menghitung total nilai per kriteria
-    $kriteriaTotals = [];
-    $totalNilai = 0;
-
-    // Iterasi setiap indikator untuk menghitung dan menyimpan data
-    foreach ($request->indikator as $indikatorId => $data) {
-        $indikator = IndikatorPenilaian::find($indikatorId);
-
-        if ($indikator) {
-            // Tambahkan jumlah bobot ke total nilai untuk kriteria terkait
-            if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
-                $kriteriaTotals[$indikator->kriteria_id] = 0;
-            }
-            $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
-
-            // Simpan data indikator ke dalam tabel FormPenilaian
-            FormPenilaian::create([
-                'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
-                'id_kriteria' => $indikator->kriteria_id,
-                'id_indikator' => $indikator->id,
-                'catatan' => $data['catatan'] ?? null,
-                'nilai' => $data['nilai'], // Menyimpan nilai per indikator
-                'status' => 'sudah dinilai',
-            ]);
-
-            // Tambahkan nilai indikator ke total nilai keseluruhan
-            $totalNilai += $data['nilai'];
-        }
-    }
-
-    // Simpan total nilai (sub_total) per kriteria di tabel FormPenilaian
-    // foreach ($kriteriaTotals as $kriteriaId => $subTotal) {
-    //     FormPenilaian::create([
-    //         'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
-    //         'id_kriteria' => $kriteriaId,
-    //         'status' => 'sudah dinilai',
-    //     ]);
-    // }
-
-    // Update status dan total nilai di tabel PenilaianReviewer
-    $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
-    $penilaianReviewer->update([
-        'status_penilaian' => 'sudah dinilai',
-        'proses_penilaian' => 'Usulan',
-        'urutan_penilaian' => 1,
-        'total_nilai' => $totalNilai,
-    ]);
-
-    // Tambahkan usulan perbaikan jika diperlukan
-    if ($penilaianReviewer) {
-        UsulanPerbaikan::create([
-            'usulan_id' => $penilaianReviewer->usulan_id,
-            'status' => 'revisi',
-            'penilaian_id' => $penilaianReviewer->id,
-        ]);
-
-        $usulan = Usulan::findOrFail($penilaianReviewer->usulan_id);
-        $usulan->update(['status' => 'revision']);
-    }
-
-    // Kembalikan respons sukses ke view
-    return redirect()->back()->with('success', 'Form penilaian berhasil diperbarui.');
-}
+     public function store(Request $request)
+     {
+         // Validasi data yang diterima
+         $validator = Validator::make($request->all(), [
+             'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
+             'indikator' => 'required|array', // Pastikan indikator adalah array
+             'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
+             'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
+         ]);
+     
+         // Jika validasi gagal, kembalikan ke view dengan pesan error
+         if ($validator->fails()) {
+             return redirect()->back()
+                 ->withErrors($validator) // Kirim error ke view
+                 ->withInput(); // Kirim input yang sudah diisi kembali ke view
+         }
+     
+         // Cek apakah penilaian untuk reviewer ini sudah ada
+         $existingEntries = FormPenilaian::where('penilaian_reviewers_id', $request->penilaian_reviewers_id)->count();
+         if ($existingEntries > 0) {
+             return redirect()->back()->with('error', 'Penilaian untuk reviewer ini sudah pernah disubmit. Silakan gunakan fungsi edit.');
+         }
+     
+         // Inisialisasi array untuk menghitung total nilai per kriteria
+         $kriteriaTotals = [];
+         $totalNilai = 0;
+     
+         // Mulai transaksi database untuk memastikan semua operasi berhasil atau gagal bersama
+         DB::beginTransaction();
+         
+         try {
+             // Iterasi setiap indikator untuk menghitung dan menyimpan data
+             foreach ($request->indikator as $indikatorId => $data) {
+                 // Periksa apakah indikator ditemukan
+                 $indikator = IndikatorPenilaian::find($indikatorId);
+     
+                 if (!$indikator) {
+                     // Jika indikator tidak ditemukan, kembalikan error
+                     DB::rollBack();
+                     return redirect()->back()->with('error', "Indikator dengan ID $indikatorId tidak ditemukan.");
+                 }
+     
+                 // Tambahkan jumlah bobot ke total nilai untuk kriteria terkait
+                 if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
+                     $kriteriaTotals[$indikator->kriteria_id] = 0;
+                 }
+                 $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
+     
+                 // Cek apakah penilaian untuk indikator ini sudah ada
+                 $existingForm = FormPenilaian::where('penilaian_reviewers_id', $request->penilaian_reviewers_id)
+                     ->where('id_indikator', $indikator->id)
+                     ->first();
+     
+                 if (!$existingForm) {
+                     // Simpan data indikator ke dalam tabel FormPenilaian jika belum ada
+                     FormPenilaian::create([
+                         'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
+                         'id_kriteria' => $indikator->kriteria_id,
+                         'id_indikator' => $indikator->id,
+                         'catatan' => $data['catatan'] ?? null,
+                         'nilai' => $data['nilai'], // Menyimpan nilai per indikator
+                         'status' => 'sudah dinilai',
+                     ]);
+                 }
+     
+                 // Tambahkan nilai indikator ke total nilai keseluruhan
+                 $totalNilai += $data['nilai'];
+             }
+     
+             // Cek apakah PenilaianReviewer ditemukan
+             $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
+             
+             // Cek apakah usulan perbaikan sudah ada
+             $existingUsulan = UsulanPerbaikan::where('penilaian_id', $penilaianReviewer->id)->first();
+     
+             // Update status dan total nilai di tabel PenilaianReviewer
+             $penilaianReviewer->update([
+                 'status_penilaian' => 'sudah dinilai',
+                 'proses_penilaian' => 'Usulan',
+                 'urutan_penilaian' => 1,
+                 'total_nilai' => $totalNilai,
+             ]);
+     
+             // Tambahkan usulan perbaikan jika belum ada
+             if (!$existingUsulan) {
+                 UsulanPerbaikan::create([
+                     'usulan_id' => $penilaianReviewer->usulan_id,
+                     'status' => 'revisi',
+                     'penilaian_id' => $penilaianReviewer->id,
+                 ]);
+     
+                 $usulan = Usulan::findOrFail($penilaianReviewer->usulan_id);
+                 $usulan->update(['status' => 'revision']);
+             }
+     
+             // Commit transaksi jika semua operasi berhasil
+             DB::commit();
+     
+             // Kembalikan respons sukses ke view
+             return redirect()->back()->with('success', 'Form penilaian berhasil diperbarui.');
+         } catch (\Exception $e) {
+             // Rollback transaksi jika terjadi error
+             DB::rollBack();
+             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+         }
+     }
+     
 
 
 

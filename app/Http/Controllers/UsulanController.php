@@ -26,6 +26,7 @@ use App\Models\TemplateDokumen;
 use App\Models\Periode;
 use App\Exports\UsulanExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\CabangIlmu;
 
 class UsulanController extends Controller
 {
@@ -33,6 +34,24 @@ class UsulanController extends Controller
     {
         $this->middleware('auth');
     }
+
+public function getCabangIlmu(Request $request)
+{
+    // Validasi input
+    $request->validate([
+        'id_rumpun' => 'required|integer',
+    ]);
+
+    // Ambil ID Rumpun Ilmu dari request
+    $idRumpun = $request->input('id_rumpun');
+
+    // Query data Cabang Ilmu dari database
+    $cabangIlmu = CabangIlmu::where('id_rumpun', $idRumpun)->get();
+
+    // Kembalikan data dalam format JSON
+    return response()->json($cabangIlmu);
+}
+
     /**
      * Display a listing of the resource.
      */
@@ -40,12 +59,19 @@ class UsulanController extends Controller
     {
 
         //cek periode
-        $periode = Periode::where('is_active', true)->first();
+        $periode = Periode::where('is_active', 1)->first();
         $isButtonActive = false;
-
+        
         if ($periode) {
-            $tanggalAwal = Carbon::parse($periode->tanggal_awal);
-            $isButtonActive = $tanggalAwal->addWeeks(2)->isPast();
+            // Set timezone ke Asia/Jakarta untuk WIB
+            $tanggalAwal = Carbon::parse($periode->tanggal_awal)->timezone('Asia/Jakarta');
+            $tanggalAkhir = Carbon::parse($periode->tanggal_akhir)->timezone('Asia/Jakarta');
+            $currentDate = Carbon::now('Asia/Jakarta'); // Waktu Indonesia saat ini
+        
+            // Periksa apakah tombol harus aktif berdasarkan rentang waktu
+            if ($currentDate->between($tanggalAwal, $tanggalAkhir)) {
+                $isButtonActive = true;
+            }
         }
 
 
@@ -74,7 +100,6 @@ class UsulanController extends Controller
     
             return view('usulan.index', compact('usulans','dosens','jenis','reviewers','isButtonActive'));
         }
-    
         // Jika user memiliki role Dosen, tampilkan usulan berdasarkan id_dosen
         elseif ($user->hasRole('Dosen')) {
             // Ambil data dosen terkait user yang login
@@ -128,9 +153,7 @@ class UsulanController extends Controller
         ->where('tahun_pelaksanaan', Carbon::now()->year) // Pastikan tahun saat ini
         ->where('jenis_skema',$jenis) // Validasi berdasarkan jenis skema
         ->count(); // Hitung jumlah record yang sesuai
-
-    // dd($usulanKetua);
-
+        // dd($usulanKetua);
         if ($usulanKetua >= 2) {
             // Menggunakan back dengan pesan error
             return back()->with('error', 'Anda hanya bisa menjadi ketua di 1 usulan proposal untuk jenis skema: ' . $jenis);
@@ -182,8 +205,8 @@ class UsulanController extends Controller
             'judul_usulan' => 'required|string|max:255',
             'tahun_pelaksanaan' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
             'dokumen_usulan' => 'required|file|mimes:pdf|max:5048',  // Only allow PDF files up to 2MB
-            'rumpun_ilmu' => 'required|string|max:255',
-            'bidang_fokus' => 'required|string|max:255',
+            'rumpun_ilmu' => 'required',
+            'bidang_fokus' => 'required',
             'tema_penelitian' => 'required|string|max:255',
             'topik_penelitian' => 'required|string|max:255',
             'lokasi_penelitian' => 'required|string',
@@ -206,6 +229,32 @@ class UsulanController extends Controller
         $dosen = Dosen::where('user_id', auth()->user()->id)->first();
         $ketua_dosen_id = $dosen->id;
 
+
+        $rumpunIlmu = [
+            ['id' => 5, 'nama_rumpun_ilmu' => 'Ilmu Sosial'],
+            ['id' => 1, 'nama_rumpun_ilmu' => 'Ilmu Alam'],
+            ['id' => 6, 'nama_rumpun_ilmu' => 'Ilmu Terapan'],
+            ['id' => 2, 'nama_rumpun_ilmu' => 'Ilmu Formal'],
+            ['id' => 3, 'nama_rumpun_ilmu' => 'Ilmu Humaniora'],
+            ['id' => 4, 'nama_rumpun_ilmu' => 'Ilmu Keagamaan'],
+        ];
+        
+        $idrumpun = $validated['rumpun_ilmu']; // Ambil id_rumpun dari input
+        
+        // Cari nama_rumpun_ilmu berdasarkan id_rumpun
+        $namarumpun = null; // Default value jika id tidak ditemukan
+        foreach ($rumpunIlmu as $rumpun) {
+            if ($rumpun['id'] == $idrumpun) {
+                $namarumpun = strtolower($rumpun['nama_rumpun_ilmu']); // Ubah ke lowercase jika diperlukan
+                break;
+            }
+        }
+        
+        // Jika id tidak ditemukan, beri nilai default atau tindakan lain
+        if (!$namarumpun) {
+            $namarumpun = 'tidak dikenali'; // Atau bisa throw error
+        }
+        
         // Create new usulan
         $usulan = Usulan::create([
             'judul_usulan' => $validated['judul_usulan'],
@@ -213,7 +262,7 @@ class UsulanController extends Controller
             'tahun_pelaksanaan' => $validated['tahun_pelaksanaan'],
             'ketua_dosen_id' => $ketua_dosen_id,
             'dokumen_usulan' => $validated['dokumen_usulan'], // Jika dokumen adalah file, ini harus di-upload terlebih dahulu
-            'rumpun_ilmu' => $validated['rumpun_ilmu'],
+            'rumpun_ilmu' => $namarumpun,
             'bidang_fokus' => $validated['bidang_fokus'],
             'tema_penelitian' => $validated['tema_penelitian'],
             'topik_penelitian' => $validated['topik_penelitian'],
@@ -244,12 +293,12 @@ class UsulanController extends Controller
         //     'approved',     // Dokumen telah disetujui/direkomendasikan oleh pembimbing
         //     'rejected',     // Dokumen ditolak oleh pembimbing atau pihak berwenang
         // ]);
-         // Retrieve all usulans where jenis_skema matches the $jenis (penelitian or pengabdian)
-         $usulans = Usulan::where('jenis_skema', $jenis)->get();
-         $reviewers = Reviewer::with('user')->get();
 
-         return view('usulan.index', compact('usulans', 'jenis','reviewers','isButtonActive')) ->with('success', 'Usulan berhasil ditambah!');
-
+        // Redirect to the 'usulan.show' route with the jenis parameter and a success message
+    return redirect()->route('usulan.show', ['jenis' => $jenis]) // Pass 'jenis' to the route
+    ->with('success', 'Usulan berhasil ditambah!');
+    
+        
     }
 
     }
@@ -343,6 +392,23 @@ class UsulanController extends Controller
             return response()->json(['error' => 'Terjadi kesalahan saat menghapus usulan!'], 500);
         }
     }
+
+    public function batalUsulan($id, $jenis)
+    {
+        // Mencari usulan berdasarkan ID dan jenis skema
+        $usulan = Usulan::where('id', $id)
+                        ->where('jenis_skema', $jenis)
+                        ->firstOrFail(); // Jika tidak ditemukan, akan melemparkan ModelNotFoundException
+
+        // Mengubah status menjadi 'rejected' atau status lain sesuai kebutuhan
+        $usulan->status = 'draft'; // Status bisa diganti dengan status yang sesuai, seperti 'batal'
+        // Menyimpan perubahan
+        $usulan->save();
+        // Mengembalikan respons atau redirect sesuai kebutuhan
+        return redirect()->back()->with('success', 'Usulan berhasil dibatalkan');
+    }
+
+
     public function detail($jenis, $id)
     {
         // Ambil data usulan berdasarkan jenis dan ID
@@ -634,7 +700,6 @@ public function cetakBuktiACC($id)
                     ->findOrFail($id);
 
      $usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $id)->first();
-        // Generate QR Code menggunakan path dokumen
      // Generate URL lengkap untuk dokumen
     $dokumenPath = $usulanPerbaikan->dokumen_usulan ?? '';
     $dokumenUrl = url($dokumenPath); // Base URL + path dokumen
@@ -752,29 +817,43 @@ public function validasiUsulanBaru($jenis)
         // ->where('status', 'approved')
         ->count();
 
-    if ($usulanKetuaPenelitian + $usulanKetuaPengabdian >= 2) {
+    
+    if($usulanKetuaPenelitian==0 && $usulanKetuaPengabdian==1)
+      {
+         return true;
+     }elseif($usulanKetuaPenelitian==1 && $usulanKetuaPengabdian==0)
+     {
+        return true;
+     }elseif ($usulanKetuaPenelitian==1 && $usulanKetuaPengabdian==1) {
         return back()->with('error', 'Anda sudah menjadi ketua di 2 usulan proposal pada tahun ini di');
-    } 
-
-      // Ambil semua usulan_id dari model Usulan berdasarkan tahun dan status approved
-      $usulanIds = Usulan::where('status', 'approved') // Filter berdasarkan status approved
-      ->whereYear('tahun_pelaksanaan', Carbon::now()->year)
-      ->where('status', 'approved')
-      ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
-      ->pluck('id'); // Ambil hanya kolom id
-
-    // Hitung jumlah usulan sebagai anggota dengan status approved untuk skema tertentu di tahun ini
-    $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
-        ->whereIn('usulan_id', $usulanIds) // Filter berdasarkan usulan_id yang sudah diambil
-        ->where('status', 'approved') // Status usulan harus approved
-        ->where('status_anggota', 'anggota') // Hanya hitung sebagai anggota
-        ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
-        ->count();
-
-    // Validasi: Batasi maksimal 1 usulan sebagai anggota per skema
-    if ($usulanAnggota >= 1) {
-        return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $jenis pada tahun ini.");
     }
+    else
+
+
+    {
+        return true;
+        // return back()->with('error', 'Anda sudah menjadi ketua di 2 usulan proposal pada tahun ini di');
+    }
+
+    //   // Ambil semua usulan_id dari model Usulan berdasarkan tahun dan status approved
+    //   $usulanIds = Usulan::where('status', 'approved') // Filter berdasarkan status approved
+    //   ->whereYear('tahun_pelaksanaan', Carbon::now()->year)
+    //   ->where('status', 'approved')
+    //   ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
+    //   ->pluck('id'); // Ambil hanya kolom id
+
+    // // Hitung jumlah usulan sebagai anggota dengan status approved untuk skema tertentu di tahun ini
+    // $usulanAnggota = AnggotaDosen::where('dosen_id', $dosen->id)
+    //     ->whereIn('usulan_id', $usulanIds) // Filter berdasarkan usulan_id yang sudah diambil
+    //     ->where('status', 'approved') // Status usulan harus approved
+    //     ->where('status_anggota', 'anggota') // Hanya hitung sebagai anggota
+    //     ->where('jenis_skema', $jenis) // Filter berdasarkan jenis skema
+    //     ->count();
+
+    // // Validasi: Batasi maksimal 1 usulan sebagai anggota per skema
+    // if ($usulanAnggota >= 1) {
+    //     return back()->with('error', "Anda sudah menjadi anggota di 1 usulan proposal untuk skema $jenis pada tahun ini.");
+    // }
 }
 
 

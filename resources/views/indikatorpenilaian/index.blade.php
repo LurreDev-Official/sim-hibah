@@ -48,6 +48,7 @@
                             <thead>
                                 <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                     <th>No</th>
+                                    <th>Kriteria Penilaian</th>
                                     <th>Nama Indikator</th>
                                     <th>Jumlah Bobot</th>
                                     <th class="text-end">Aksi</th>
@@ -57,7 +58,19 @@
                                 @foreach ($indikatorPenilaians as $key => $indikator)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
+                                        <td>
+                                            {{ optional($indikator->kriteriaPenilaian)->nama }} - {{ optional($indikator->kriteriaPenilaian)->jenis }} -{{ optional($indikator->kriteriaPenilaian)->proses }}
+                                        </td>
                                         <td>{{ $indikator->nama_indikator }}</td>
+                                        {{-- <td>
+                                            @foreach ($kriteriaPenilaians as $kriteria)
+                                                @if ($kriteria->id == $indikator->kriteria_id)
+                                                    {{ $kriteria->nama }}-{{ $kriteria->jenis }}
+                                                @endif
+                                            @endforeach
+                                        </td> --}}
+                                       
+                                        
                                         <td>{{ $indikator->jumlah_bobot }}</td>
                                         <td class="text-end">
                                             <button class="btn btn-light btn-active-light-primary btn-sm"
@@ -149,7 +162,8 @@
                         <select name="kriteria_id" class="form-select" required>
                             <option value="">Pilih Kriteria</option>
                             @foreach ($kriteriaPenilaians as $kriteria)
-                                <option value="{{ $kriteria->id }}">{{ $kriteria->nama }}-{{ $kriteria->jenis }}</option>
+                                <option value="{{ $kriteria->id }}">{{ $kriteria->nama }}-{{ $kriteria->jenis }}-{{ $kriteria->proses }}</option>
+
                             @endforeach
                         </select>
                     </div>

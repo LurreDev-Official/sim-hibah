@@ -36,10 +36,22 @@ class KriteriaPenilaianController extends Controller
             'jenis' => 'required|string|max:255',
             'proses' => 'required|string|max:255',
         ]);
-
+    
+        // Check if the exact combination already exists
+        $exists = KriteriaPenilaian::where('nama', $request->nama)
+                                  ->where('jenis', $request->jenis)
+                                  ->where('proses', $request->proses)
+                                  ->exists();
+    
+        if ($exists) {
+            return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Kriteria Penilaian dengan kombinasi data tersebut sudah ada.');
+        }
+    
         // Membuat kriteria penilaian baru
         KriteriaPenilaian::create($request->all());
-
+    
         // Redirect ke halaman index dengan pesan sukses
         return redirect()->route('kriteria-penilaian.index')
             ->with('success', 'Kriteria Penilaian berhasil ditambahkan.');
@@ -65,22 +77,34 @@ class KriteriaPenilaianController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, KriteriaPenilaian $kriteriaPenilaian)
-    {
-        // Validasi input
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'jenis' => 'required|string|max:255',
-            'proses' => 'required|string|max:255',
-     
-        ]);
+{
+    // Validasi input
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'jenis' => 'required|string|max:255',
+        'proses' => 'required|string|max:255',
+    ]);
 
-        // Update kriteria penilaian
-        $kriteriaPenilaian->update($request->all());
+    // Check if another record with the same combination exists (excluding the current record)
+    $exists = KriteriaPenilaian::where('nama', $request->nama)
+                              ->where('jenis', $request->jenis)
+                              ->where('proses', $request->proses)
+                              ->where('id', '!=', $kriteriaPenilaian->id)
+                              ->exists();
 
-        // Redirect ke halaman index dengan pesan sukses
-        return redirect()->route('kriteria-penilaian.index')
-            ->with('success', 'Kriteria Penilaian berhasil diperbarui.');
+    if ($exists) {
+        return redirect()->back()
+                ->withInput()
+                ->with('error', 'Kriteria Penilaian dengan kombinasi data tersebut sudah ada.');
     }
+
+    // Update kriteria penilaian
+    $kriteriaPenilaian->update($request->all());
+
+    // Redirect ke halaman index dengan pesan sukses
+    return redirect()->route('kriteria-penilaian.index')
+        ->with('success', 'Kriteria Penilaian berhasil diperbarui.');
+}
 
     /**
      * Remove the specified resource from storage.

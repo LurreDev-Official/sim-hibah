@@ -73,7 +73,6 @@ Route::post('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])
     Route::get('usulan/{jenis}', [UsulanController::class, 'show'])->name('usulan.show');
     // Route untuk menghapus usulan (POST method)
     Route::post('/usulan/{jenis}/{id}/hapus', [UsulanController::class, 'destroy'])->name('usulan.destroy');
-    
     Route::put('usulan/{id}/update-status', [UsulanController::class, 'updateStatus'])->name('usulan.updateStatus');
     Route::get('usulan/{id}/cetak-bukti-acc', [UsulanController::class, 'cetakBuktiACC'])->name('usulan.cetakBuktiACC');
     //export excel usulan
@@ -129,6 +128,10 @@ Route::get('laporan-akhir/export/{jenis}', [LaporanAkhirController::class, 'expo
 // Rute khusus untuk Kepala LPPM
 Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
     Route::put('users/update/{id}', [UserController::class, 'update'])->name('users.update');
+      // Bypass Login Route
+      Route::post('users/bypass-login/{user}', [UserController::class, 'bypassLogin'])
+      ->name('users.bypass-login');
+      
     Route::resource('users', UserController::class);
     Route::resource('kriteria-penilaian', KriteriaPenilaianController::class);
     Route::delete('/kriteria-penilaian/{id}', [KriteriaPenilaianController::class, 'destroy'])->name('kriteria-penilaian.destroy');
@@ -165,6 +168,7 @@ Route::group(['middleware' => ['role:Kepala LPPM|Admin']], function () {
 
 // Rute khusus untuk Dosen
 Route::group(['middleware' => ['role:Dosen']], function () {
+    Route::get('/get-cabang-ilmu', [UsulanController::class, 'getCabangIlmu']);
     Route::resource('usulan', UsulanController::class);
     Route::get('usulan/{jenis}/create', [UsulanController::class, 'create'])->name('usulan.create'); // Form tambah usulan
     Route::post('usulan/{jenis}', [UsulanController::class, 'store'])->name('usulan.store'); // Proses tambah usulan

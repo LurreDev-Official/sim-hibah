@@ -55,6 +55,7 @@ class ReviewerController extends Controller
     {
         // Validasi data yang masuk
         $request->validate([
+            'name' => 'required|string|max:255',
             'nidn' => 'required|string|max:255',
             'fakultas' => 'required|string|max:255',
             'prodi' => 'required|string|max:255',
@@ -66,6 +67,13 @@ class ReviewerController extends Controller
             'fakultas' => $request->input('fakultas'),
             'prodi' => $request->input('prodi'),
         ]);
+
+        //update name di model users
+        $user = $reviewer->user;
+        $user->update([
+            'name' => $request->input('name'),
+        ]);
+
 
         // Redirect atau response setelah update berhasil
         return redirect()->back()->with('success', 'Data reviewer berhasil diperbarui.');
