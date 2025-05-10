@@ -14,8 +14,6 @@ use App\Models\PenilaianReviewer;
 use Illuminate\Http\Request;
 use App\Models\Reviewer;
 use Illuminate\Support\Facades\Validator;
-
-
 use Illuminate\Support\Facades\DB;
 
 class FormPenilaianController extends Controller
@@ -202,7 +200,6 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
         $penilaianReviewer = PenilaianReviewer::where('reviewer_id', $reviewer->id)
             ->where('usulan_id', $usulanId)
             ->firstOrFail();
-    
         // Tampilkan view form penilaian dengan data Usulan, IndikatorPenilaian, dan PenilaianReviewer
         return view('form_penilaian.create', compact('usulan', 'indikatorPenilaians', 'penilaianReviewer'));
     }
@@ -212,6 +209,7 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
      */
   
 
+     
      public function store(Request $request)
      {
          // Validasi data yang diterima
@@ -219,7 +217,7 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
              'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
              'indikator' => 'required|array', // Pastikan indikator adalah array
              'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
-             'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
+             'indikator.*.catatan' => 'nullable|string', // Validasi catatan (opsional)
          ]);
      
          // Jika validasi gagal, kembalikan ke view dengan pesan error
@@ -229,64 +227,48 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
                  ->withInput(); // Kirim input yang sudah diisi kembali ke view
          }
      
-         // Cek apakah penilaian untuk reviewer ini sudah ada
-         $existingEntries = FormPenilaian::where('penilaian_reviewers_id', $request->penilaian_reviewers_id)->count();
-         if ($existingEntries > 0) {
-             return redirect()->back()->with('error', 'Penilaian untuk reviewer ini sudah pernah disubmit. Silakan gunakan fungsi edit.');
+         // Periksa apakah penilaian sudah ada untuk reviewer ini
+         $existingEntries = FormPenilaian::where('penilaian_reviewers_id', $request->penilaian_reviewers_id)->exists();
+         
+         if ($existingEntries) {
+             return redirect()->back()->with('error', 'Anda sudah melakukan penilaian untuk usulan ini. Silakan gunakan menu edit untuk mengubah penilaian.');
          }
      
-         // Inisialisasi array untuk menghitung total nilai per kriteria
-         $kriteriaTotals = [];
-         $totalNilai = 0;
-     
-         // Mulai transaksi database untuk memastikan semua operasi berhasil atau gagal bersama
+         // Gunakan transaksi database untuk memastikan integritas data
          DB::beginTransaction();
-         
+     
          try {
-             // Iterasi setiap indikator untuk menghitung dan menyimpan data
-             foreach ($request->indikator as $indikatorId => $data) {
-                 // Periksa apakah indikator ditemukan
-                 $indikator = IndikatorPenilaian::find($indikatorId);
-     
-                 if (!$indikator) {
-                     // Jika indikator tidak ditemukan, kembalikan error
-                     DB::rollBack();
-                     return redirect()->back()->with('error', "Indikator dengan ID $indikatorId tidak ditemukan.");
-                 }
-     
-                 // Tambahkan jumlah bobot ke total nilai untuk kriteria terkait
-                 if (!isset($kriteriaTotals[$indikator->kriteria_id])) {
-                     $kriteriaTotals[$indikator->kriteria_id] = 0;
-                 }
-                 $kriteriaTotals[$indikator->kriteria_id] += $data['nilai'];
-     
-                 // Cek apakah penilaian untuk indikator ini sudah ada
-                 $existingForm = FormPenilaian::where('penilaian_reviewers_id', $request->penilaian_reviewers_id)
-                     ->where('id_indikator', $indikator->id)
-                     ->first();
-     
-                 if (!$existingForm) {
-                     // Simpan data indikator ke dalam tabel FormPenilaian jika belum ada
-                     FormPenilaian::create([
-                         'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
-                         'id_kriteria' => $indikator->kriteria_id,
-                         'id_indikator' => $indikator->id,
-                         'catatan' => $data['catatan'] ?? null,
-                         'nilai' => $data['nilai'], // Menyimpan nilai per indikator
-                         'status' => 'sudah dinilai',
-                     ]);
-                 }
-     
-                 // Tambahkan nilai indikator ke total nilai keseluruhan
-                 $totalNilai += $data['nilai'];
-             }
-     
              // Cek apakah PenilaianReviewer ditemukan
              $penilaianReviewer = PenilaianReviewer::findOrFail($request->penilaian_reviewers_id);
              
-             // Cek apakah usulan perbaikan sudah ada
-             $existingUsulan = UsulanPerbaikan::where('penilaian_id', $penilaianReviewer->id)->first();
-     
+             // Inisialisasi total nilai
+             $totalNilai = 0;
+             
+             // Iterasi setiap indikator untuk menyimpan data
+             foreach ($request->indikator as $indikatorId => $data) {
+                 // Periksa apakah indikator ditemukan
+                 $indikator = IndikatorPenilaian::find($indikatorId);
+                 
+                 if (!$indikator) {
+                     // Jika indikator tidak ditemukan, batalkan transaksi
+                     DB::rollBack();
+                     return redirect()->back()->with('error', "Indikator dengan ID $indikatorId tidak ditemukan.");
+                 }
+                 
+                 // Simpan data indikator ke dalam tabel FormPenilaian
+                 FormPenilaian::create([
+                     'penilaian_reviewers_id' => $request->penilaian_reviewers_id,
+                     'id_kriteria' => $indikator->kriteria_id,
+                     'id_indikator' => $indikator->id,
+                     'catatan' => $data['catatan'] ?? '-', // Jika catatan kosong, gunakan '-'
+                     'nilai' => $data['nilai'],
+                     'status' => 'sudah dinilai',
+                 ]);
+                 
+                 // Tambahkan nilai indikator ke total nilai keseluruhan
+                 $totalNilai += $data['nilai'];
+             }
+             
              // Update status dan total nilai di tabel PenilaianReviewer
              $penilaianReviewer->update([
                  'status_penilaian' => 'sudah dinilai',
@@ -294,31 +276,93 @@ return view('form_penilaian.create_laporan_akhir', compact('laporanAkhir', 'peni
                  'urutan_penilaian' => 1,
                  'total_nilai' => $totalNilai,
              ]);
-     
-             // Tambahkan usulan perbaikan jika belum ada
+             
+             // Periksa apakah sudah ada usulan perbaikan untuk penilaian ini
+             $existingUsulan = UsulanPerbaikan::where('penilaian_id', $penilaianReviewer->id)->exists();
+             
              if (!$existingUsulan) {
+                 // Tambahkan usulan perbaikan jika belum ada
                  UsulanPerbaikan::create([
                      'usulan_id' => $penilaianReviewer->usulan_id,
                      'status' => 'revisi',
                      'penilaian_id' => $penilaianReviewer->id,
                  ]);
-     
+                 
+                 // Update status usulan
                  $usulan = Usulan::findOrFail($penilaianReviewer->usulan_id);
                  $usulan->update(['status' => 'revision']);
              }
+             
+             // Commit transaksi jika semua operasi berhasil
+             DB::commit();
+             
+             // Kembalikan respons sukses ke view
+             return redirect()->back()->with('success', 'Form penilaian berhasil disimpan.');
+             
+         } catch (\Exception $e) {
+             // Rollback transaksi jika terjadi error
+             DB::rollBack();
+             
+             // Log error untuk debugging
+             \Log::error('Error saat menyimpan penilaian: ' . $e->getMessage());
+             
+             // Kembalikan pesan error ke view
+             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan penilaian. Silakan coba lagi.');
+         }
+     }
+    
+    
+     public function batalPenilaian($id, Request $request)
+     {
+         // Validasi ID penilaian reviewer
+         $request->validate([
+             'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
+             'usulan_id' => 'required|exists:usulans,id', // Validasi usulan_id
+         ]);
+     
+         // Cari penilaian reviewer berdasarkan penilaian_reviewers_id
+         $penilaianReviewer = PenilaianReviewer::find($request->penilaian_reviewers_id);
+     
+         // Pastikan penilaian reviewer ditemukan
+         if (!$penilaianReviewer) {
+             return redirect()->back()->with('error', 'Penilaian reviewer tidak ditemukan.');
+         }
+     
+         // Mulai transaksi untuk memastikan integritas data
+         DB::beginTransaction();
+     
+         try {
+             // Hapus data FormPenilaian yang terkait dengan penilaian reviewer
+             FormPenilaian::where('penilaian_reviewers_id', $penilaianReviewer->id)->delete();
+     
+             // Update status penilaian reviewer menjadi 'Belum Dinilai'
+             $penilaianReviewer->update([
+                 'status_penilaian' => 'Belum Dinilai',
+                 'total_nilai' => 0, // Set total nilai ke 0
+             ]);
+     
+             // Jika perlu, hapus usulan perbaikan terkait
+             $existingUsulan = UsulanPerbaikan::where('penilaian_id', $penilaianReviewer->id)->first();
+             if ($existingUsulan) {
+                 $existingUsulan->delete();
+             }
+     
+             // Update status usulan menjadi 'belum ada'
+             $usulan = Usulan::findOrFail($request->usulan_id);
+             $usulan->update(['status' => 'review']);
      
              // Commit transaksi jika semua operasi berhasil
              DB::commit();
      
-             // Kembalikan respons sukses ke view
-             return redirect()->back()->with('success', 'Form penilaian berhasil diperbarui.');
+             return redirect()->back()->with('success', 'Penilaian berhasil dibatalkan dan status diupdate.');
          } catch (\Exception $e) {
-             // Rollback transaksi jika terjadi error
+             // Rollback transaksi jika terjadi kesalahan
              DB::rollBack();
              return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
          }
      }
      
+
 
 
 

@@ -228,6 +228,8 @@ Route::group(['middleware' => ['role:Reviewer']], function () {
 
     Route::resource('form-penilaian', FormPenilaianController::class);
     Route::get('form-penilaian/create/{id}', [FormPenilaianController::class, 'create'])->name('form-penilaian.input');
+    // Tambahkan route untuk batal penilaian
+     Route::post('form-penilaian/{id}/batal', [FormPenilaianController::class, 'batalPenilaian'])->name('review-usulan.batal');
     Route::get('form-penilaian/laporan-kemajuan/{id}', [FormPenilaianController::class, 'createLaporanKemajuan'])->name('form-penilaian.laporan-kemajuan');
     Route::get('form-penilaian/laporan-akhir/{id}', [FormPenilaianController::class, 'createLaporanAkhir'])->name('form-penilaian.laporan-akhir');
 

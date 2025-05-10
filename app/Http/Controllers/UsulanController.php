@@ -72,6 +72,8 @@ public function getCabangIlmu(Request $request)
             if ($currentDate->between($tanggalAwal, $tanggalAkhir)) {
                 $isButtonActive = true;
             }
+          
+
         }
 
 
@@ -146,6 +148,23 @@ public function getCabangIlmu(Request $request)
      */
     public function create($jenis)
     {
+        $periode = Periode::where('is_active', 1)->first();
+        $isButtonActive = false;
+
+        if ($periode) {
+            // Set timezone ke Asia/Jakarta untuk WIB
+            $tanggalAwal = Carbon::parse($periode->tanggal_awal)->timezone('Asia/Jakarta');
+            $tanggalAkhir = Carbon::parse($periode->tanggal_akhir)->timezone('Asia/Jakarta');
+            $currentDate = Carbon::now('Asia/Jakarta'); // Waktu Indonesia saat ini
+
+            // Periksa apakah tombol harus aktif berdasarkan rentang waktu
+            if ($currentDate->between($tanggalAwal, $tanggalAkhir)) {
+                $isButtonActive = true;
+            } else {
+                return redirect()->back()->with('error', 'Usulan Sudah ditutup pada tanggal ' . $tanggalAkhir->format('d-m-Y') . ' pukul 23:59 WIB');
+            }
+        }
+
         $user_id = auth()->user()->id;
         $dosen = Dosen::where('user_id', $user_id)->first();
         $usulanKetua = Usulan::
@@ -154,7 +173,7 @@ public function getCabangIlmu(Request $request)
         ->where('jenis_skema',$jenis) // Validasi berdasarkan jenis skema
         ->count(); // Hitung jumlah record yang sesuai
         // dd($usulanKetua);
-        if ($usulanKetua >= 2) {
+        if ($usulanKetua == 1) {
             // Menggunakan back dengan pesan error
             return back()->with('error', 'Anda hanya bisa menjadi ketua di 1 usulan proposal untuk jenis skema: ' . $jenis);
 

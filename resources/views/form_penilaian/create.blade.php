@@ -1,5 +1,15 @@
 @extends('layouts.main_layout')
+<style>
+    .nilai-review {
+    background-color: #FFEB3B; /* Warna cerah (kuning) */
+    font-size: 24px; /* Ukuran font yang lebih besar */
+    font-weight: bold; /* Tebalkan font */
+    padding: 8px 16px; /* Memberikan padding di sekitar teks */
+    border-radius: 8px; /* Membuat sudut menjadi lebih bulat */
+    color: #000000; /* Warna teks hitam untuk kontras */
+}
 
+</style>
 @section('content')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <!--begin::Toolbar-->
@@ -64,14 +74,14 @@
                                         <th>Bidang Fokus</th>
                                         <td>{{ $usulan->bidang_fokus }}</td>
                                     </tr>
-                                    <tr>
+                                    {{-- <tr>
                                         <th>Tema Penelitian</th>
                                         <td>{{ $usulan->tema_penelitian }}</td>
                                     </tr>
                                     <tr>
                                         <th>Topik Penelitian</th>
                                         <td>{{ $usulan->topik_penelitian }}</td>
-                                    </tr>
+                                    </tr> --}}
                                     <tr>
                                         <th>Lama Kegiatan</th>
                                         <td>{{ $usulan->lama_kegiatan }} tahun</td>
@@ -133,16 +143,18 @@
                                     <td>{{ $indikator->nama_indikator }}</td>
                                     <td>
                                         <select name="indikator[{{ $indikator->id }}][nilai]" class="form-control bobot-selector" required>
-                                            <option value="1" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 1 ? 'selected' : '' }}>1</option>
-                                            <option value="2" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 2 ? 'selected' : '' }}>2</option>
-                                            <option value="3" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 3 ? 'selected' : '' }}>3</option>
-                                            <option value="4" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 4 ? 'selected' : '' }}>4</option>
-                                            <option value="5" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 5 ? 'selected' : '' }}>5</option>
+                                            <option value="5" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 5 ? 'selected' : '' }}>5 - Baik Sekali</option>
+                                            <option value="4" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 4 ? 'selected' : '' }}>4 - Sangat Baik</option>
+                                            <option value="3" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 3 ? 'selected' : '' }}>3 - Baik</option>
+                                            <option value="2" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 2 ? 'selected' : '' }}>2 - Cukup</option>
+                                            <option value="1" {{ old('indikator.' . $indikator->id . '.nilai', $indikator->nilai ?? '') == 1 ? 'selected' : '' }}>1 - Kurang</option>
                                         </select>
+                                        
                                     </td>
                                     <td>
-                                        <textarea name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" style="height: 200px;" required>{{ old('indikator.' . $indikator->id . '.catatan', '') }}</textarea>
+                                        <textarea name="indikator[{{ $indikator->id }}][catatan]" class="form-control" placeholder="Catatan" style="height: 200px;" required>{{ old('indikator.' . $indikator->id . '.catatan', 'Perlu diperjelas') }}</textarea>
                                     </td>
+                                    
                                 </tr>
                             @endforeach
                             
@@ -150,11 +162,10 @@
                                         </table>
                                     
                                         <!-- Total Bobot Display -->
-                                        <div class="mt-4">
-                                            <h5>Nilai Review : <span id="totalBobot">0</span></h5>
-                                            {{-- <h5>Rata-rata Bobot: <span id="averageBobot">0</span></h5> --}}
-                                            {{-- <h5>Nilai Review: <span id="percentageBobot">0%</span></h5> --}}
-                                        </div>
+                                        {{-- <div class="mt-4">
+                                            <h5>Nilai Review : <span id="totalBobot" class="nilai-review">0</span></h5>
+                                        </div> --}}
+                                        
                                     
                                         <script>
                                             // Function to calculate total, average, and percentage bobot
@@ -197,7 +208,7 @@
                                     
                                         <!-- Submit Button -->
                                         <div class="text-end mt-4">
-                                            <button type="submit" class="btn btn-primary">Simpan Penilaian</button>
+                                            <button type="submit" class="btn btn-primary">Simpan</button>
                                         </div>
                                     </form>
                                     

@@ -142,9 +142,59 @@
 
                                             <td>
                                                 <a href="{{ route('review-usulan.lihat', ['id' => $usulan->usulan_id]) }}"
-                                                    class="btn btn-info">
+                                                    class="btn btn-info" style="margin-right: 10px;">
                                                     Lihat Detail
                                                 </a>
+
+                                                @if ($usulan->total_nilai == 0)
+                                                    <a href="{{ route('form-penilaian.input', ['id' => $usulan->usulan_id]) }}"
+                                                        class="btn btn-primary" style="margin-right: 10px;">
+                                                        Review
+                                                    </a>
+                                                @else
+                                                    <!-- Tombol Batal Penilaian -->
+                                                    <form
+                                                        action="{{ route('form-penilaian.batal', ['id' => $usulan->id]) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('POST')
+                                                        <input type="hidden" name="penilaian_reviewers_id"
+                                                            value="{{ $usulan->id }}">
+                                                        <input type="hidden" name="usulan_id"
+                                                            value="{{ $usulan->usulan_id }}">
+
+                                                        <button type="button" class="btn btn-danger" id="batalButton"
+                                                            style="margin-right: 10px;">
+                                                            Batal Penilaian
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+
+
+                                                <!-- SweetAlert2 Script -->
+                                                <script>
+                                                    document.getElementById('batalButton').addEventListener('click', function(event) {
+                                                        event.preventDefault(); // Prevent form submission immediately
+
+                                                        // Show SweetAlert2 confirmation dialog
+                                                        Swal.fire({
+                                                            title: 'Apakah Anda yakin?',
+                                                            text: "Penilaian ini akan dibatalkan!",
+                                                            icon: 'warning',
+                                                            showCancelButton: true,
+                                                            confirmButtonText: 'Ya, batalkan!',
+                                                            cancelButtonText: 'Tidak, batalkan!',
+                                                            reverseButtons: true
+                                                        }).then((result) => {
+                                                            if (result.isConfirmed) {
+                                                                // Jika pengguna mengonfirmasi, kirim form
+                                                                this.closest('form').submit();
+                                                            }
+                                                        });
+                                                    });
+                                                </script>
+
                                             </td>
                                         </tr>
                                     @endforeach
