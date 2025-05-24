@@ -478,6 +478,7 @@ public function getCabangIlmu(Request $request)
 
             // If the total reviewers count matches the accepted reviewers count, set allReviewersAccepted to true
             $usulan->allReviewersAccepted = $totalReviewers === $acceptedReviewers;
+ 
         }
 
         // Fetch all reviewers (if you need to display them too)

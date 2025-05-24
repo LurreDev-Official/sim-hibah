@@ -129,6 +129,9 @@
                                             <td>{{ $usulan->judul_usulan }}</td>
                                             <td>{{ $usulan->tahun_pelaksanaan }}</td>
                                             <td>
+                                                           @role('Kepala LPPM')
+                                                                <li>skor {{ $usulan->total_nilai_review }}</li>
+                                                            @endrole
                                                 @if ($usulan->status == 'draft')
                                                     <span class="badge bg-warning">Draf</span>
                                                 @elseif ($usulan->status == 'submitted')
@@ -145,6 +148,8 @@
                                                             ->get();
                                                     @endphp
                                                     <ul>
+                                                            
+                                                      
                                                         @forelse ($getreviewer as $item)
                                                             @role('Kepala LPPM')
                                                                 <li>{{ $item->reviewer->user->name }}</li>
