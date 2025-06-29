@@ -106,7 +106,10 @@ class LaporanKemajuanController extends Controller
         })
         ->where('status', 'approved') // Adding the status filter after the initial condition
         ->get();
-        $getTemplate = TemplateDokumen::where('proses', 'Laporan Kemajuan')->where('skema', $jenis)->first();
+        $getTemplate = TemplateDokumen::where([
+            ['proses', '=', 'Laporan-Kemajuan'],
+            ['skema', '=', $jenis]
+        ])->first();
     
         return view('laporan_kemajuan.create', compact('usulans', 'jenis','getTemplate'));
     } else {
@@ -259,7 +262,10 @@ class LaporanKemajuanController extends Controller
                 ->where('jenis_skema', $jenis)
                 ->get();
                 // Ambil template laporan kemajuan (opsional)
-            $getTemplate = TemplateDokumen::where('skema', $jenis)->first();
+            $getTemplate = TemplateDokumen::where([
+            ['proses', '=', 'Laporan Kemajuan'],
+            ['skema', '=', $jenis]
+        ])->first();
                 return view('laporan_kemajuan.create', compact('usulans', 'jenis', 'getTemplate'));
             }
                 

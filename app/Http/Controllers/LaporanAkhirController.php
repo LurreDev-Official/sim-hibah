@@ -291,7 +291,10 @@ public function kirim(Request $request)
                 ->where('jenis', $jenis)
                 ->get();
                 // Ambil template laporan kemajuan (opsional)
-                $getTemplate = TemplateDokumen::where('skema', $jenis)->first();
+                $getTemplate = TemplateDokumen::where([
+            ['proses', '=', 'Laporan Akhir'],
+            ['skema', '=', $jenis]
+        ])->first();
                 return view('laporan_akhir.create', compact('laporakemajuans', 'jenis', 'getTemplate'));
             }
 

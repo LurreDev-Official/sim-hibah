@@ -709,6 +709,7 @@ return view('usulan.perbaiki_revisi', compact('usulan', 'penilaianReviewer', 'in
     // Update the status of the Usulan
     $usulan->status = $validated['status'];
     $usulan->save(); // Save the updated status
+    //cek status jika di penilain review status masih revisi kembalikan ke halaman
     return redirect()->back()->with('success', 'Berhasil di simpan.');
 }
  
