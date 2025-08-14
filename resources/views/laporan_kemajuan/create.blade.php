@@ -63,30 +63,71 @@
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="usulan_id"><strong>Usulan:</strong></label>
-                                    <select name="usulan_id" id="usulan_id" class="form-select" required>
+                                    <select name="usulan_id" id="usulan_id" class="form-select">
                                         <option value="">Pilih Usulan</option>
                                         @foreach ($usulans as $usulan)
                                         <option value="{{ $usulan->id }}">{{ $usulan->judul_usulan }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-
                             </div>
-                            <!-- Dokumen dokumen_kontrak -->
+
+                             <!-- Dokumen dokumen_kontrak -->
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="dokumen_kontrak"><strong>Dokumen Kontrak:</strong></label>
-                                    <input type="file" name="dokumen_kontrak" id="dokumen_kontrak" class="form-control"  required/>
+                                    <input type="file" name="dokumen_kontrak" id="dokumen_kontrak" class="form-control" required/>
+                                    <small class="form-text text-muted">Maksimal ukuran file: 5MB</small>
+                                    <div class="invalid-feedback" id="dokumen_kontrak_error"></div>
                                 </div>
                             </div>
+                            
 
-                            <!-- Dokumen Laporan Kemajuan -->
+                            <!-- Dokumen Laporan Kemajuan --> 
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="dokumen_laporan_kemajuan"><strong>Dokumen Laporan Kemajuan:</strong></label>
-                                    <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" required />
+                                    <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" required/>
+                                    <small class="form-text text-muted">Maksimal ukuran file: 10MB</small>
+                                    <div class="invalid-feedback" id="dokumen_laporan_kemajuan_error"></div>
                                 </div>
                             </div>
+
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Validasi dokumen kontrak (max 5MB)
+                                document.getElementById('dokumen_kontrak').addEventListener('change', function() {
+                                    const file = this.files[0];
+                                    const errorDiv = document.getElementById('dokumen_kontrak_error');
+                                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                                    
+                                    if (file && file.size > maxSize) {
+                                        this.classList.add('is-invalid');
+                                        errorDiv.textContent = 'Ukuran file tidak boleh lebih dari 5MB';
+                                        errorDiv.style.display = 'block';
+                                    } else {
+                                        this.classList.remove('is-invalid');
+                                        errorDiv.style.display = 'none';
+                                    }
+                                });
+                                
+                                // Validasi dokumen laporan kemajuan (max 10MB)
+                                document.getElementById('dokumen_laporan_kemajuan').addEventListener('change', function() {
+                                    const file = this.files[0];
+                                    const errorDiv = document.getElementById('dokumen_laporan_kemajuan_error');
+                                    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+                                    
+                                    if (file && file.size > maxSize) {
+                                        this.classList.add('is-invalid');
+                                        errorDiv.textContent = 'Ukuran file tidak boleh lebih dari 10MB';
+                                        errorDiv.style.display = 'block';
+                                    } else {
+                                        this.classList.remove('is-invalid');
+                                        errorDiv.style.display = 'none';
+                                    }
+                                });
+                            });
+                            </script>
 
                             <!-- jenis -->
                             <div class="col-md-12 mb-4">

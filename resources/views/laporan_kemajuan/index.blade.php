@@ -399,13 +399,30 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+
+                        <div class="mb-3">
+                           <label for="dokumen_kontrak{{ $laporan->id }}" class="form-label">Dokumen
+                               Kontrak</label>
+                           <input type="file" class="form-control"
+                               id="dokumen_kontrak{{ $laporan->id }}" name="dokumen_kontrak"
+                               accept=".pdf">
+                           <small class="text-warning">Maksimal ukuran file: 5MB</small>
+                           <!-- Show current document if exists -->
+                           @if ($laporan->dokumen_kontrak)
+                               <div class="mt-2">
+                                   <a href="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
+                                       target="_blank">Lihat Dokumen Kontrak Lama</a>
+                               </div>
+                           @endif
+                        </div>
                         <!-- File upload input -->
                         <div class="mb-3">
                             <label for="dokumen_laporan_kemajuan{{ $laporan->id }}" class="form-label">Dokumen
-                                Laporan</label>
+                                Laporan Kemajuan</label>
                             <input type="file" class="form-control"
                                 id="dokumen_laporan_kemajuan{{ $laporan->id }}" name="dokumen_laporan_kemajuan"
-                                accept=".pdf,.doc,.docx">
+                                accept=".pdf">
+                            <small class="text-warning">Maksimal ukuran file: 10MB</small>
                             <!-- Show current document if exists -->
                             @if ($laporan->dokumen_laporan_kemajuan)
                                 <div class="mt-2">
@@ -414,6 +431,9 @@
                                 </div>
                             @endif
                         </div>
+
+                        
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
