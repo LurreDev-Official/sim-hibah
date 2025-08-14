@@ -57,33 +57,21 @@
                                         $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
                                         $scoreSinta = $dosen->score_sinta;
                                     @endphp
-                                    {{-- @if ($isButtonActive) --}}
-                                        <!-- Tombol aktif jika skor Sinta lebih dari 200 -->
-                                        <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}"
-                                            class="btn btn-primary mr-3">Tambah Usulan</a>
-                                    {{-- @else  --}}
-                                        <!-- Tombol dinonaktifkan jika skor Sinta kurang dari atau sama dengan 200 -->
-                                        {{-- <button class="btn btn-primary mr-3" disabled>Tambah Usulan</button> --}}
-                                    {{-- @endif --}}
+                                    @if ($isButtonActive)
+                                            <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}" class="btn btn-primary mb-3">Tambah Usulan </a>
+                                            @else
+                                            @endif
+                                        <!-- @if($usulans->count() < 2 )
+                                            <a href="{{ route('usulan.create', ['jenis' => $jenis]) }}" class="btn btn-primary mb-3">Tambah Usulan </a>
+                                            
+                                        @endif -->
                                 @endrole
                                 <!-- Export Button -->
                                 <a href="{{ route('usulan.export', ['jenis' => $jenis]) }}" class="btn btn-success">
                                     <i class="fa fa-download"></i> Export Data
                                 </a>
 
-                                @php
-                                    // Ambil data dosen terkait user yang sedang login
-                                    $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
 
-                                    // Ambil data anggota dosen berdasarkan dosen yang login
-                                    $anggotaDosencek = null;
-                                    if ($dosen) {
-                                        $anggotaDosencek = \App\Models\AnggotaDosen::where(
-                                            'dosen_id',
-                                            $dosen->id,
-                                        )->first();
-                                    }
-                                @endphp
                             </div>
                         </div>
                         <!--end::Card toolbar-->
@@ -129,9 +117,7 @@
                                             <td>{{ $usulan->judul_usulan }}</td>
                                             <td>{{ $usulan->tahun_pelaksanaan }}</td>
                                             <td>
-                                                           @role('Kepala LPPM')
-                                                                <li>skor {{ $usulan->total_nilai_review }}</li>
-                                                            @endrole
+                                                   
                                                 @if ($usulan->status == 'draft')
                                                     <span class="badge bg-warning">Draf</span>
                                                 @elseif ($usulan->status == 'submitted')
@@ -148,20 +134,40 @@
                                                             ->get();
                                                     @endphp
                                                     <ul>
-                                                            
+                                                          
                                                       
                                                         @forelse ($getreviewer as $item)
                                                             @role('Kepala LPPM')
                                                                 <li>{{ $item->reviewer->user->name }}</li>
+ 
+
                                                             @endrole
                                                         @empty
                                                             <li>Belum ada peninjau yang ditugaskan</li>
                                                         @endforelse
                                                     </ul>
-                                                @elseif ($usulan->status == 'revision')
+                                                @elseif ($usulan->status == 'revision'&& $usulan->status != 'approved')
+
                                                     <span class="badge bg-warning">Perlu Revisi</span>
+
                                                 @elseif ($usulan->status == 'waiting approved')
+
+
                                                     <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
+@php
+        // Ambil satu record PenilaianReviewer berdasarkan usulan_id
+        $penilaianReviewer = \App\Models\PenilaianReviewer::where('usulan_id', $usulan->id)
+            ->where('status_penilaian', 'sudah dinilai') // Status penilaian yang diterima
+            ->first(); // Ambil satu record pertama yang ditemukan
+    @endphp
+
+    <p>Total Nilai:
+        @if ($penilaianReviewer)
+<span class="badge bg-danger fs-4 p-3">{{ $penilaianReviewer->total_nilai }}</span>
+        @else
+            Belum Ada Penilaian
+        @endif
+    </p>
                                                 @elseif ($usulan->status == 'approved')
                                                     <span class="badge bg-success">Disetujui</span>
                                                 @elseif ($usulan->status == 'rejected')
@@ -192,10 +198,46 @@
                                                     </button>
                                                 </div>
 
+                                                <!-- Modal for Edit File -->
+                                                <div class="modal fade" id="editFileModal{{ $usulan->id }}"
+                                                    tabindex="-1" aria-labelledby="editFileModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="editFileModalLabel">Upload
+                                                                    Dokumen Usulan Baru</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form
+                                                                    action="{{ route('usulan.update', ['jenis' => $usulan->jenis_skema, 'id' => $usulan->id]) }}"
+                                                                    method="POST" enctype="multipart/form-data">
+                                                                    @csrf
+                                                                    @method('PUT')
 
+                                                                    <div class="mb-3">
+                                                                        <label for="dokumen_usulan" class="form-label">Pilih
+                                                                            File PDF
+                                                                            Usulan</label>
+                                                                        <input type="file" class="form-control"
+                                                                            name="dokumen_usulan" accept=".pdf" required>
+                                                                        @error('dokumen_usulan')
+                                                                            <div class="text-danger">{{ $message }}</div>
+                                                                        @enderror
+                                                                    </div>
+
+                                                                    <button type="submit"
+                                                                        class="btn btn-primary">Upload</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <!-- Modal for viewing the corrected document -->
                                                 <div class="modal fade" id="perbaikanModal{{ $usulan->id }}"
-                                                    tabindex="-1" aria-labelledby="perbaikanModalLabel{{ $usulan->id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="perbaikanModalLabel{{ $usulan->id }}"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog modal-lg">
                                                         <div class="modal-content">
@@ -279,16 +321,7 @@
                                                     </div>
 
 
-                                                    <!-- Tombol Detail -->
-                                                    @if ($usulan->status == 'revision')
-                                                        <div class="d-flex justify-content-end mt-4">
-                                                            <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $usulan->id]) }}"
-                                                                class="btn btn-secondary">
-                                                                <i class="fas fa-edit"></i> Perbaiki Revisi
-                                                            </a>
-                                                        </div>
-                                                    @else
-                                                    @endif
+                                                
 
 
                                                     <script>
@@ -299,161 +332,205 @@
                                                         }
                                                     </script>
 
-                                                    @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft' $usulan->status == 'submitted')
+                                                    @php
+                                                        // Ambil data dosen terkait user yang sedang login
+                                                        $dosen = \App\Models\Dosen::where(
+                                                            'user_id',
+                                                            auth()->user()->id,
+                                                        )->first();
+
+                                                        // Jika dosen ditemukan, cek apakah dosen tersebut adalah ketua untuk usulan yang sesuai
+                                                        $anggotaDosencek = null;
+                                                        if ($dosen) {
+                                                            // Cek apakah dosen yang login adalah ketua dari usulan ini dengan mencocokkan ketua_dosen_id
+                                                            if ($usulan->ketua_dosen_id == $dosen->id) {
+                                                                $anggotaDosencek = true;
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @if ($anggotaDosencek && in_array($usulan->status, ['draft', 'submitted']))
                                                         <div class="col p-2">
+                                                            <!-- Button to Delete Usulan -->
                                                             <button class="btn btn-danger btn-sm"
                                                                 onclick="deleteUsulan('{{ $jenis }}', {{ $usulan->id }})">
                                                                 <i class="fas fa-trash-alt"></i> Hapus
                                                             </button>
+
+                                                            <!-- Button to Edit Usulan with margin-right for spacing -->
+                                                            <a href="{{ route('usulan.edit', ['jenis' => $usulan->jenis_skema, 'id' => $usulan->id]) }}"
+                                                                class="btn btn-warning btn-sm ms-2">
+                                                                <i class="fas fa-pencil-alt"></i> Edit
+                                                            </a>
+                                                        </div>
+                                                    @else
+                                                        <!-- Display notification when user is not the ketua or usulan status is not valid -->
+                                                        <div class="col p-2">
+                                                            @if (!$anggotaDosencek)
+                                                                <p class="text-warning">Anda bukan ketua untuk usulan ini.</p>
+                                                            @elseif ($usulan->status == 'revision')
+                                                                <div class="d-flex justify-content-end mt-4">
+                                                                    <a href="{{ route('usulan.perbaikiRevisi', ['jenis' => $jenis, 'id' => $usulan->id]) }}"
+                                                                        class="btn btn-secondary">
+                                                                        <i class="fas fa-edit"></i> Perbaiki Revisi
+                                                                    </a>
+                                                                </div>
+                                                            @elseif (!in_array($usulan->status, ['draft', 'submitted']))
+                                                                <p class="text-warning">Usulan ini tidak dalam status yang
+                                                                    dapat diedit atau dihapus.</p>
+                                                            @endif
                                                         </div>
                                                     @endif
 
 
-                                                </td>
+                                        </td>
 
-                                                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                                                <script>
-                                                    function deleteUsulan(jenis, id) {
-                                                        // Menggunakan SweetAlert2 untuk dialog konfirmasi
-                                                        Swal.fire({
-                                                            title: 'Apakah Anda yakin?',
-                                                            text: "Usulan ini akan dihapus secara permanen!",
-                                                            icon: 'warning',
-                                                            showCancelButton: true,
-                                                            confirmButtonColor: '#3085d6',
-                                                            cancelButtonColor: '#d33',
-                                                            confirmButtonText: 'Ya, hapus!',
-                                                            cancelButtonText: 'Batal'
-                                                        }).then((result) => {
-                                                            if (result.isConfirmed) {
-                                                                // Jika konfirmasi di-klik
-                                                                $.ajax({
-                                                                    url: '{{ url('usulan') }}/' + jenis + '/' + id + '/hapus', // URL endpoint dengan jenis dan ID usulan
-                                                                    type: 'POST', // HTTP method POST
-                                                                    data: {
-                                                                        "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
-                                                                    },
-                                                                    success: function(response) {
-                                                                        // Tampilkan pesan sukses dengan SweetAlert2
-                                                                        Swal.fire(
-                                                                            'Dihapus!',
-                                                                            response.success,
-                                                                            'success'
-                                                                        ).then(() => {
-                                                                            location.reload(); // Reload halaman setelah penghapusan berhasil
-                                                                        });
-                                                                    },
-                                                                    error: function(xhr) {
-                                                                        if (xhr.status === 404) {
-                                                                            // Jika usulan tidak ditemukan
-                                                                            Swal.fire(
-                                                                                'Error!',
-                                                                                xhr.responseJSON.error,
-                                                                                'error'
-                                                                            );
-                                                                        } else {
-                                                                            // Jika terjadi error lainnya
-                                                                            Swal.fire(
-                                                                                'Error!',
-                                                                                'Terjadi kesalahan: ' + xhr.responseJSON.error,
-                                                                                'error'
-                                                                            );
-                                                                        }
-                                                                    }
+                                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                        <script>
+                                            function deleteUsulan(jenis, id) {
+                                                // Menggunakan SweetAlert2 untuk dialog konfirmasi
+                                                Swal.fire({
+                                                    title: 'Apakah Anda yakin?',
+                                                    text: "Usulan ini akan dihapus secara permanen!",
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#3085d6',
+                                                    cancelButtonColor: '#d33',
+                                                    confirmButtonText: 'Ya, hapus!',
+                                                    cancelButtonText: 'Batal'
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        // Jika konfirmasi di-klik
+                                                        $.ajax({
+                                                            url: '{{ url('usulan') }}/' + jenis + '/' + id +
+                                                                '/hapus', // URL endpoint dengan jenis dan ID usulan
+                                                            type: 'POST', // HTTP method POST
+                                                            data: {
+                                                                "_token": "{{ csrf_token() }}", // Mengirimkan token CSRF untuk keamanan
+                                                            },
+                                                            success: function(response) {
+                                                                // Tampilkan pesan sukses dengan SweetAlert2
+                                                                Swal.fire(
+                                                                    'Dihapus!',
+                                                                    response.success,
+                                                                    'success'
+                                                                ).then(() => {
+                                                                    location
+                                                                        .reload(); // Reload halaman setelah penghapusan berhasil
                                                                 });
+                                                            },
+                                                            error: function(xhr) {
+                                                                if (xhr.status === 404) {
+                                                                    // Jika usulan tidak ditemukan
+                                                                    Swal.fire(
+                                                                        'Error!',
+                                                                        xhr.responseJSON.error,
+                                                                        'error'
+                                                                    );
+                                                                } else {
+                                                                    // Jika terjadi error lainnya
+                                                                    Swal.fire(
+                                                                        'Error!',
+                                                                        'Terjadi kesalahan: ' + xhr.responseJSON.error,
+                                                                        'error'
+                                                                    );
+                                                                }
                                                             }
                                                         });
                                                     }
-                                                </script>
-                                            @endrole
-                                            @role('Kepala LPPM')
-                                                <td>
-                                                    <div class="col p-2">
-                                                        <!-- Button Kirim Ke Reviewer -->
-                                                        @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review')
-                                                            <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                                                data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
-                                                                <i class="fas fa-paper-plane"></i> Kirim Ke Reviewer
-                                                            </button>
-                                                        @endif
+                                                });
+                                            }
+                                        </script>
+                                    @endrole
+                                    @role('Kepala LPPM')
+                                        <td>
+                                            <div class="col p-2">
+
+                                                     
+
+                                                <!-- Button Kirim Ke Reviewer -->
+                                                @if ($usulan->status == 'draft' || $usulan->status == 'submitted' || $usulan->status == 'review')
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#pilihKirimReviewerModal-{{ $usulan->id }}">
+                                                        <i class="fas fa-paper-plane"></i> Kirim Ke Reviewer
+                                                    </button>
+                                                @endif
 
 
-                                                        <!-- Modal Kirim Ke Reviewer -->
-                                                        <div class="modal fade"
-                                                            id="pilihKirimReviewerModal-{{ $usulan->id }}" tabindex="-1"
-                                                            aria-labelledby="pilihKirimReviewerModalLabel-{{ $usulan->id }}"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title"
-                                                                            id="pilihKirimReviewerModalLabel-{{ $usulan->id }}">
-                                                                            Pilih/Kirim Usulan ke Reviewer</h5>
-                                                                        <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"
-                                                                            aria-label="Close"></button>
+                                                <!-- Modal Kirim Ke Reviewer -->
+                                                <div class="modal fade" id="pilihKirimReviewerModal-{{ $usulan->id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="pilihKirimReviewerModalLabel-{{ $usulan->id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="pilihKirimReviewerModalLabel-{{ $usulan->id }}">
+                                                                    Pilih/Kirim Usulan ke Reviewer</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Silakan pilih reviewer untuk mengirim atau mengirim
+                                                                    ulang usulan ini.</p>
+
+                                                                <!-- Form untuk Pilih/Kirim Reviewer -->
+                                                                <form id="pilihKirimReviewerForm-{{ $usulan->id }}"
+                                                                    action="{{ route('usulan.kirim', ['jenis' => $jenis]) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="usulan_id"
+                                                                        value="{{ $usulan->id }}">
+                                                                    <input type="hidden" name="jenis"
+                                                                        value="{{ $jenis }}">
+                                                                    <input type="hidden" name="action"
+                                                                        id="action-{{ $usulan->id }}" value="">
+                                                                    <!-- Action diset lewat JavaScript -->
+
+                                                                    <!-- Dropdown Reviewer -->
+                                                                    <div class="mb-3">
+                                                                        <label for="reviewer_id-{{ $usulan->id }}"
+                                                                            class="form-label">Pilih Reviewer</label>
+                                                                        <select name="reviewer_id[]"
+                                                                            id="reviewer_id-{{ $usulan->id }}"
+                                                                            class="form-select" multiple required>
+                                                                            <option value="" disabled selected>
+                                                                                Pilih Reviewer</option>
+                                                                            @foreach ($reviewers as $reviewer)
+                                                                                <option value="{{ $reviewer->id }}">
+                                                                                    {{ $reviewer->user->name }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </div>
-                                                                    <div class="modal-body">
-                                                                        <p>Silakan pilih reviewer untuk mengirim atau mengirim
-                                                                            ulang usulan ini.</p>
-
-                                                                        <!-- Form untuk Pilih/Kirim Reviewer -->
-                                                                        <form id="pilihKirimReviewerForm-{{ $usulan->id }}"
-                                                                            action="{{ route('usulan.kirim', ['jenis' => $jenis]) }}"
-                                                                            method="POST">
-                                                                            @csrf
-                                                                            <input type="hidden" name="usulan_id"
-                                                                                value="{{ $usulan->id }}">
-                                                                            <input type="hidden" name="jenis"
-                                                                                value="{{ $jenis }}">
-                                                                            <input type="hidden" name="action"
-                                                                                id="action-{{ $usulan->id }}"
-                                                                                value="">
-                                                                            <!-- Action diset lewat JavaScript -->
-
-                                                                            <!-- Dropdown Reviewer -->
-                                                                            <div class="mb-3">
-                                                                                <label for="reviewer_id-{{ $usulan->id }}"
-                                                                                    class="form-label">Pilih Reviewer</label>
-                                                                                <select name="reviewer_id[]"
-                                                                                    id="reviewer_id-{{ $usulan->id }}"
-                                                                                    class="form-select" multiple required>
-                                                                                    <option value="" disabled selected>
-                                                                                        Pilih Reviewer</option>
-                                                                                    @foreach ($reviewers as $reviewer)
-                                                                                        <option value="{{ $reviewer->id }}">
-                                                                                            {{ $reviewer->user->name }}
-                                                                                        </option>
-                                                                                    @endforeach
-                                                                                </select>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            data-bs-dismiss="modal">Tutup</button>
-                                                                        <!-- Tombol Kirim -->
-                                                                        <button type="button" class="btn btn-primary"
-                                                                            onclick="submitForm('{{ $usulan->id }}', 'kirim')">Kirim</button>
-                                                                        <!-- Tombol Kirim Ulang -->
-                                                                        <button type="button" class="btn btn-warning"
-                                                                            onclick="submitForm('{{ $usulan->id }}', 'kirim_ulang')">Kirim
-                                                                            Ulang</button>
-                                                                    </div>
-                                                                </div>
+                                                                </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <!-- Tombol Kirim -->
+                                                                <button type="button" class="btn btn-primary"
+                                                                    onclick="submitForm('{{ $usulan->id }}', 'kirim')">Kirim</button>
+                                                                <!-- Tombol Kirim Ulang -->
+                                                                <button type="button" class="btn btn-warning"
+                                                                    onclick="submitForm('{{ $usulan->id }}', 'kirim_ulang')">Kirim
+                                                                    Ulang</button>
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
 
-                                                    <script>
-                                                        function submitForm(usulanId, action) {
-                                                            // Set value 'action' berdasarkan pilihan tombol
-                                                            document.getElementById('action-' + usulanId).value = action;
+                                            <script>
+                                                function submitForm(usulanId, action) {
+                                                    // Set value 'action' berdasarkan pilihan tombol
+                                                    document.getElementById('action-' + usulanId).value = action;
 
-                                                            // Submit form berdasarkan ID dinamis
-                                                            document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
-                                                        }
-                                                    </script>
+                                                    // Submit form berdasarkan ID dinamis
+                                                    document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
+                                                }
+                                            </script>
 
                             </div>
                             @if ($usulan->allReviewersAccepted)

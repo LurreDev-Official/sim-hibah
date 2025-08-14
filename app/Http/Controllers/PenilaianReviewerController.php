@@ -246,7 +246,7 @@ public function indexReviewUsulan()
         return redirect()->back()->with('error', 'Reviewer tidak ditemukan.');
     }
     // Fetch the usulans that have been reviewed by the current reviewer
-    $getpenilaianreview = PenilaianReviewer::where('reviewer_id', $reviewer->id)
+    $getpenilaianreview = PenilaianReviewer::with('usulan')->where('reviewer_id', $reviewer->id)
     ->where('proses_penilaian', 'Usulan')
     ->where('urutan_penilaian', 1)
     ->where(function($query) {

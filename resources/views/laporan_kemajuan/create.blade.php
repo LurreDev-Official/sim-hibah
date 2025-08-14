@@ -43,12 +43,12 @@
                 <div class="card-body pt-0">
                     @if ($getTemplate == null)
                     <div class="alert alert-danger">
-                        <strong>Whoops!</strong> Template Laporan Kemajuan penelitian belum tersedia.<br><br>
+                        <strong>Whoops!</strong> Template Laporan Kemajuan {{$jenis}} belum tersedia.<br><br>
                     </div>
                 @else
                     <div class="alert alert-info">
-                        <h3 class="text-center">Template Laporan Kemajuan Penelitian</h3>
-                        <strong>Info!</strong> Silahkan download template Laporan Kemajuan penelitian <a
+                        <h3 class="text-center">Template Laporan Kemajuan {{{$jenis}}}</h3>
+                        <strong>Info!</strong> Silahkan download template Laporan Kemajuan {{$jenis}} <a
                             href="{{ asset('storage/' . $getTemplate->file) }}" class="btn btn-success btn-sm"
                             download>disini</a>.
                     </div>
@@ -63,12 +63,20 @@
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="usulan_id"><strong>Usulan:</strong></label>
-                                    <select name="usulan_id" id="usulan_id" class="form-select">
+                                    <select name="usulan_id" id="usulan_id" class="form-select" required>
                                         <option value="">Pilih Usulan</option>
                                         @foreach ($usulans as $usulan)
                                         <option value="{{ $usulan->id }}">{{ $usulan->judul_usulan }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+
+                            </div>
+                            <!-- Dokumen dokumen_kontrak -->
+                            <div class="col-md-12 mb-4">
+                                <div class="form-group">
+                                    <label for="dokumen_kontrak"><strong>Dokumen Kontrak:</strong></label>
+                                    <input type="file" name="dokumen_kontrak" id="dokumen_kontrak" class="form-control"  required/>
                                 </div>
                             </div>
 
@@ -76,7 +84,7 @@
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="dokumen_laporan_kemajuan"><strong>Dokumen Laporan Kemajuan:</strong></label>
-                                    <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" />
+                                    <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" required />
                                 </div>
                             </div>
 

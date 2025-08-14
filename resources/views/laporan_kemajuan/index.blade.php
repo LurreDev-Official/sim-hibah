@@ -147,7 +147,7 @@
                                                 @endif
                                             </div>
 
-                                            <!-- Modal untuk Melihat Dokumen PDF -->
+                                            <!-- Modal untuk Melihat Dokumen Laporan Kemajuan -->
                                             @if ($laporan->dokumen_laporan_kemajuan)
                                                 <div class="modal fade" id="lihatDokumenModal-{{ $laporan->id }}"
                                                     tabindex="-1"
@@ -172,6 +172,52 @@
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Tutup</button>
                                                                 <a href="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
+                                                                    class="btn btn-success" target="_blank">
+                                                                    <i class="fas fa-download"></i> Download
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <!-- Tombol Lihat Dokumen Kontrak -->
+                                            <div class="col p-2">
+                                                @if ($laporan->dokumen_kontrak)
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#lihatDokumenKontrakModal-{{ $laporan->id }}">
+                                                        <i class="fas fa-file-contract"></i> Lihat Dokumen Kontrak
+                                                    </button>
+                                                @else
+                                                    <span class="text-danger">Tidak ada dokumen kontrak</span>
+                                                @endif
+                                            </div>
+
+                                            <!-- Modal untuk Melihat Dokumen Kontrak -->
+                                            @if ($laporan->dokumen_kontrak)
+                                                <div class="modal fade" id="lihatDokumenKontrakModal-{{ $laporan->id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="lihatDokumenKontrakModalLabel-{{ $laporan->id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-fullscreen">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title"
+                                                                    id="lihatDokumenKontrakModalLabel-{{ $laporan->id }}">Lihat
+                                                                    Dokumen Kontrak</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <!-- Iframe untuk Menampilkan PDF Kontrak -->
+                                                                <iframe
+                                                                    src="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
+                                                                    width="100%" height="500px" frameborder="0"></iframe>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <a href="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
                                                                     class="btn btn-success" target="_blank">
                                                                     <i class="fas fa-download"></i> Download
                                                                 </a>

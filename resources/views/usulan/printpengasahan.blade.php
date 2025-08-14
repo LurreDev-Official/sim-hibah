@@ -233,9 +233,10 @@
                         <td>Jangka Waktu Pelaksanaan</td>
                         <td class="text-center">:</td>
                         <td>
-                            {{ $periode ? $periode->tanggal_awal->format('d M Y') : '-' }}
+                            {{-- {{ $periode ? $periode->tanggal_awal->format('d M Y') : '-' }}
                             -
-                            {{ $periode ? $periode->tanggal_akhir->format('d M Y') : '-' }}
+                            {{ $periode ? $periode->tanggal_akhir->format('d M Y') : '-' }} --}}
+                             22 Mei - 22 September 2025
                         </td>
                     </tr>
                     <tr>
@@ -249,7 +250,13 @@
                         <td>Sumber Biaya Unhasy</td>
                         <td class="text-center">:</td>
                         <td>
-                            Rp. {{ $periode ? number_format($periode->nominal, 0, ',', '.') : '0' }}
+                            {{-- Rp. {{ $periode ? number_format($periode->nominal, 0, ',', '.') : '0' }} --}}
+
+                            @if ($usulan->jenis_skema == 'penelitian')
+                                Rp. 45.000.000
+                            @elseif ($usulan->jenis_skema == 'pengabdian')
+                                Rp. 5.000.000
+                            @endif
                         </td>
                     </tr>
                     
@@ -287,7 +294,7 @@
 
                     
                     <tr>
-                        <td colspan="2" class="text-center">
+                        <td colspan="3" class="text-center">
                             <br>
                             <p>Dekan</p>
                             <br>
@@ -295,7 +302,7 @@
                             <p>{{ $dekan['nama'] }}</p>
                             <p>NIDN: {{ $dekan['nidn'] }}</p>
                         </td>
-                        <td colspan="2" class="text-center">
+                        <td colspan="3" class="text-center">
                             <p>Jombang, {{ now()->format('d F Y') }}</p>
                             <p>Ketua Peneliti,</p>
                             <br>
