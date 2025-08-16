@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('ketua_dosen_id'); // Relasi ke dosen
             $table->unsignedBigInteger('usulan_id'); // Relasi ke usulan
+            $table->string('dokumen_kontrak'); // File kontrak 
             $table->string('dokumen_laporan_kemajuan'); // File dokumen kemajuan
             $table->string('status');
             $table->enum('jenis', ['penelitian', 'penelitian']);

@@ -12,6 +12,7 @@ class LaporanKemajuan extends Model
     protected $fillable = [
         'ketua_dosen_id',
         'usulan_id',
+        'dokumen_kontrak',
         'dokumen_laporan_kemajuan',
         'status',
         'jenis',

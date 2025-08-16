@@ -94,82 +94,93 @@ class LaporanKemajuanController extends Controller
      * Show the form for creating a new resource.
      */
     public function create($jenis)
-{
-    $user = auth()->user(); // Get the currently authenticated user
+    {
+        $user = auth()->user();
 
-    // Check if the user has the 'Dosen' role
-    if ($user->hasRole('Dosen')) {
-        // Filter Usulan based on ketua_dosen_id and optionally the 'jenis' if provided
-        $usulans = Usulan::where('ketua_dosen_id', $user->dosen->id)
-        ->when($jenis, function($query, $jenis) {
-            return $query->where('jenis_skema', $jenis);  // Filtering by jenis
-        })
-        ->where('status', 'approved') // Adding the status filter after the initial condition
-        ->get();
-        $getTemplate = TemplateDokumen::where([
-            ['proses', '=', 'Laporan-Kemajuan'],
-            ['skema', '=', $jenis]
-        ])->first();
-    
-        return view('laporan_kemajuan.create', compact('usulans', 'jenis','getTemplate'));
-    } else {
-        return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membuat laporan.');
+        // Hanya user dengan role Dosen yang bisa mengakses
+        if ($user->hasRole('Dosen')) {
+            $dosen = Dosen::where('user_id', $user->id)->first();
+            if (!$dosen) {
+                return redirect()->back()->with('error', 'Data dosen tidak ditemukan.');
+            }
+
+            // Ambil usulan di mana dosen adalah ketua
+            $usulans = Usulan::where('ketua_dosen_id', $dosen->id)
+                ->where('status', 'approved')
+                ->when($jenis, function($query, $jenis) {
+                    return $query->where('jenis_skema', $jenis);
+                })
+                ->get();
+
+            // Jika tidak ada usulan sebagai ketua, tolak akses
+            if ($usulans->isEmpty()) {
+                return redirect()->back()->with('error', 'Hanya ketua dosen yang dapat membuat laporan kemajuan.');
+            }
+
+            $getTemplate = TemplateDokumen::where([
+                ['proses', '=', 'Laporan Kemajuan'],
+                ['skema', '=', $jenis]
+            ])->first();
+
+            return view('laporan_kemajuan.create', compact('usulans', 'jenis', 'getTemplate'));
+        } else {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk membuat laporan.');
+        }
     }
-
-    // Tampilkan form untuk menambah data
-}
 
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    // Validate the input
-    $validated = $request->validate([
-        'usulan_id' => 'required|exists:usulans,id',
-        'dokumen_laporan_kemajuan' => 'required|file|mimes:pdf,doc,docx|max:5048',
-        'jenis' => 'required|in:penelitian,pengabdian',
-    ]);
+    {
+        // Validate the input
+        $validated = $request->validate([
+            'usulan_id' => 'required|exists:usulans,id',
+            'dokumen_laporan_kemajuan' => 'required|file|mimes:pdf|max:10048',
+            'dokumen_kontrak' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
+            'jenis' => 'required|in:penelitian,pengabdian',
+        ]);
 
-     // Check if usulan_id already exists in LaporanKemajuan
-     $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])
-     ->where('jenis', $request->jenis)->first();
+        // Check if usulan_id already exists in LaporanKemajuan
+        $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])
+            ->where('jenis', $request->jenis)->first();
 
-     if ($existingLaporanKemajuan) {
-         // If there's already a LaporanKemajuan for the given usulan_id
-         return back()->with('error', 'Laporan Kemajuan untuk usulan ini sudah ada.');
-     }else{
+        if ($existingLaporanKemajuan) {
+            // If there's already a LaporanKemajuan for the given usulan_id
+            return back()->with('error', 'Laporan Kemajuan untuk usulan ini sudah ada.');
+        } else {
+            // Save dokumen_laporan_kemajuan with the original name
+            if ($request->hasFile('dokumen_laporan_kemajuan')) {
+                $file = $request->file('dokumen_laporan_kemajuan');
+                $fileName = $file->getClientOriginalName();
+                $filePath = $file->storeAs('laporan_kemajuan', $fileName, 'public');
+                $validated['dokumen_laporan_kemajuan'] = $filePath;
+            }
 
-        
-    // Save file with the original name
-    if ($request->hasFile('dokumen_laporan_kemajuan')) {
-        $file = $request->file('dokumen_laporan_kemajuan');
-        
-        // Get the original file name
-        $fileName = $file->getClientOriginalName();
-        
-        // Store file in the 'public/uploads' folder with its original name
-        $filePath = $file->storeAs('uploads', $fileName, 'public');
-        
-        // Add the file path to the validated data
-        $validated['dokumen_laporan_kemajuan'] = $filePath;
+            // Save dokumen_kontrak with the original name if uploaded
+            if ($request->hasFile('dokumen_kontrak')) {
+                $kontrakFile = $request->file('dokumen_kontrak');
+                $kontrakFileName = $kontrakFile->getClientOriginalName();
+                $kontrakFilePath = $kontrakFile->storeAs('dokumen_kontrak', $kontrakFileName, 'public');
+                $validated['dokumen_kontrak'] = $kontrakFilePath;
+            }
+
+            $user = auth()->user();
+            // Set the status to 'submitted'
+            $usulan = Usulan::findOrFail($validated['usulan_id']);
+            $validated['status'] = 'submitted';
+            $validated['ketua_dosen_id'] = $usulan->ketua_dosen_id;
+            $validated['jenis'] = $request->jenis;
+
+            // Create the LaporanKemajuan record in the database
+            LaporanKemajuan::create($validated);
+
+            // Redirect to the show page with the jenis parameter
+            return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
+                ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
+        }
     }
-    $user = auth()->user(); 
-    // Set the status to 'submitted'
-    $usulan = Usulan::findOrFail($validated['usulan_id']);
-    $validated['status'] = 'submitted';
-    $validated['ketua_dosen_id'] =$usulan->ketua_dosen_id;
-    $validated['jenis'] = $request->jenis;
-
-    // Create the LaporanKemajuan record in the database
-    LaporanKemajuan::create($validated);
-
-   // Redirect to the show page with the jenis parameter
-   return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
-   ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
-}
-}
 
 
 
@@ -265,7 +276,23 @@ class LaporanKemajuanController extends Controller
             $getTemplate = TemplateDokumen::where([
             ['proses', '=', 'Laporan Kemajuan'],
             ['skema', '=', $jenis]
-        ])->first();
+             ])->first();
+
+             //cek data usulan
+
+             // Ambil usulan di mana dosen adalah ketua
+            $usulans = Usulan::where('ketua_dosen_id', $dosen->id)
+                ->where('status', 'approved')
+                ->when($jenis, function($query, $jenis) {
+                    return $query->where('jenis_skema', $jenis);
+                })
+                ->get();
+
+            // Jika tidak ada usulan sebagai ketua, tolak akses
+            if ($usulans->isEmpty()) {
+                return redirect()->back()->with('error', 'Hanya ketua dosen yang dapat membuat laporan kemajuan.');
+            }
+
                 return view('laporan_kemajuan.create', compact('usulans', 'jenis', 'getTemplate'));
             }
                 
@@ -302,30 +329,43 @@ class LaporanKemajuanController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    $validated = $request->validate([
-        'dokumen_laporan_kemajuan' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
-    ]);
+    {
+        $validated = $request->validate([
+            'dokumen_laporan_kemajuan' => 'nullable|file|mimes:pdf|max:10048',
+            'dokumen_kontrak' => 'nullable|file|mimes:pdf|max:5048',
+        ]);
 
-    $laporanKemajuan = LaporanKemajuan::findOrFail($id);
+        $laporanKemajuan = LaporanKemajuan::findOrFail($id);
 
-    // Simpan file baru jika ada
-    if ($request->hasFile('dokumen_laporan_kemajuan')) {
-        // Hapus file lama jika ada
-        if ($laporanKemajuan->dokumen_laporan_kemajuan && \Storage::disk('public')->exists($laporanKemajuan->dokumen_laporan_kemajuan)) {
-            \Storage::disk('public')->delete($laporanKemajuan->dokumen_laporan_kemajuan);
+        // Simpan file laporan kemajuan baru jika ada
+        if ($request->hasFile('dokumen_laporan_kemajuan')) {
+            // Hapus file lama jika ada
+            if ($laporanKemajuan->dokumen_laporan_kemajuan && \Storage::disk('public')->exists($laporanKemajuan->dokumen_laporan_kemajuan)) {
+                \Storage::disk('public')->delete($laporanKemajuan->dokumen_laporan_kemajuan);
+            }
+
+            // Simpan file baru
+            $filePath = $request->file('dokumen_laporan_kemajuan')->store('laporan_kemajuan', 'public');
+            $validated['dokumen_laporan_kemajuan'] = $filePath;
         }
 
-        // Simpan file baru
-        $filePath = $request->file('dokumen_laporan_kemajuan')->store('uploads', 'public');
-        $validated['dokumen_laporan_kemajuan'] = $filePath;
+        // Simpan file dokumen kontrak baru jika ada
+        if ($request->hasFile('dokumen_kontrak')) {
+            // Hapus file lama jika ada
+            if ($laporanKemajuan->dokumen_kontrak && \Storage::disk('public')->exists($laporanKemajuan->dokumen_kontrak)) {
+                \Storage::disk('public')->delete($laporanKemajuan->dokumen_kontrak);
+            }
+
+            // Simpan file baru
+            $kontrakPath = $request->file('dokumen_kontrak')->store('dokumen_kontrak', 'public');
+            $validated['dokumen_kontrak'] = $kontrakPath;
+        }
+
+        // Perbarui data
+        $laporanKemajuan->update($validated);
+
+        return redirect()->back()->with('success', 'Laporan kemajuan berhasil diperbarui.');
     }
-
-    // Perbarui data
-    $laporanKemajuan->update($validated);
-
-    return redirect()->back()->with('success', 'Laporan kemajuan berhasil diperbarui.');
-}
 
     /**
      * Remove the specified resource from storage.
