@@ -83,7 +83,7 @@
                             </div>
                             
 
-                            <!-- Dokumen Laporan Kemajuan --> 
+                            <!-- Dokumen Laporan Kemajuan -->
                             <div class="col-md-12 mb-4">
                                 <div class="form-group">
                                     <label for="dokumen_laporan_kemajuan"><strong>Dokumen Laporan Kemajuan:</strong></label>
@@ -95,15 +95,28 @@
 
                             <script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Validasi dokumen kontrak (max 5MB)
+                                // Validasi dokumen kontrak (max 5MB dan panjang nama file)
                                 document.getElementById('dokumen_kontrak').addEventListener('change', function() {
                                     const file = this.files[0];
                                     const errorDiv = document.getElementById('dokumen_kontrak_error');
                                     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                                    const maxNameLength = 25;
                                     
-                                    if (file && file.size > maxSize) {
+                                    let errorMessage = '';
+                                    
+                                    if (file) {
+                                        if (file.size > maxSize) {
+                                            errorMessage = 'Ukuran file tidak boleh lebih dari 5MB';
+                                        }
+                                        
+                                        if (file.name.length > maxNameLength) {
+                                            errorMessage += (errorMessage ? ' dan ' : '') + 'Nama file tidak boleh lebih dari 25 karakter';
+                                        }
+                                    }
+                                    
+                                    if (errorMessage) {
                                         this.classList.add('is-invalid');
-                                        errorDiv.textContent = 'Ukuran file tidak boleh lebih dari 5MB';
+                                        errorDiv.textContent = errorMessage;
                                         errorDiv.style.display = 'block';
                                     } else {
                                         this.classList.remove('is-invalid');
@@ -111,15 +124,28 @@
                                     }
                                 });
                                 
-                                // Validasi dokumen laporan kemajuan (max 10MB)
+                                // Validasi dokumen laporan kemajuan (max 10MB dan panjang nama file)
                                 document.getElementById('dokumen_laporan_kemajuan').addEventListener('change', function() {
                                     const file = this.files[0];
                                     const errorDiv = document.getElementById('dokumen_laporan_kemajuan_error');
                                     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+                                    const maxNameLength = 25;
                                     
-                                    if (file && file.size > maxSize) {
+                                    let errorMessage = '';
+                                    
+                                    if (file) {
+                                        if (file.size > maxSize) {
+                                            errorMessage = 'Ukuran file tidak boleh lebih dari 10MB';
+                                        }
+                                        
+                                        if (file.name.length > maxNameLength) {
+                                            errorMessage += (errorMessage ? ' dan ' : '') + 'Nama file tidak boleh lebih dari 25 karakter';
+                                        }
+                                    }
+                                    
+                                    if (errorMessage) {
                                         this.classList.add('is-invalid');
-                                        errorDiv.textContent = 'Ukuran file tidak boleh lebih dari 10MB';
+                                        errorDiv.textContent = errorMessage;
                                         errorDiv.style.display = 'block';
                                     } else {
                                         this.classList.remove('is-invalid');
