@@ -150,35 +150,56 @@ class LaporanKemajuanController extends Controller
             // If there's already a LaporanKemajuan for the given usulan_id
             return back()->with('error', 'Laporan Kemajuan untuk usulan ini sudah ada.');
         } else {
-            // Save dokumen_laporan_kemajuan with the original name
-            if ($request->hasFile('dokumen_laporan_kemajuan')) {
-                $file = $request->file('dokumen_laporan_kemajuan');
-                $fileName = $file->getClientOriginalName();
-                $filePath = $file->storeAs('laporan_kemajuan', $fileName, 'public');
-                $validated['dokumen_laporan_kemajuan'] = $filePath;
+            try {
+                // Save dokumen_laporan_kemajuan with the original name
+                if ($request->hasFile('dokumen_laporan_kemajuan')) {
+                    $file = $request->file('dokumen_laporan_kemajuan');
+                    $fileName = $file->getClientOriginalName();
+                    $filePath = $file->storeAs('laporan_kemajuan', $fileName, 'public');
+                    if (!$filePath) {
+                        throw new \Exception('Gagal menyimpan file laporan kemajuan');
+                    }
+                    $validated['dokumen_laporan_kemajuan'] = $filePath;
+                }
+
+                // Save dokumen_kontrak with the original name if uploaded
+                if ($request->hasFile('dokumen_kontrak')) {
+                    $kontrakFile = $request->file('dokumen_kontrak');
+                    $kontrakFileName = $kontrakFile->getClientOriginalName();
+                    $kontrakFilePath = $kontrakFile->storeAs('dokumen_kontrak', $kontrakFileName, 'public');
+                    if (!$kontrakFilePath) {
+                        throw new \Exception('Gagal menyimpan file dokumen kontrak');
+                    }
+                    $validated['dokumen_kontrak'] = $kontrakFilePath;
+                }
+
+                $user = auth()->user();
+                // Set the status to 'submitted'
+                $usulan = Usulan::findOrFail($validated['usulan_id']);
+                $validated['status'] = 'submitted';
+                $validated['ketua_dosen_id'] = $usulan->ketua_dosen_id;
+                $validated['jenis'] = $request->jenis;
+
+                // Create the LaporanKemajuan record in the database
+                LaporanKemajuan::create($validated);
+
+                // Redirect to the show page with the jenis parameter
+                return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
+                    ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
+
+            } catch (\Exception $e) {
+                // Clean up any uploaded files if database save fails
+                if (isset($validated['dokumen_laporan_kemajuan']) && Storage::disk('public')->exists($validated['dokumen_laporan_kemajuan'])) {
+                    Storage::disk('public')->delete($validated['dokumen_laporan_kemajuan']);
+                }
+                if (isset($validated['dokumen_kontrak']) && Storage::disk('public')->exists($validated['dokumen_kontrak'])) {
+                    Storage::disk('public')->delete($validated['dokumen_kontrak']);
+                }
+
+                // Redirect to laporan kemajuan index with error message
+                return redirect()->route('laporan-kemajuan.show', ['jenis' => $request->jenis])
+                    ->with('error', 'Gagal menyimpan file ke server. Kemungkinan karena pembatasan keamanan Cloudflare. Silakan coba lagi atau hubungi administrator.');
             }
-
-            // Save dokumen_kontrak with the original name if uploaded
-            if ($request->hasFile('dokumen_kontrak')) {
-                $kontrakFile = $request->file('dokumen_kontrak');
-                $kontrakFileName = $kontrakFile->getClientOriginalName();
-                $kontrakFilePath = $kontrakFile->storeAs('dokumen_kontrak', $kontrakFileName, 'public');
-                $validated['dokumen_kontrak'] = $kontrakFilePath;
-            }
-
-            $user = auth()->user();
-            // Set the status to 'submitted'
-            $usulan = Usulan::findOrFail($validated['usulan_id']);
-            $validated['status'] = 'submitted';
-            $validated['ketua_dosen_id'] = $usulan->ketua_dosen_id;
-            $validated['jenis'] = $request->jenis;
-
-            // Create the LaporanKemajuan record in the database
-            LaporanKemajuan::create($validated);
-
-            // Redirect to the show page with the jenis parameter
-            return redirect()->route('laporan-kemajuan.show', ['jenis' => $validated['jenis']])
-                ->with('success', 'Laporan kemajuan berhasil ditambahkan.');
         }
     }
 

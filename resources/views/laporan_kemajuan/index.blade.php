@@ -119,9 +119,9 @@
                                                 @endphp
                                                 <ul>
                                                     @forelse ($getreviewer as $item)
-                                                        @role('Kepala LPPM')
+                                                        {{-- @role('Kepala LPPM') --}}
                                                             <li>{{ $item->reviewer->user->name }}</li>
-                                                        @endrole
+                                                        {{-- @endrole --}}
                                                     @empty
                                                         <li>Belum ada reviewer yang ditugaskan</li>
                                                     @endforelse
@@ -166,7 +166,9 @@
                                                                 <!-- Iframe untuk Menampilkan PDF -->
                                                                 <iframe
                                                                     src="{{ asset('storage/' . $laporan->dokumen_laporan_kemajuan) }}"
-                                                                    width="100%" height="500px" frameborder="0"></iframe>
+                                                                    width="100%" height="500px" frameborder="0"
+                                                                    style="pointer-events: auto;">
+                                                                </iframe>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
@@ -212,7 +214,9 @@
                                                                 <!-- Iframe untuk Menampilkan PDF Kontrak -->
                                                                 <iframe
                                                                     src="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
-                                                                    width="100%" height="500px" frameborder="0"></iframe>
+                                                                    width="100%" height="500px" frameborder="0"
+                                                                    style="pointer-events: auto;">
+                                                                </iframe>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
@@ -320,12 +324,7 @@
                                                 </div>
                                             </div>
                                         
-                                            <script>
-                                                function submitForm(usulanId, action) {
-                                                    document.getElementById('action-' + usulanId).value = action;
-                                                    document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
-                                                }
-                                            </script>
+
                                         
                                             <!-- Tombol Approve/Reject Usulan -->
                                             @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved')
@@ -350,13 +349,14 @@
                                                                     @csrf
                                                                     @method('PUT')
                                                                     <div class="form-group">
-                                                                        <label for="status">Select Status:</label>
-                                                                        <select name="status" id="status"
+                                                                        <label for="status{{ $laporan->id }}">Select Status:</label>
+                                                                        <select name="status" id="status{{ $laporan->id }}"
                                                                             class="form-select" required>
                                                                             <option value="approved">Diterima</option>
                                                                             <option value="rejected">Ditolak</option>
                                                                         </select>
                                                                     </div>
+                                                                </form>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
@@ -452,6 +452,44 @@
     <script>
         var xin_table = $('#table-laporan').DataTable({
             searchable: true,
+        });
+
+        // Function untuk submit form reviewer
+        function submitForm(usulanId, action) {
+            document.getElementById('action-' + usulanId).value = action;
+            document.getElementById('pilihKirimReviewerForm-' + usulanId).submit();
+        }
+
+        // Function untuk delete usulan
+        function deleteUsulan(jenis, laporanId) {
+            if (confirm('Apakah Anda yakin ingin menghapus laporan ini?')) {
+                // Ajax call atau redirect untuk delete
+                window.location.href = `/laporan-kemajuan/delete/${jenis}/${laporanId}`;
+            }
+        }
+
+        // Prevent modal conflicts and event bubbling
+        $(document).ready(function() {
+            // Stop event propagation for PDF modal buttons
+            $('[id^="lihatDokumenModal-"], [id^="lihatDokumenKontrakModal-"]').on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Ensure modal backdrop doesn't trigger other modals
+            $('.modal').on('click', '.modal-backdrop', function(e) {
+                e.stopPropagation();
+            });
+
+            // Handle modal show events to prevent conflicts
+            $('[id^="lihatDokumenModal-"], [id^="lihatDokumenKontrakModal-"]').on('show.bs.modal', function (e) {
+                // Close any other open modals
+                $('.modal').not(this).modal('hide');
+            });
+
+            // Prevent click events inside modal content from bubbling up
+            $('.modal-content').on('click', function(e) {
+                e.stopPropagation();
+            });
         });
     </script>
 @endsection
