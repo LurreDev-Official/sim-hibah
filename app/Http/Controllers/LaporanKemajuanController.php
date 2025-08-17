@@ -138,9 +138,32 @@ class LaporanKemajuanController extends Controller
         $validated = $request->validate([
             'usulan_id' => 'required|exists:usulans,id',
             'dokumen_laporan_kemajuan' => 'required|file|mimes:pdf|max:10048',
-            'dokumen_kontrak' => 'nullable|file|mimes:pdf,doc,docx|max:5048',
+            'dokumen_kontrak' => 'required|file|mimes:pdf|max:5048',
             'jenis' => 'required|in:penelitian,pengabdian',
         ]);
+
+        // Check if files with same names already exist
+        if ($request->hasFile('dokumen_laporan_kemajuan')) {
+            $file = $request->file('dokumen_laporan_kemajuan');
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $fileName = $originalName . '_' . $validated['usulan_id'] . '.' . $extension;
+            
+            if (Storage::disk('public')->exists('laporan_kemajuan/' . $fileName)) {
+            return back()->withErrors(['dokumen_laporan_kemajuan' => 'File dengan nama tersebut sudah ada. Silakan ubah nama file atau pilih file yang berbeda.']);
+            }
+        }
+
+        if ($request->hasFile('dokumen_kontrak')) {
+            $kontrakFile = $request->file('dokumen_kontrak');
+            $originalKontrakName = pathinfo($kontrakFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $kontrakExtension = $kontrakFile->getClientOriginalExtension();
+            $kontrakFileName = $originalKontrakName . '_' . $validated['usulan_id'] . '.' . $kontrakExtension;
+            
+            if (Storage::disk('public')->exists('dokumen_kontrak/' . $kontrakFileName)) {
+            return back()->withErrors(['dokumen_kontrak' => 'File dengan nama tersebut sudah ada. Silakan ubah nama file atau pilih file yang berbeda.']);
+            }
+        }
 
         // Check if usulan_id already exists in LaporanKemajuan
         $existingLaporanKemajuan = LaporanKemajuan::where('usulan_id', $validated['usulan_id'])
@@ -151,10 +174,12 @@ class LaporanKemajuanController extends Controller
             return back()->with('error', 'Laporan Kemajuan untuk usulan ini sudah ada.');
         } else {
             try {
-                // Save dokumen_laporan_kemajuan with the original name
+                // Save dokumen_laporan_kemajuan with the original name + usulan_id
                 if ($request->hasFile('dokumen_laporan_kemajuan')) {
                     $file = $request->file('dokumen_laporan_kemajuan');
-                    $fileName = $file->getClientOriginalName();
+                    $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $extension = $file->getClientOriginalExtension();
+                    $fileName = $originalName . '_' . $validated['usulan_id'] . '.' . $extension;
                     $filePath = $file->storeAs('laporan_kemajuan', $fileName, 'public');
                     if (!$filePath) {
                         throw new \Exception('Gagal menyimpan file laporan kemajuan');
@@ -162,10 +187,12 @@ class LaporanKemajuanController extends Controller
                     $validated['dokumen_laporan_kemajuan'] = $filePath;
                 }
 
-                // Save dokumen_kontrak with the original name if uploaded
+                // Save dokumen_kontrak with the original name + usulan_id if uploaded
                 if ($request->hasFile('dokumen_kontrak')) {
                     $kontrakFile = $request->file('dokumen_kontrak');
-                    $kontrakFileName = $kontrakFile->getClientOriginalName();
+                    $originalKontrakName = pathinfo($kontrakFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $kontrakExtension = $kontrakFile->getClientOriginalExtension();
+                    $kontrakFileName = $originalKontrakName . '_' . $validated['usulan_id'] . '.' . $kontrakExtension;
                     $kontrakFilePath = $kontrakFile->storeAs('dokumen_kontrak', $kontrakFileName, 'public');
                     if (!$kontrakFilePath) {
                         throw new \Exception('Gagal menyimpan file dokumen kontrak');
@@ -365,8 +392,12 @@ class LaporanKemajuanController extends Controller
                 \Storage::disk('public')->delete($laporanKemajuan->dokumen_laporan_kemajuan);
             }
 
-            // Simpan file baru
-            $filePath = $request->file('dokumen_laporan_kemajuan')->store('laporan_kemajuan', 'public');
+            // Simpan file baru dengan nama yang menyertakan usulan_id
+            $file = $request->file('dokumen_laporan_kemajuan');
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $fileName = $originalName . '_' . $laporanKemajuan->usulan_id . '.' . $extension;
+            $filePath = $file->storeAs('laporan_kemajuan', $fileName, 'public');
             $validated['dokumen_laporan_kemajuan'] = $filePath;
         }
 
@@ -377,8 +408,12 @@ class LaporanKemajuanController extends Controller
                 \Storage::disk('public')->delete($laporanKemajuan->dokumen_kontrak);
             }
 
-            // Simpan file baru
-            $kontrakPath = $request->file('dokumen_kontrak')->store('dokumen_kontrak', 'public');
+            // Simpan file baru dengan nama yang menyertakan usulan_id
+            $kontrakFile = $request->file('dokumen_kontrak');
+            $originalKontrakName = pathinfo($kontrakFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $kontrakExtension = $kontrakFile->getClientOriginalExtension();
+            $kontrakFileName = $originalKontrakName . '_' . $laporanKemajuan->usulan_id . '.' . $kontrakExtension;
+            $kontrakPath = $kontrakFile->storeAs('dokumen_kontrak', $kontrakFileName, 'public');
             $validated['dokumen_kontrak'] = $kontrakPath;
         }
 

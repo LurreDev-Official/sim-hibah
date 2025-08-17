@@ -400,29 +400,37 @@
                     </div>
                     <div class="modal-body">
 
+                        <!-- File upload input with file size validation -->
                         <div class="mb-3">
-                           <label for="dokumen_kontrak{{ $laporan->id }}" class="form-label">Dokumen
-                               Kontrak</label>
-                           <input type="file" class="form-control"
-                               id="dokumen_kontrak{{ $laporan->id }}" name="dokumen_kontrak"
-                               accept=".pdf">
-                           <small class="text-warning">Maksimal ukuran file: 5MB</small>
-                           <!-- Show current document if exists -->
-                           @if ($laporan->dokumen_kontrak)
-                               <div class="mt-2">
-                                   <a href="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
-                                       target="_blank">Lihat Dokumen Kontrak Lama</a>
-                               </div>
-                           @endif
+                            <label for="dokumen_kontrak{{ $laporan->id }}" class="form-label">Dokumen
+                                Kontrak</label>
+                            <input type="file" class="form-control"
+                                id="dokumen_kontrak{{ $laporan->id }}" name="dokumen_kontrak"
+                                accept=".pdf" onchange="checkFileSize(this, 'kontrak{{ $laporan->id }}', 2)">
+                            <small class="text-warning">Maksimal ukuran file: 2MB</small>
+                            <div id="kontrak{{ $laporan->id }}-error" class="text-danger mt-1" style="display: none;">
+                                Ukuran file melebihi 2MB. Silakan pilih file yang lebih kecil.
+                            </div>
+                            <!-- Show current document if exists -->
+                            @if ($laporan->dokumen_kontrak)
+                                <div class="mt-2">
+                                    <a href="{{ asset('storage/' . $laporan->dokumen_kontrak) }}"
+                                        target="_blank">Lihat Dokumen Kontrak Lama</a>
+                                </div>
+                            @endif
                         </div>
+                        
                         <!-- File upload input -->
                         <div class="mb-3">
                             <label for="dokumen_laporan_kemajuan{{ $laporan->id }}" class="form-label">Dokumen
                                 Laporan Kemajuan</label>
                             <input type="file" class="form-control"
                                 id="dokumen_laporan_kemajuan{{ $laporan->id }}" name="dokumen_laporan_kemajuan"
-                                accept=".pdf">
-                            <small class="text-warning">Maksimal ukuran file: 10MB</small>
+                                accept=".pdf" onchange="checkFileSize(this, 'laporan{{ $laporan->id }}', 5)">
+                            <small class="text-warning">Maksimal ukuran file: 5MB</small>
+                            <div id="laporan{{ $laporan->id }}-error" class="text-danger mt-1" style="display: none;">
+                                Ukuran file melebihi 5MB. Silakan pilih file yang lebih kecil.
+                            </div>
                             <!-- Show current document if exists -->
                             @if ($laporan->dokumen_laporan_kemajuan)
                                 <div class="mt-2">
@@ -432,7 +440,37 @@
                             @endif
                         </div>
 
-                        
+                        <script>
+                            function checkFileSize(input, errorId, maxSizeMB) {
+                                const maxSize = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+                                const errorElement = document.getElementById(errorId + '-error');
+                                const submitButton = input.closest('form').querySelector('button[type="submit"]');
+                                
+                                if (input.files.length > 0) {
+                                    const fileSize = input.files[0].size;
+                                    
+                                    if (fileSize > maxSize) {
+                                        errorElement.style.display = 'block';
+                                        errorElement.textContent = `Ukuran file melebihi ${maxSizeMB}MB. Silakan pilih file yang lebih kecil.`;
+                                        input.classList.add('is-invalid');
+                                        submitButton.disabled = true;
+                                        submitButton.textContent = 'File terlalu besar';
+                                    } else {
+                                        errorElement.style.display = 'none';
+                                        input.classList.remove('is-invalid');
+                                        input.classList.add('is-valid');
+                                        submitButton.disabled = false;
+                                        submitButton.textContent = 'Save changes';
+                                    }
+                                } else {
+                                    errorElement.style.display = 'none';
+                                    input.classList.remove('is-invalid', 'is-valid');
+                                    submitButton.disabled = false;
+                                    submitButton.textContent = 'Save changes';
+                                }
+                            }
+                        </script>
+
 
                     </div>
                     <div class="modal-footer">

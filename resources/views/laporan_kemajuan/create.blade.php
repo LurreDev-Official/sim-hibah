@@ -77,7 +77,7 @@
                                 <div class="form-group">
                                     <label for="dokumen_kontrak"><strong>Dokumen Kontrak:</strong></label>
                                     <input type="file" name="dokumen_kontrak" id="dokumen_kontrak" class="form-control" required/>
-                                    <small class="form-text text-muted">Maksimal ukuran file: 5MB</small>
+                                    <small class="form-text text-muted">Maksimal ukuran file: 2MB</small>
                                     <div class="invalid-feedback" id="dokumen_kontrak_error"></div>
                                 </div>
                             </div>
@@ -88,7 +88,7 @@
                                 <div class="form-group">
                                     <label for="dokumen_laporan_kemajuan"><strong>Dokumen Laporan Kemajuan:</strong></label>
                                     <input type="file" name="dokumen_laporan_kemajuan" id="dokumen_laporan_kemajuan" class="form-control" required/>
-                                    <small class="form-text text-muted">Maksimal ukuran file: 10MB</small>
+                                    <small class="form-text text-muted">Maksimal ukuran file: 5MB</small>
                                     <div class="invalid-feedback" id="dokumen_laporan_kemajuan_error"></div>
                                 </div>
                             </div>
@@ -99,14 +99,14 @@
                                 document.getElementById('dokumen_kontrak').addEventListener('change', function() {
                                     const file = this.files[0];
                                     const errorDiv = document.getElementById('dokumen_kontrak_error');
-                                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                                    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
                                     const maxNameLength = 25;
                                     
                                     let errorMessage = '';
                                     
                                     if (file) {
                                         if (file.size > maxSize) {
-                                            errorMessage = 'Ukuran file tidak boleh lebih dari 5MB';
+                                            errorMessage = 'Ukuran file tidak boleh lebih dari 2 MB';
                                         }
                                         
                                         if (file.name.length > maxNameLength) {
@@ -128,14 +128,14 @@
                                 document.getElementById('dokumen_laporan_kemajuan').addEventListener('change', function() {
                                     const file = this.files[0];
                                     const errorDiv = document.getElementById('dokumen_laporan_kemajuan_error');
-                                    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+                                    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
                                     const maxNameLength = 25;
                                     
                                     let errorMessage = '';
                                     
                                     if (file) {
                                         if (file.size > maxSize) {
-                                            errorMessage = 'Ukuran file tidak boleh lebih dari 10MB';
+                                            errorMessage = 'Ukuran file tidak boleh lebih dari 5MB';
                                         }
                                         
                                         if (file.name.length > maxNameLength) {

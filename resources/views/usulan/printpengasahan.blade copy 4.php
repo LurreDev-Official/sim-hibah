@@ -297,14 +297,16 @@
                         <td colspan="3" class="text-center">
                             <br>
                             <p>Dekan</p>
-                            <span style="color: green; font-size: 24px;">✓ Verified</span>
+                            <br>
+                            <br>
                             <p>{{ $dekan['nama'] }}</p>
                             <p>NIDN: {{ $dekan['nidn'] }}</p>
                         </td>
                         <td colspan="3" class="text-center">
                             <p>Jombang, {{ now()->format('d F Y') }}</p>
                             <p>Ketua Peneliti,</p>
-                            <span style="color: green; font-size: 24px;">✓ Verified</span>
+                            <br>
+                            <br>
                             <p>{{ $formattedUsulan['ketuaDosen']['name'] }}</p>
                             <p>NIDN: {{ $formattedUsulan['ketuaDosen']['nidn'] }}</p>
                         </td>
@@ -313,7 +315,8 @@
                         <td colspan="5" class="text-center">
                             <p>Menyetujui,</p>
                             <p>Kepala LPPM Unhasy</p>
-                            <span style="color: green; font-size: 24px;">✓ Verified</span>
+                            <br>
+                            <br>
                             <p>{{ $kepalaLPPM['nama'] }}</p>
                             <p>NIDN: {{ $kepalaLPPM['nidn'] }}</p>
                         </td>
