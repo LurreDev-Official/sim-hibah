@@ -115,8 +115,8 @@
                     
                             <div class="mb-3">
                                 <label for="file_perbaikan" class="form-label">Upload File Perbaikan</label>
-                                <input type="file" name="file_perbaikan" id="file_perbaikan" class="form-control" required>
-                                <small class="text-muted">Unggah file perbaikan dalam format PDF atau DOCX (maks. 5MB).</small>
+                                <input type="file" name="file_perbaikan" id="file_perbaikan" class="form-control" accept="application/pdf" required>
+                                <small class="text-muted">Unggah file perbaikan dalam format PDF (maks. 5MB).</small>
                             </div>
                     
                             <div class="d-grid">

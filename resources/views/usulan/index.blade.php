@@ -533,7 +533,7 @@
                                             </script>
 
                             </div>
-                            @if ($usulan->allReviewersAccepted)
+                            @if ($usulan->allReviewersAccepted && $usulan->status == 'waiting approved')
                                 <button class="btn btn-primary" data-bs-toggle="modal"
                                     data-bs-target="#approveRejectModal{{ $usulan->id }}">
                                     Diterima Atau Ditolak
@@ -541,7 +541,7 @@
 
 
                                 <!-- Modal for Approving or Rejecting Usulan -->
-                                @if ($usulan->allReviewersAccepted)
+                                @if ($usulan->allReviewersAccepted && $usulan->status == 'waiting approved')
                                     <div class="modal fade" id="approveRejectModal{{ $usulan->id }}" tabindex="-1"
                                         aria-labelledby="approveRejectModalLabel{{ $usulan->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">

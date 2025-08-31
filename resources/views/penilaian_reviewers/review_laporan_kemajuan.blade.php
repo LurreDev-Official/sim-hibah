@@ -48,62 +48,65 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $data->laporankemajuan->usulan->judul_usulan }}</td>
                                         <td>
-                                            <span class="badge badge-light-primary">{{ $data->status_penilaian }}</span>
+                                            @if ($data->status_penilaian == 'Diterima')
+                                                <span class="badge badge-light-success">{{ $data->status_penilaian }}</span>
+                                            @elseif ($data->status_penilaian == 'Di Revisi Kembali')
+                                                <span class="badge badge-light-danger">{{ $data->status_penilaian }}</span>
+                                            @else
+                                                <span class="badge badge-light-primary">{{ $data->status_penilaian }}</span>
+                                            @endif
                                         </td>
                                         <td>{{ $data->total_nilai }}</td>
                                         <td>
                                             @if ($data->status_penilaian == 'sudah diperbaiki')
-                                            <!-- Tombol untuk membuka modal -->
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewLaporanModal">
-                                                Lihat Laporan Kemajuan
-                                            </button>
-                                        
-                                            <!-- Modal untuk melihat Laporan Kemajuan -->
-                                            <div class="modal fade" id="viewLaporanModal" tabindex="-1" aria-labelledby="viewLaporanModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="viewLaporanModalLabel">Laporan Kemajuan</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <embed src="{{ asset('storage/' . $data->laporankemajuan->dokumen_laporan_kemajuan) }}" type="application/pdf" width="100%" height="500px">
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <!-- Form to update status of perbaikan -->
-                                                            <form
-                                                                action="{{ route('review-laporan-kemajuan.updateStatus', $data->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <!-- Status Dropdown -->
-                                                                <div class="d-flex align-items-center">
-                                                                    <label for="status{{ $data->id }}"
-                                                                        class="form-label me-2">Status:</label>
-                                                                    <select name="status"
-                                                                        id="status{{ $data->id }}"
-                                                                        class="form-select me-3" required>
-                                                                        <option value="Di Revisi Kembali"
-                                                                        {{ $data->status == 'Di Revisi Kembali' ? 'selected' : '' }}>
-                                                                        Di Revisi Kembali
-                                                                        </option>
-                                                                        <option value="Diterima"
-                                                                            {{ $data->status_penilaian == 'Diterima' ? 'selected' : '' }}>
-                                                                            Diterima
-                                                                        </option>
+                                                <!-- Tombol untuk membuka modal -->
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewLaporanModal{{ $data->id }}">
+                                                    Lihat Laporan Kemajuan
+                                                </button>
 
-                                                                    </select>
-                                                                    <button type="submit"
-                                                                        class="btn btn-success">Simpan</button>
-                                                                </div>
-                                                            </form>
+                                                <!-- Modal untuk melihat Laporan Kemajuan -->
+                                                <div class="modal fade" id="viewLaporanModal{{ $data->id }}" tabindex="-1" aria-labelledby="viewLaporanModalLabel{{ $data->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-xl"> <!-- modal-xl agar lebih besar -->
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="viewLaporanModalLabel{{ $data->id }}">Laporan Kemajuan</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @if (!empty($data->laporankemajuan->dokumen_laporan_kemajuan) && file_exists(storage_path('app/public/' . $data->laporankemajuan->dokumen_laporan_kemajuan)))
+                                                                    <embed src="{{ asset('storage/' . $data->laporankemajuan->dokumen_laporan_kemajuan) }}" type="application/pdf" width="100%" height="700px">
+                                                                @else
+                                                                    <div class="alert alert-warning">
+                                                                        File laporan kemajuan tidak ditemukan. Silakan instruksikan untuk revisi kembali.
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <!-- Form to update status of perbaikan -->
+                                                                <form action="{{ route('review-laporan-kemajuan.updateStatus', $data->id) }}" method="POST">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <div class="d-flex align-items-center">
+                                                                        <label for="status{{ $data->id }}" class="form-label me-2">Status:</label>
+                                                                        <select name="status" id="status{{ $data->id }}" class="form-select me-3" required>
+                                                                            <option value="Di Revisi Kembali" {{ $data->status_penilaian == 'Di Revisi Kembali' ? 'selected' : '' }}>
+                                                                                Di Revisi Kembali
+                                                                            </option>
+                                                                            <option value="Diterima" {{ $data->status_penilaian == 'Diterima' ? 'selected' : '' }}>
+                                                                                Diterima
+                                                                            </option>
+                                                                        </select>
+                                                                        <button type="submit" class="btn btn-success">Simpan</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                             @else
-                                            -
-                                        @endif
+                                                -
+                                            @endif
+                                        </td>
                                         
                                         </td>
                                        

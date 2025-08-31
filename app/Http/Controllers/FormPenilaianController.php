@@ -373,7 +373,7 @@ public function storeLaporanKemajuan(Request $request)
         'penilaian_reviewers_id' => 'required|exists:penilaian_reviewers,id',
         'indikator' => 'required|array', // Pastikan indikator adalah array
         'indikator.*.nilai' => 'required|integer|min:1|max:5', // Validasi jumlah bobot setiap indikator
-        'indikator.*.catatan' => 'nullable|string|max:255', // Validasi catatan (opsional)
+        'indikator.*.catatan' => 'nullable|string', // Validasi catatan (opsional)
     ]);
 
     // Jika validasi gagal, kembalikan ke view dengan pesan error
