@@ -108,7 +108,11 @@
                         <!--begin::Mobile logo-->
                         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
                             <a href="#" class="d-lg-none">
-                                <h2> {{ Auth::user()->name }}</h2>
+                                @auth
+                                    <h2>{{ auth()->user()->name }}</h2>
+                                @else
+                                    <h2>Guest</h2>
+                                @endauth
                             </a>
                         </div>
                         <!--end::Mobile logo-->
@@ -267,10 +271,11 @@
                                 
                                 <div class="d-flex align-items-stretch flex-shrink-0">
                                     <!--begin::User-->
+                                    @auth
                                     <div class="d-flex align-items-center ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
                                         <!--begin::Menu wrapper-->
                                         <div class="cursor-pointer symbol symbol-30px symbol-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end" data-kt-menu-flip="bottom">
-                                            <img src="{{ asset('assets/admin.png') }}" alt="{{ Auth::user()->name }}" />
+                                            <img src="{{ asset('assets/admin.png') }}" alt="{{ auth()->user()->name }}" />
                                         </div>
                                         <!--begin::Menu-->
                                         <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-primary fw-bold py-4 fs-6 w-275px" data-kt-menu="true">
@@ -283,27 +288,36 @@
                                                     <!--end::Avatar-->
                                                     <!--begin::Username-->
                                                     <div class="d-flex flex-column">
-                                                        <div class="fw-bolder d-flex align-items-center fs-5">{{ Auth::user()->name }}
-                                                            <span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">Online</span>
+                                                        <div class="fw-bolder d-flex align-items-center fs-5">
+                                                            {{ auth()->user()->name }}
+                                                            <span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">
+                                                                Online
+                                                            </span>
                                                         </div>
-                                                        <h6 class="fw-bold text-muted text-hover-primary fs-7">{{ Auth::user()->email }}</h6>
+                                                        <h6 class="fw-bold text-muted text-hover-primary fs-7">
+                                                            {{ auth()->user()->email }}
+                                                        </h6>
                                                         <p>
                                                             Akses: 
-                                                            @role('Kepala LPPM')
-                                                                Kepala LPPM
-                                                            @endrole
-                                                    
-                                                            @role('Dosen')
-                                                                Dosen
-                                                            @endrole
-                                                    
-                                                            @role('Reviewer')
-                                                                Reviewer
-                                                            @endrole
-                                                    
-                                                            @role('Admin') {{-- Jika ada role Admin, bisa ditambahkan disini --}}
-                                                                Admin
-                                                            @endrole
+                                                            @auth
+                                                                @role('Kepala LPPM')
+                                                                    Kepala LPPM
+                                                                @endrole
+                                                        
+                                                                @role('Dosen')
+                                                                    Dosen
+                                                                @endrole
+                                                        
+                                                                @role('Reviewer')
+                                                                    Reviewer
+                                                                @endrole
+                                                        
+                                                                @role('Admin') {{-- Jika ada role Admin, bisa ditambahkan disini --}}
+                                                                    Admin
+                                                                @endrole
+                                                            @else
+                                                                Guest
+                                                            @endauth
                                                         </p>
 
                                                     </div>
@@ -330,6 +344,14 @@
                                         <!--end::Menu wrapper-->
                                     </div>
                                     <!--end::User -->
+                                    @else
+                                    <!-- Login button untuk guest user -->
+                                    <div class="d-flex align-items-center ms-1 ms-lg-3">
+                                        <a href="{{ route('login') }}" class="btn btn-primary">
+                                            <i class="fas fa-sign-in-alt"></i> Login
+                                        </a>
+                                    </div>
+                                    @endauth
                                     <!--begin::Heaeder menu toggle-->
                                     <div class="d-flex align-items-center d-lg-none ms-2 me-n3" title="Show header menu">
                                         <div class="btn btn-icon btn-active-light-primary w-30px h-30px w-md-40px h-md-40px" id="kt_header_menu_mobile_toggle">

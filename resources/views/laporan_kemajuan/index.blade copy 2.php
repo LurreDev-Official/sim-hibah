@@ -129,17 +129,7 @@
                                             @elseif ($laporan->status == 'revision')
                                                 <span class="badge bg-warning">Perlu Revisi</span>
                                             @elseif ($laporan->status == 'waiting approved')
-                                                @php
-                                                    // Ganti dengan pengecekan langsung jika accessor tidak ada
-                                                    $allAccepted = \App\Models\PenilaianReviewer::where('laporankemajuan_id', $laporan->id)
-                                                        ->where('status_penilaian', '!=', 'Diterima')
-                                                        ->count() === 0;
-                                                @endphp
-                                                @if ($allAccepted)
-                                                    <span class="badge bg-info">Menunggu ACC LPPM</span>
-                                                @else
-                                                    <span class="badge bg-secondary text-black">Menunggu Persetujuan Reviewer</span>
-                                                @endif
+                                                <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                             @elseif ($laporan->status == 'approved')
                                                 <span class="badge bg-success">Disetujui</span>
                                             @endif
@@ -353,7 +343,7 @@
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <form id="approveRejectForm{{ $laporan->id }}"
+                                                                <form
                                                                     action="{{ route('laporan-kemajuan.updateStatus', $laporan->id) }}"
                                                                     method="POST">
                                                                     @csrf
@@ -366,13 +356,13 @@
                                                                             <option value="rejected">Ditolak</option>
                                                                         </select>
                                                                     </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            data-bs-dismiss="modal">Tutup</button>
-                                                                        <button type="submit"
-                                                                            class="btn btn-primary">Simpan</button>
-                                                                    </div>
                                                                 </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Tutup</button>
+                                                                <button type="submit"
+                                                                    class="btn btn-primary">Simpan</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -537,22 +527,6 @@
             // Prevent click events inside modal content from bubbling up
             $('.modal-content').on('click', function(e) {
                 e.stopPropagation();
-            });
-
-            // Handle approve/reject form submission
-            $('[id^="approveRejectForm"]').on('submit', function(e) {
-                e.preventDefault();
-                const form = $(this);
-                const status = form.find('select[name="status"]').val();
-                
-                if (!status) {
-                    alert('Silakan pilih status terlebih dahulu.');
-                    return;
-                }
-
-                if (confirm('Apakah Anda yakin dengan keputusan ini?')) {
-                    form.off('submit').submit();
-                }
             });
         });
     </script>

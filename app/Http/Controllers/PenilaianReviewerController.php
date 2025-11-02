@@ -442,13 +442,19 @@ public function updateStatus($id, Request $request)
 {
     // Validasi input status
     $request->validate([
-        'status' => 'required|string|in:Diterima',  // Status hanya bisa 'Diterima'
+        'status' => 'required|string|in:Diterima,Di Revisi Kembali',
     ]);
     // Cari PenilaianReviewer berdasarkan ID
     $penilaianReviewer = PenilaianReviewer::findOrFail($id);
     // Update status_penilaian sesuai dengan input dari form
     $penilaianReviewer->status_penilaian = $request->input('status');
     $penilaianReviewer->save();
+
+    // update status laporan kemajuan =  jika direvisi kembali
+    if ($request->input('status') === 'Di Revisi Kembali') {
+        $penilaianReviewer->laporanKemajuan->status = 'revision';
+        $penilaianReviewer->laporanKemajuan->save();
+    }
 
     return redirect()->back()
                      ->with('success', 'Status penilaian berhasil diperbarui.');

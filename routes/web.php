@@ -202,7 +202,7 @@ Route::group(['middleware' => ['role:Dosen']], function () {
 });
 
 // Reviewer Routes
-Route::group(['middleware' => ['role:Reviewer']], function () {
+Route::group(['middleware' => ['auth', 'role:Reviewer']], function () {
     Route::resource('penilaian-usulan', PenilaianReviewerController::class);
     // Penilaian Usulan
     Route::get('penilaian-usulan', [PenilaianReviewerController::class, 'indexPenilaianUsulan'])->name('penilaian-usulan.index');
