@@ -32,12 +32,12 @@
                     <div class="card-body">
                         <!-- Display Usulan Information -->
                         <div class="mb-5">
-                            <h4 class="fw-bold">Tampilkan Laporan Kemajuan PDF</h4>
+                            <h4 class="fw-bold">Tampilkan Laporan Akhir PDF</h4>
                             @if ($laporanAkhir->dokumen_laporan_akhir)
                                 <!-- Menggunakan <iframe> untuk menampilkan dokumen PDF -->
                                 <iframe src="{{ asset('storage/' . $laporanAkhir->dokumen_laporan_akhir) }}" width="100%" height="600px" frameborder="0"></iframe>
                             @else
-                                <p class="text-danger">Dokumen laporan kemajuan tidak ditemukan.</p>
+                                <p class="text-danger">Dokumen laporan Akhir tidak ditemukan.</p>
                             @endif
                         </div>
                     </div>

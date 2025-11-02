@@ -15,6 +15,7 @@ use App\Models\FormPenilaian;
 use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
+use App\Models\Luaran;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use Milon\Barcode\DNS1D;
@@ -79,6 +80,8 @@ class LaporanAkhirController extends Controller
         'dokumen_laporan_akhir' => 'required|file|mimes:pdf|max:10120', // Max 5MB
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
+
+    // dd($validated['jenis']);
     $existingLaporanAkhir = LaporanAkhir::where('usulan_id', $validated['usulan_id'])
     ->where('jenis', $request->jenis)->first();
 
@@ -333,7 +336,7 @@ public function kirim(Request $request)
         $validated = $request->validate([
             'ketua_dosen_id' => 'required|exists:dosens,id',
             'usulan_id' => 'required|exists:usulans,id',
-            'dokumen_laporan_akhir' => 'nullable|file|mimes:pdf|max:10120', // Max 10MB
+            'dokumen_laporan_akhir' => 'nullable|file|mimes:pdf|max:10120', // Max 5MB
             'jenis' => 'required|in:penelitian,pengabdian',
             'status' => 'required|string',
         ]);
@@ -445,20 +448,21 @@ public function simpanPerbaikan(Request $request, $id)
     ]);
 
     // Update the status of the LaporanAkhir
-    $laporanAkhir->status = $validated['status'];
-    $laporanAkhir->save(); // Save the updated status
+    
 
     // If the status is 'approved', update the corresponding Luaran
     if ($validated['status'] == 'approved') {
         $existingLuaran = Luaran::where('usulan_id', $laporanAkhir->usulan_id)
-                                ->where('type', 'Laporan akhir' . $laporanAkhir->usulan->jenis_skema) // Make sure type is unique
+                                ->where('type', 'Laporan akhir' ) // Make sure type is unique
                                 ->first();
 
         if ($existingLuaran) {
             // Update the Luaran status to 'Terpenuhi' and set the URL
             $existingLuaran->status = 'Terpenuhi';
-            $existingLuaran->url = url('storage/' . $laporanAkhir->dokumenLaporanAkhir); // Assuming you have the document URL
+            $existingLuaran->url = url('storage/' . $laporanAkhir->dokumen_laporan_akhir); // Assuming you have the document URL
             $existingLuaran->save(); // Save the updated Luaran
+            $laporanAkhir->status = $validated['status'];
+             $laporanAkhir->save(); // Save the updated status
         }
     }
 
