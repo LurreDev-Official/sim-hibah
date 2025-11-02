@@ -56,19 +56,21 @@
                             </div>
                         </div>
                         <div class="card-toolbar">
+
+                            
                             @php
                                     // Ambil data dosen terkait user yang sedang login
                                     $dosen = \App\Models\Dosen::where('user_id', auth()->user()->id)->first();
 
+                                    // dd( $usulan->id);
                                     // Ambil data anggota dosen berdasarkan dosen yang login
                                     $anggotaDosencek = null;
                                     if ($dosen) {
                                         $anggotaDosencek = \App\Models\AnggotaDosen::where(
                                             'dosen_id',
                                             $dosen->id,
-                                        
                                         )
-                                        ->where('usulan_id', $laporan->usulan_id)
+                                        ->where('usulan_id', $usulan->id)
                                         ->first();
                                     }
                                 @endphp
@@ -102,7 +104,7 @@
                                     <th>URL</th>
                                     <th>LoA</th>
                                     <th>Status</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,11 +145,12 @@
                                             
                                 @role('Dosen')
 
-                                        @if ($anggotaDosencek->status_anggota == 'ketua')
+                                          @if ($anggotaDosencek->status_anggota == 'ketua' && $luaran->type != 'Laporan akhir')
                                         <button class="btn btn-light btn-active-light-primary btn-sm me-2"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editModal{{ $luaran->id }}">Edit</button>
-                                        @endif
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editModal{{ $luaran->id }}">Edit</button>
+                                    @endif
+
                                        
                                         @endrole
 
@@ -203,9 +206,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-
-
                                     <!-- Edit Modal -->
                                     <div class="modal fade" id="editModal{{ $luaran->id }}" tabindex="-1"
                                         aria-hidden="true">
@@ -230,7 +230,7 @@
 
 
                                                         <div class="mb-3">
-                                                            <label for="type" class="form-label">Type</label>
+                                                            <label for="type" class="form-label">Jenis</label>
                                                             <input type="text" class="form-control" name="type"
                                                                 value="{{ $luaran->type }}" required>
                                                         </div>
@@ -242,13 +242,12 @@
                                                         </div>
 
                                                         <div class="mb-3">
-                                                            <label for="file_loa" class="form-label">File LOA</label>
+                                                            <label for="file_loa" class="form-label">Draf Artikel/ LoA/ Published</label>
                                                             <input type="file" class="form-control" name="file_loa">
                                                         </div>
 
                                                         <div class="text-end">
-                                                            <button type="submit" class="btn btn-primary">Simpan
-                                                                Perubahan</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -286,7 +285,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="type" class="form-label">Type</label>
+                                <label for="type" class="form-label">Jenis</label>
                                 <select class="form-select" name="type" required>
                                     <option value="" disabled selected>Pilih Tipe</option>
                                     <option value="artikel">Artikel</option>
@@ -302,9 +301,9 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="file_loa" class="form-label">File LOA</label>
+                                <label for="file_loa" class="form-label">Draf Artikel/ LoA/ Published</label>
                                 <input type="file" class="form-control" name="file_loa">
-                                <small class="form-text text-muted">Opsional: Unggah file LOA jika tersedia.</small>
+                                <small class="form-text text-muted">Opsional: Unggah Draf Artikel/ LoA/ Publisheds.</small>
                             </div>
 
                             <div class="text-end">

@@ -76,7 +76,7 @@ class LaporanAkhirController extends Controller
     // Validate the input
     $validated = $request->validate([
         'usulan_id' => 'required|exists:usulans,id',
-        'dokumen_laporan_akhir' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'dokumen_laporan_akhir' => 'required|file|mimes:pdf|max:10120', // Max 5MB
         'jenis' => 'required|in:penelitian,pengabdian',
     ]);
     $existingLaporanAkhir = LaporanAkhir::where('usulan_id', $validated['usulan_id'])
@@ -333,8 +333,8 @@ public function kirim(Request $request)
         $validated = $request->validate([
             'ketua_dosen_id' => 'required|exists:dosens,id',
             'usulan_id' => 'required|exists:usulans,id',
-            'dokumen_laporan_akhir' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'jenis' => 'required|in:Penelitian,Pengabdian',
+            'dokumen_laporan_akhir' => 'nullable|file|mimes:pdf|max:10120', // Max 10MB
+            'jenis' => 'required|in:penelitian,pengabdian',
             'status' => 'required|string',
         ]);
 
@@ -392,7 +392,7 @@ public function simpanPerbaikan(Request $request, $id)
 {
     // Validate input
     $request->validate([
-        'file_perbaikan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
+        'file_perbaikan' => 'required|file|mimes:pdf|max:10120', // Max 5MB
     ]);
     
     $laporanAkhir = LaporanAkhir::findOrFail($id);
@@ -436,7 +436,7 @@ public function simpanPerbaikan(Request $request, $id)
 
     public function updateStatus($id, Request $request)
 {
-    // Find the Usulan by ID
+    // Find the LaporanAkhir by ID
     $laporanAkhir = LaporanAkhir::findOrFail($id);
 
     // Validate the request data
@@ -444,11 +444,28 @@ public function simpanPerbaikan(Request $request, $id)
         'status' => 'required|in:approved,rejected', // Only allow 'approved' or 'rejected' status
     ]);
 
-    // Update the status of the Usulan
+    // Update the status of the LaporanAkhir
     $laporanAkhir->status = $validated['status'];
     $laporanAkhir->save(); // Save the updated status
-    return redirect()->back()->with('success', 'Berhasil di simpan.');
+
+    // If the status is 'approved', update the corresponding Luaran
+    if ($validated['status'] == 'approved') {
+        $existingLuaran = Luaran::where('usulan_id', $laporanAkhir->usulan_id)
+                                ->where('type', 'Laporan akhir' . $laporanAkhir->usulan->jenis_skema) // Make sure type is unique
+                                ->first();
+
+        if ($existingLuaran) {
+            // Update the Luaran status to 'Terpenuhi' and set the URL
+            $existingLuaran->status = 'Terpenuhi';
+            $existingLuaran->url = url('storage/' . $laporanAkhir->dokumenLaporanAkhir); // Assuming you have the document URL
+            $existingLuaran->save(); // Save the updated Luaran
+        }
+    }
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Berhasil disimpan.');
 }
+
  
 
 

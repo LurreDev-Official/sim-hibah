@@ -73,7 +73,7 @@ class LuaranController extends Controller
             // Jika jenis luaran adalah 'Laporan akhir', tentukan URL otomatis
             if ($jenisLuaran == 'Laporan akhir') {
                 $judul = $usulan->judul_usulan;
-                $status = 'Terpenuhi';
+                $status = 'Belum terpenuhi';
                 $url = $dokumenLaporanAkhir ? url('storage/' . $dokumenLaporanAkhir) : ''; // Jika ada dokumen, ambil URL-nya
             }
 
