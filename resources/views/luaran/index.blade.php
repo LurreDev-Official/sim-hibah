@@ -111,7 +111,7 @@
                                                 @endphp
 
                                                 @if ($terpenuhiCount <3)
-                                                    <span class="badge badge-light-primary">Belum Terpenuhi= {{ $terpenuhiCount }}</span>
+                                                    <span class="badge badge-light-primary">Belum Terpenuhi</span>
                                                 @else
                                                     <span class="badge badge-light-success">Terpenuhi</span>
                                                 @endif

@@ -518,6 +518,113 @@ public function cetakBuktiACC($id)
     return $pdf->download('bukti_acc_' . $laporanAkhir->id . '.pdf');
 }
 
+public function cetakLembarPengesahan($id)
+{
+    // Ambil data usulan dengan relasi terkait
+    $usulan = Usulan::with(['ketuaDosen.user', 'anggotaDosen.dosen.user'])
+                    ->findOrFail($id);
+
+     $usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $id)->first();
+     // Generate URL lengkap untuk dokumen
+    $dokumenPath = $usulanPerbaikan->dokumen_usulan ?? '';
+    $dokumenUrl = url($dokumenPath); // Base URL + path dokumen
+
+    // Generate QR Code dalam format SVG
+    $qrCodeSVG = \DNS2D::getBarcodeSVG($dokumenUrl, 'QRCODE', 3, 3); // Gunakan SVG
+        // Filter anggota dosen dengan status_anggota = 'anggota'
+     $filteredAnggotaDosen = $usulan->anggotaDosen->filter(function ($anggota) {
+        return $anggota->status_anggota === 'anggota';
+    });
+
+    // Hitung jumlah total anggota dosen dan mahasiswa
+    $jumlahAnggotaDosen = $filteredAnggotaDosen->count();
+    $jumlahAnggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->count();
+    // $jumlahAnggotaTotal = $jumlahAnggotaDosen + $jumlahAnggotaMahasiswa;
+    $jumlahAnggotaTotal = $jumlahAnggotaDosen;
+
+
+
+    // Ambil data anggota mahasiswa dari model AnggotaMahasiswa
+    $anggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->get();
+
+    // Ambil periode yang aktif
+    $periode = Periode::where('is_active', true)->first();
+
+    // Data dekan berdasarkan fakultas
+    $listdekan = [
+        'Fakultas Agama Islam' => [
+            'nama' => 'Dr. Jasminto, M.Pd.I., M.Ag',
+            'nidn' => '2112038101',
+        ],
+        'Fakultas Ilmu Pendidikan' => [
+            'nama' => 'Dr. Resdianto Permata Raharjo, M.Pd',
+            'nidn' => '0701109201',
+        ],
+        'Fakultas Teknik' => [
+            'nama' => 'Dr. Ir. Nur Kholis, S.T., M.T.',
+            'nidn' => '0021057204',
+        ],
+        'Fakultas Teknologi Informasi' => [
+            'nama' => 'Aries Dwi Indriyanti, S.Kom., M.Kom',
+            'nidn' => '0012048006',
+        ],
+        'Fakultas Ekonomi' => [
+            'nama' => 'Dr. Tony Seno Aji, S.E., M.E',
+            'nidn' => '0024097803',
+        ],
+    ];
+
+    // Cocokkan dekan berdasarkan fakultas ketua dosen
+    $fakultasKetua = $usulan->ketuaDosen->fakultas->name ?? 'Unknown';
+    $dekan = $listdekan[$fakultasKetua] ?? ['nama' => 'Unknown', 'nidn' => 'Unknown'];
+
+    $kepalaLPPM = [
+        'nama' => 'Prof. Dr. Udjang Pairin M. Basir, M.Pd',
+        'nidn' => '0010065707',
+    ];
+
+    // Format data usulan untuk dikirim ke view
+    $formattedUsulan = [
+        'judul_usulan' => $usulan->judul_usulan,
+        'lokasi_penelitian' => $usulan->lokasi_penelitian,
+        'tingkat_kecukupan_teknologi' => $usulan->tingkat_kecukupan_teknologi,
+        'nama_mitra' => $usulan->nama_mitra,
+        'bidang_mitra' => $usulan->bidang_mitra,
+        'lokasi_mitra' => $usulan->lokasi_mitra,
+        'jarak_pt_ke_lokasi_mitra' => $usulan->jarak_pt_ke_lokasi_mitra,
+        'luaran' => $usulan->luaran,
+        'ketuaDosen' => [
+            'name' => $usulan->ketuaDosen->user->name ?? 'Tidak Tersedia',
+            'nidn' => $usulan->ketuaDosen->nidn ?? '-',
+            'jabatan' => $usulan->ketuaDosen->jabatan ?? '-',
+            'prodi' => $usulan->ketuaDosen->prodi->name ?? '-',
+        ],
+        'anggotaDosen' => $usulan->anggotaDosen
+    ->filter(function ($anggota) {
+        return $anggota->status_anggota === 'anggota'; // Filter hanya yang status_anggota = 'anggota'
+    })
+    ->map(function ($anggota) {
+        return [
+            'name' => $anggota->dosen->user->name ?? 'Tidak Tersedia',
+            'nidn' => $anggota->dosen->nidn ?? '-',
+        ];
+    })
+    ->toArray(),
+
+        'anggotaMahasiswa' => $anggotaMahasiswa->map(function ($anggota) {
+            return [
+                'name' => $anggota->nama_lengkap ?? 'Tidak Tersedia',
+                'nim' => $anggota->nim ?? '-',
+            ];
+        })->toArray(),
+
+        'jumlahAnggota' => $jumlahAnggotaTotal,
+        'dokumen_usulan' => $usulanPerbaikan->dokumen_usulan,
+    ];
+    // Return view dengan data
+    return view('laporan_akhir.printpengasahan', compact('formattedUsulan', 'usulan','periode', 'dekan', 'kepalaLPPM','qrCodeSVG'));
+}
+
 
 public function report(Request $request, $jenis)
     {

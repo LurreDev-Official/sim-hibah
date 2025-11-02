@@ -199,9 +199,15 @@
                                                             <i class="fas fa-download"></i> Download Bukti ACC
                                                         </a>
                                                     </div>
-                                                @endif
+                                                <!-- Tombol Download Lembar Pengesahan -->
 
-                                              
+                                                    <div class="col p-2">
+                                                        <a href="{{ route('laporan-akhir.cetakLembarPengesahan', $laporan->id) }}"
+                                                            class="btn btn-success btn-sm" target="_blank">
+                                                            <i class="fas fa-download"></i> Download Lembar Pengesahan
+                                                        </a>
+                                                    </div>
+                                                @endif
 
                                                 <!-- Tombol Perbaiki Revisi -->
                                                 @if ($laporan->status == 'revision')
