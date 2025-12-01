@@ -183,7 +183,7 @@
                                         <td class="text-end">
                                             @role('Dosen')
                                             <td>
-                                                @if ($anggotaDosencek->status_anggota == 'ketua'  && $laporan->status == 'submitted')
+                                                @if ($anggotaDosencek->status_anggota == 'ketua'  && ($laporan->status == 'submitted' || $laporan->status == 'draft'))
                                                 <!-- Tombol Edit -->
                                                 <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
                                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
