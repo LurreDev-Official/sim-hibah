@@ -16,6 +16,9 @@ use App\Models\KriteriaPenilaian;
 use App\Models\IndikatorPenilaian;
 use App\Models\UsulanPerbaikan;
 use App\Models\Luaran;
+use App\Models\Periode;
+
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use Milon\Barcode\DNS1D;
@@ -432,99 +435,19 @@ public function simpanPerbaikan(Request $request, $id)
   return redirect()->back()->with('success', 'Berhasil di simpan');
 }
 
-
-
-
-
-
-    public function updateStatus($id, Request $request)
+public function cetakLembarPengesahan($id)
 {
-    // Find the LaporanAkhir by ID
-    $laporanAkhir = LaporanAkhir::findOrFail($id);
 
-    // Validate the request data
-    $validated = $request->validate([
-        'status' => 'required|in:approved,rejected', // Only allow 'approved' or 'rejected' status
-    ]);
-
-    // Update the status of the LaporanAkhir
-    
-
-    // If the status is 'approved', update the corresponding Luaran
-    if ($validated['status'] == 'approved') {
-        $existingLuaran = Luaran::where('usulan_id', $laporanAkhir->usulan_id)
-                                ->where('type', 'Laporan akhir' ) // Make sure type is unique
-                                ->first();
-
-        if ($existingLuaran) {
-            // Update the Luaran status to 'Terpenuhi' and set the URL
-            $existingLuaran->status = 'Terpenuhi';
-            $existingLuaran->url = url('storage/' . $laporanAkhir->dokumen_laporan_akhir); // Assuming you have the document URL
-            $existingLuaran->save(); // Save the updated Luaran
-            $laporanAkhir->status = $validated['status'];
-             $laporanAkhir->save(); // Save the updated status
-        }
-    }
-
-    // Redirect back with a success message
-    return redirect()->back()->with('success', 'Berhasil disimpan.');
-}
-
- 
-
-
-public function cetakBuktiACC($id)
-{
-    // Ambil data usulan dengan relasi terkait
     $laporanAkhir = LaporanAkhir::with(['usulan.ketuaDosen', 'usulan.anggotaDosen.dosen.user', 'usulan.anggotaMahasiswa'])
                     ->findOrFail($id);
 
-    // Ambil timestamp Unix
-    $timestamp = time(); // Mendapatkan timestamp Unix saat ini
+    $usulan_id = $laporanAkhir->usulan_id;
 
-    // Generate Barcode 2D (QR Code) menggunakan milon/barcode
-    // Menggabungkan ID usulan dan timestamp ke dalam QR Code
-    $dataToEncode = [
-        'id' => $laporanAkhir->id,
-        'timestamp' => $timestamp,
-    ];
-    
-    // Encode data menjadi JSON string
-    $jsonData = json_encode($dataToEncode);
-
-    // Encrypt JSON data before encoding it to QR Code
-    $encryptedData = Crypt::encryptString(json_encode($dataToEncode));
-
-// Generate QR Code containing encrypted data
-     $barcode2D = \DNS2D::getBarcodePNG($encryptedData, 'QRCODE');
-
-  
-    // Simpan Barcode 2D ke file sementara di storage
-    $barcode2DPath = 'public/images/ttd_usulan_2D_' . $laporanAkhir->id . '.png';
-    \Storage::put($barcode2DPath, base64_decode($barcode2D)); // Decode base64 sebelum disimpan
-
-    // Dapatkan URL untuk QR Code yang disimpan
-    $barcode2DUrl = \Storage::url($barcode2DPath); // Mendapatkan URL yang dapat diakses publik
-
-    // Mengonversi QR Code ke Base64
-    $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/' . $barcode2DPath)));
-
-    // Generate PDF
-    $pdf = \PDF::loadView('laporan_akhir.bukti_acc', [
-        'laporanAkhir' => $laporanAkhir,
-        'barcodeBase64' => $barcodeBase64, // Kirim Base64 barcode ke view
-    ]);
-    // Kembalikan file PDF untuk diunduh
-    return $pdf->download('bukti_acc_' . $laporanAkhir->id . '.pdf');
-}
-
-public function cetakLembarPengesahan($id)
-{
     // Ambil data usulan dengan relasi terkait
     $usulan = Usulan::with(['ketuaDosen.user', 'anggotaDosen.dosen.user'])
-                    ->findOrFail($id);
+                    ->findOrFail($usulan_id);
 
-     $usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $id)->first();
+     $usulanPerbaikan = UsulanPerbaikan::where('usulan_id', $usulan_id)->first();
      // Generate URL lengkap untuk dokumen
     $dokumenPath = $usulanPerbaikan->dokumen_usulan ?? '';
     $dokumenUrl = url($dokumenPath); // Base URL + path dokumen
@@ -538,14 +461,14 @@ public function cetakLembarPengesahan($id)
 
     // Hitung jumlah total anggota dosen dan mahasiswa
     $jumlahAnggotaDosen = $filteredAnggotaDosen->count();
-    $jumlahAnggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->count();
+    $jumlahAnggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $usulan_id)->count();
     // $jumlahAnggotaTotal = $jumlahAnggotaDosen + $jumlahAnggotaMahasiswa;
     $jumlahAnggotaTotal = $jumlahAnggotaDosen;
 
 
 
     // Ambil data anggota mahasiswa dari model AnggotaMahasiswa
-    $anggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $id)->get();
+    $anggotaMahasiswa = AnggotaMahasiswa::where('usulan_id', $usulan_id)->get();
 
     // Ambil periode yang aktif
     $periode = Periode::where('is_active', true)->first();
@@ -565,7 +488,7 @@ public function cetakLembarPengesahan($id)
             'nidn' => '0021057204',
         ],
         'Fakultas Teknologi Informasi' => [
-            'nama' => 'Aries Dwi Indriyanti, S.Kom., M.Kom',
+            'nama' => 'Dr. Aries Dwi Indriyanti, S.Kom., M.Kom',
             'nidn' => '0012048006',
         ],
         'Fakultas Ekonomi' => [
@@ -623,6 +546,93 @@ public function cetakLembarPengesahan($id)
     ];
     // Return view dengan data
     return view('laporan_akhir.printpengasahan', compact('formattedUsulan', 'usulan','periode', 'dekan', 'kepalaLPPM','qrCodeSVG'));
+}
+
+
+
+
+
+
+    public function updateStatus($id, Request $request)
+{
+    // Find the LaporanAkhir by ID
+    $laporanAkhir = LaporanAkhir::findOrFail($id);
+
+    // Validate the request data
+    $validated = $request->validate([
+        'status' => 'required|in:approved,rejected', // Only allow 'approved' or 'rejected' status
+    ]);
+
+    // Update the status of the LaporanAkhir
+    // If the status is 'approved', update the corresponding Luaran
+    if ($validated['status'] == 'approved') {
+        $existingLuaran = Luaran::where('usulan_id', $laporanAkhir->usulan_id)
+                                ->where('type', 'Laporan akhir' ) // Make sure type is unique
+                                ->first();
+
+        if ($existingLuaran) {
+            // Update the Luaran status to 'Terpenuhi' and set the URL
+            $existingLuaran->status = 'Terpenuhi';
+            $existingLuaran->url = url('storage/' . $laporanAkhir->dokumen_laporan_akhir); // Assuming you have the document URL
+            $existingLuaran->save(); // Save the updated Luaran
+            $laporanAkhir->status = $validated['status'];
+             $laporanAkhir->save(); // Save the updated status
+        }
+    }else {
+         $laporanAkhir->status = $validated['status'];
+         $laporanAkhir->save(); // Save the updated status
+    }
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Berhasil disimpan.');
+}
+
+ 
+
+
+public function cetakBuktiACC($id)
+{
+    // Ambil data usulan dengan relasi terkait
+    $laporanAkhir = LaporanAkhir::with(['usulan.ketuaDosen', 'usulan.anggotaDosen.dosen.user', 'usulan.anggotaMahasiswa'])
+                    ->findOrFail($id);
+
+    // Ambil timestamp Unix
+    $timestamp = time(); // Mendapatkan timestamp Unix saat ini
+
+    // Generate Barcode 2D (QR Code) menggunakan milon/barcode
+    // Menggabungkan ID usulan dan timestamp ke dalam QR Code
+    $dataToEncode = [
+        'id' => $laporanAkhir->id,
+        'timestamp' => $timestamp,
+    ];
+    
+    // Encode data menjadi JSON string
+    $jsonData = json_encode($dataToEncode);
+
+    // Encrypt JSON data before encoding it to QR Code
+    $encryptedData = Crypt::encryptString(json_encode($dataToEncode));
+
+// Generate QR Code containing encrypted data
+     $barcode2D = \DNS2D::getBarcodePNG($encryptedData, 'QRCODE');
+
+  
+    // Simpan Barcode 2D ke file sementara di storage
+    $barcode2DPath = 'public/images/ttd_usulan_2D_' . $laporanAkhir->id . '.png';
+    \Storage::put($barcode2DPath, base64_decode($barcode2D)); // Decode base64 sebelum disimpan
+
+    // Dapatkan URL untuk QR Code yang disimpan
+    $barcode2DUrl = \Storage::url($barcode2DPath); // Mendapatkan URL yang dapat diakses publik
+
+    // Mengonversi QR Code ke Base64
+    $barcodeBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/' . $barcode2DPath)));
+
+    // Generate PDF
+    $pdf = \PDF::loadView('laporan_akhir.bukti_acc', [
+        'laporanAkhir' => $laporanAkhir,
+        'barcodeBase64' => $barcodeBase64, // Kirim Base64 barcode ke view
+    ]);
+    // Kembalikan file PDF untuk diunduh
+    return $pdf->download('bukti_acc_' . $laporanAkhir->id . '.pdf');
 }
 
 

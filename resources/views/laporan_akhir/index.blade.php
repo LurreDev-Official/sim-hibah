@@ -131,16 +131,23 @@
                                                 <span class="badge bg-secondary text-black">Menunggu Persetujuan</span>
                                             @elseif ($laporan->status == 'approved')
                                                 <span class="badge bg-success">Disetujui</span>
+                                            @elseif ($laporan->status == 'rejected')
+                                                <span class="badge bg-danger">Ditolak</span>    
                                             @endif
                                         </td>
                                         <td>
                                             <!-- Tombol Lihat Dokumen Laporan Akhir -->
                                             <div class="col p-2">
                                                 @if ($laporan->dokumen_laporan_akhir)
-                                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    {{-- <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                                         data-bs-target="#lihatDokumenModal-{{ $laporan->id }}">
                                                         <i class="fas fa-file-pdf"></i> Lihat Dokumen Laporan Akhir
-                                                    </button>
+                                                    </button> --}}
+
+                                                     <a href="{{ asset('storage/' . $laporan->dokumen_laporan_akhir) }}"
+                                                                    class="btn btn-success" target="_blank">
+                                                                    <i class="fas fa-download"></i>  Lihat Dokumen
+                                                                </a>
                                                 @else
                                                     <span class="text-danger">Tidak ada dokumen</span>
                                                 @endif
@@ -183,7 +190,7 @@
                                         <td class="text-end">
                                             @role('Dosen')
                                             <td>
-                                                @if ($anggotaDosencek->status_anggota == 'ketua'  && ($laporan->status == 'submitted' || $laporan->status == 'draft'))
+                                                @if ($anggotaDosencek->status_anggota == 'ketua'  && ($laporan->status == 'submitted' || $laporan->status == 'rejected'))
                                                 <!-- Tombol Edit -->
                                                 <button type="button" class="btn btn-light btn-active-light-primary btn-sm"
                                                     data-bs-toggle="modal" data-bs-target="#editModal{{ $laporan->id }}">
@@ -199,8 +206,6 @@
                                                             <i class="fas fa-download"></i> Download Bukti ACC
                                                         </a>
                                                     </div>
-                                                <!-- Tombol Download Lembar Pengesahan -->
-
                                                     <div class="col p-2">
                                                         <a href="{{ route('laporan-akhir.cetakLembarPengesahan', $laporan->id) }}"
                                                             class="btn btn-success btn-sm" target="_blank">
@@ -208,6 +213,8 @@
                                                         </a>
                                                     </div>
                                                 @endif
+
+                                              
 
                                                 <!-- Tombol Perbaiki Revisi -->
                                                 @if ($laporan->status == 'revision')
@@ -310,7 +317,7 @@
                                                 </script>
 
                                                 <!-- Tombol Approve/Reject Usulan -->
-                                                @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved')
+                                                @if ($laporan->allReviewersAccepted && $laporan->status !== 'approved' || $laporan->status !== 'rejected')
                                                     <div class="col p-2">
                                                         <button class="btn btn-primary" data-bs-toggle="modal"
                                                             data-bs-target="#approveRejectModal{{ $laporan->id }}">

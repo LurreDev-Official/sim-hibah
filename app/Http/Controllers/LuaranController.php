@@ -279,23 +279,45 @@ class LuaranController extends Controller
     
 
     public function updatestatus(Request $request, $id)
-{
-    // Validasi data
-    $request->validate([
-        'status' => 'required',
-    ]);
-    // dd($request->all());
+    {
+        // Validasi data
+        $request->validate([
+            'status' => 'required',
+        ]);
 
-    // Cari luaran berdasarkan ID
-    $luaran = Luaran::findOrFail($id);
+        // Cari luaran berdasarkan ID
+        $luaran = Luaran::findOrFail($id);
 
-    // Perbarui status
-    $luaran->status = $request->input('status');
-    $luaran->save();
+        // Perbarui status luaran
+        $luaran->status = $request->input('status');
+        $luaran->save();
 
-    // Redirect kembali dengan pesan sukses
-    return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi: ' . ucfirst($luaran->status));
-}
+        // Cari LaporanAkhir terkait (cari berdasarkan laporanakhir_id dulu, jika tidak ada cari berdasarkan usulan_id)
+        $laporanAkhir = null;
+
+        if (!empty($luaran->laporanakhir_id)) {
+            $laporanAkhir = LaporanAkhir::find($luaran->laporanakhir_id);
+        }
+
+        if (!$laporanAkhir) {
+            $laporanAkhir = LaporanAkhir::where('usulan_id', $luaran->usulan_id)->first();
+        }
+
+        // Jika ada laporan akhir terkait, perbarui status sesuai status luaran
+        if ($laporanAkhir) {
+            if (strtolower($luaran->status) === strtolower('Terpenuhi')) {
+                // Jika luaran terpenuhi, set laporan akhir menjadi approved
+                $laporanAkhir->status = 'approved';
+            } else {
+                // Jika luaran tidak terpenuhi, set laporan akhir menjadi Ditolak
+                $laporanAkhir->status = 'rejected';
+            }
+            $laporanAkhir->save();
+        }
+
+        // Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi: ' . ucfirst($luaran->status));
+    }
 
 public function export($jenis)
     {
