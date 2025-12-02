@@ -80,9 +80,9 @@ class LuaranController extends Controller
             // Jika jenis luaran adalah 'Artikel ilmiah di jurnal terakreditasi minimal'
             if ($jenisLuaran == 'Artikel ilmiah') {
                 if ($usulan->jenis_skema == 'penelitian') {
-                    $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 4';
+                    $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 2';
                 } else {
-                    $judul = 'Artikel ilmiah di jurnal terakreditasi minimal sinta 5';
+                    $judul = 'Artikel ilmiah di jurnal ber-ISSN';
                 }
                 $status = 'Belum terpenuhi';
                 $url = '';
@@ -90,7 +90,7 @@ class LuaranController extends Controller
 
             // Jika jenis luaran adalah 'Artikel ilmiah di prosiding SAINSTEKNOPAK'
             if ($jenisLuaran == 'Prosiding') {
-                $judul = 'Artikel ilmiah di prosiding SAINSTEKNOPA Sinta 5';
+                $judul = 'Artikel ilmiah di prosiding SAINSTEKNOPAK';
                 $status = 'Belum terpenuhi';
                 $url = '';
             }
@@ -248,14 +248,21 @@ class LuaranController extends Controller
             Storage::disk('public')->delete($luaran->file_loa);
         }
 
+        // Get the name of the ketua (head)
+        $ketuaName = $luaran->usulan->ketuaDosen->user->name;
+
+        // Generate the new file name using combination of type and ketua's name
+        $fileName = $request->type . '_' . $ketuaName . '.' . $request->file('file_loa')->getClientOriginalExtension();
+
         // Store the new file and update the file_loa path
-        $luaran->file_loa = $request->file('file_loa')->store('luaran', 'public'); // Store in 'luaran' directory
+        $luaran->file_loa = $request->file('file_loa')->storeAs('luaran', $fileName, 'public'); // Store in 'luaran' directory
     }
 
     $luaran->save(); // Save the updated record
 
     return redirect()->back()->with('success', 'Luaran updated successfully.');
 }
+
 
     /**
      * Remove the specified resource from storage.
