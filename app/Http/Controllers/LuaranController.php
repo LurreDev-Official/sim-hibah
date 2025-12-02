@@ -159,7 +159,7 @@ class LuaranController extends Controller
             'judul' => $request->judul,
             'type' => $request->type,
             'url' => $request->url,
-            'status' => 'Terpenuhi',  // Default value
+            'status' => 'Tidak Terpenuhi',  // Default value
             'file_loa' => $filePath, // This will be null if no file was uploaded
         ]);
 
