@@ -62,14 +62,13 @@ class LuaranExport implements FromCollection, WithHeadings, WithMapping
         return [
             $luaran->id,
             $luaran->usulan_id,
-            $luaran->usulan_id,
             $luaran->usulan?->ketuaDosen?->user?->name ?? 'N/A', // Mengambil Nama Ketua Dosen
             $luaran->judul,
             $luaran->jenis_luaran,
             $luaran->type,
             $luaran->url,
             $luaran->status,
-            $luaran->file_loa,
+            $luaran->file_loa ? 'https://srikandi.unhasy.ac.id/storage/' . $luaran->file_loa : null,
             $luaran->created_at,
             $luaran->updated_at,
         ];

@@ -335,29 +335,40 @@ public function kirim(Request $request)
      */
     public function update(Request $request, LaporanAkhir $laporanAkhir)
     {
-        // Validasi data input
+        // Validasi data input - hanya dokumen yang bisa diupdate
         $validated = $request->validate([
-            'ketua_dosen_id' => 'required|exists:dosens,id',
-            'usulan_id' => 'required|exists:usulans,id',
-            'dokumen_laporan_akhir' => 'nullable|file|mimes:pdf|max:10120', // Max 5MB
-            'jenis' => 'required|in:penelitian,pengabdian',
-            'status' => 'required|string',
+            'dokumen_laporan_akhir' => 'required|file|mimes:pdf|max:10120', // Max 10MB
         ]);
 
         // Perbarui file jika ada
         if ($request->hasFile('dokumen_laporan_akhir')) {
+            $file = $request->file('dokumen_laporan_akhir');
+            
             // Hapus file lama jika ada
             if ($laporanAkhir->dokumen_laporan_akhir && \Storage::disk('public')->exists($laporanAkhir->dokumen_laporan_akhir)) {
                 \Storage::disk('public')->delete($laporanAkhir->dokumen_laporan_akhir);
             }
-            // Simpan file baru
-            $validated['dokumen_laporan_akhir'] = $request->file('dokumen_laporan_akhir')->store('laporan_akhir', 'public');
+            
+            // Get the original file name
+            $fileName = $file->getClientOriginalName();
+            
+            // Store file in the 'public/uploads' folder with its original name
+            $filePath = $file->storeAs('laporan_akhir', $fileName, 'public');
+            
+            // Update dokumen laporan akhir
+            $laporanAkhir->dokumen_laporan_akhir = $filePath;
+            
+            // Update status menjadi submitted jika sebelumnya rejected atau draft
+            if (in_array($laporanAkhir->status, ['rejected', 'draft'])) {
+                $laporanAkhir->status = 'submitted';
+            }
+            
+            $laporanAkhir->save();
         }
 
-        // Perbarui data di database
-        $laporanAkhir->update($validated);
-
-        return redirect()->route('laporan-akhir.index')->with('success', 'Laporan akhir berhasil diperbarui.');
+        // Redirect kembali ke halaman index dengan jenis yang sesuai
+        return redirect()->route('laporan-akhir.show', ['jenis' => $laporanAkhir->jenis])
+            ->with('success', 'Dokumen laporan akhir berhasil diperbarui.');
     }
 
     /**

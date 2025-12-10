@@ -92,7 +92,7 @@
                         <table class="table table-bordered mb-5">
                             <thead>
                                 <tr>
-                                    <th>No</th>
+                                    <th>ID SRIKANDI</th>
                                     <th>Nama Dosen</th>
                                     <th>Status Anggota</th>
                                     <th>Status</th>
@@ -104,22 +104,40 @@
                             <tbody>
                                 @foreach ($anggotaDosen as $index => $dosen)
                                     <tr>
-                                        <td>{{ $dosen->dosen->user->id }}</td>
-                                        <td>{{ $dosen->dosen->user->name }}</td>
+                                        <td>{{ $dosen->dosen->id }}</td>
+                                        <td>
+                                            {{ $dosen->dosen->user->name }}<br>
+                                            <small class="text-muted">{{ $dosen->dosen->user->email }}</small><br>
+                                            <small class="text-muted">SINTA-ID: {{ $dosen->dosen->sintaid ?? 'Belum diisi' }}</small>
+                                        </td>                
+
                                         <td>{{ $dosen->status_anggota }}</td>
                                         <td>{{ $dosen->status }}</td>
                                         <td>
                                             <!-- Jika dosen ini adalah ketua, munculkan tombol hapus -->
-                                            @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
-                                                <form
-                                                    action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}"
-                                                    method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
-                                                </form>
-                                            @endif
+                                            @if ($dosen->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                           
+                                          @else
+                                           @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                            <!-- Tombol Hapus Anggota Dosen -->
+                                          <form action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
+                                        </form>
+                                        @endif
+
+
+                                        @endif
+                                        {{-- @if ($anggotaDosencek->status_anggota == 'ketua' && $usulan->status == 'draft')
+                                            <form action="{{ route('anggota-dosen.destroy', ['anggota_dosen' => $dosen->id]) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">Hapus</button>
+                                            </form>
+                                            @else
+                                            
+                                             @endif --}}
 
                                             <!-- Jika status dosen adalah 'belum disetujui' dan pengguna yang login adalah dosen yang bersangkutan -->
                                             @if (
@@ -475,7 +493,7 @@
         
         if (anggotaDosenCount >= 7) {
             // Enable both buttons if there are 6 or more members
-            tambahanggotadosen.disabled = true;
+            tambahanggotadosen.disabled = false;
         }
 
         // Check if the number of members is less than 6
@@ -494,16 +512,62 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- Tambahkan CSS untuk mengatasi masalah z-index pada select2 di dalam modal -->
+<style>
+    .select2-container {
+        z-index: 9999;
+    }
+    
+    /* Memastikan dropdown select2 muncul di atas modal */
+    .select2-dropdown {
+        z-index: 10000;
+    }
+    
+    /* Style tambahan untuk mempercantik select2 */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        line-height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+        padding-left: 12px;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+
 <script>
     $(document).ready(function() {
-        // Inisialisasi Select2 pada dropdown dosen
-        $('#select_dosen').select2({
-            placeholder: "Pilih Dosen",
-            allowClear: true,
-            width: '100%',
-            // Customisasi tampilan dropdown
-            templateResult: formatDosen,
-            templateSelection: formatDosenSelection
+        // Solusi untuk select2 dalam modal
+        // Inisialisasi saat modal dibuka - ini penting!
+        $('#modalTambahDosen').on('shown.bs.modal', function () {
+            // Inisialisasi Select2 pada dropdown dosen
+            $('#select_dosen').select2({
+                dropdownParent: $('#modalTambahDosen .modal-body'),  // Penting! Set parent elemen dropdown
+                placeholder: "Pilih Dosen",
+                allowClear: true,
+                width: '100%',
+                // Customisasi tampilan dropdown
+                templateResult: formatDosen,
+                templateSelection: formatDosenSelection
+            });
+            
+            // Tambahkan focus pada search saat dropdown dibuka
+            $('#select_dosen').on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-search__field').focus();
+                }, 100);
+            });
+        });
+        
+        // Destroy select2 saat modal ditutup untuk menghindari masalah
+        $('#modalTambahDosen').on('hidden.bs.modal', function () {
+            $('#select_dosen').select2('destroy');
         });
         
         // Fungsi untuk format tampilan dalam dropdown
@@ -512,14 +576,9 @@
                 return dosen.text;
             }
             
-            // Membuat tampilan custom dengan icon dan informasi tambahan
+            // Membuat tampilan custom dengan informasi tambahan
             var $dosen = $(
                 '<div class="d-flex align-items-center">' +
-                    '<div class="symbol symbol-30px me-3">' +
-                        '<div class="symbol-label bg-light-primary">' +
-                            '<i class="ki-duotone ki-profile-circle fs-2x text-primary"></i>' +
-                        '</div>' +
-                    '</div>' +
                     '<div class="d-flex flex-column">' +
                         '<span class="fw-bolder">' + dosen.text + '</span>' +
                     '</div>' +
@@ -533,10 +592,5 @@
         function formatDosenSelection(dosen) {
             return dosen.text || dosen.id;
         }
-        
-        // Tambahkan pencarian
-        $('#select_dosen').on('select2:open', function() {
-            document.querySelector('.select2-search__field').focus();
-        });
     });
 </script>
