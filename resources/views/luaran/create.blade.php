@@ -156,12 +156,9 @@
 
                                         @role('Dosen')
 
-                                           @if($luaran->jenis_luaran == 'wajib')
-                                           @else
-                                              @if ($anggotaDosencek->status_anggota == 'ketua')
+                                              @if ($anggotaDosencek->status_anggota == 'ketua' && $luaran->status != 'Terpenuhi' && $luaran->type != 'Laporan akhir')
                                            <button class="btn btn-danger btn-sm me-2"
                                            onclick="deleteLuaran({{ $luaran->id }})">Hapus</button>
-                                            @endif
                                             @endif
                                             @endrole
 
