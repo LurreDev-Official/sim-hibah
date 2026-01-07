@@ -94,15 +94,15 @@
 
                     <!--begin::Card body-->
                     <div class="card-body pt-0">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="table-luaran">
+                        <table class="text-center table align-middle table-row-dashed fs-6 gy-5" id="table-luaran">
                             <thead>
-                                <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                                    <th>No</th>
+                                <tr class="text-center text-muted fw-bolder fs-7 text-uppercase gs-0">
+                                    <th >No</th>
                                     <th>Judul</th>
                                     <th>jenis</th>
                                     <th>Luaran</th>
                                     <th>URL</th>
-                                    <th>LoA</th>
+                                    <th>Dokumen</th>
                                     <th>Status</th>
                                     <th class="text-end">Aksi</th>
                                 </tr>
@@ -122,7 +122,7 @@
                                         <td>{{ $luaran->jenis_luaran }}</td>
                                         <td>
                                             @if ($luaran->url && $luaran->url !== '0')
-                                                <a href="{{ $luaran->url }}" target="_blank">Link</a>
+                                                <a href="{{ $luaran->url }}" target="_blank">Kunjungi</a>
                                             @else
                                                 Belum diisi
                                             @endif
@@ -130,7 +130,7 @@
                                         <td>
 
                                             @if ($luaran->file_loa && $luaran->file_loa !== '0')
-                                             <a href="{{ Storage::url($luaran->file_loa) }}" target="_blank">Link</a>
+                                             <a href="{{ Storage::url($luaran->file_loa) }}" target="_blank">Unduh</a>
                                             @else
                                                 -
                                             @endif
@@ -154,9 +154,9 @@
                                        
                                         @endrole
 
-                                        @role('Dosen')
+                                       @role('Dosen')
 
-                                              @if ($anggotaDosencek->status_anggota == 'ketua' && $luaran->status != 'Terpenuhi' && $luaran->type != 'Laporan akhir')
+                                              @if ($anggotaDosencek->status_anggota == 'ketua' && $luaran->status != 'Terpenuhi')
                                            <button class="btn btn-danger btn-sm me-2"
                                            onclick="deleteLuaran({{ $luaran->id }})">Hapus</button>
                                             @endif
@@ -227,10 +227,17 @@
 
 
                                                         <div class="mb-3">
-                                                            <label for="type" class="form-label">Jenis</label>
-                                                            <input type="text" class="form-control" name="type"
-                                                                value="{{ $luaran->type }}" required>
-                                                        </div>
+    <label for="type" class="form-label">Jenis</label>
+    <select class="form-select" name="type" required>
+        <option value="" disabled {{ $luaran->type == '' || is_null($luaran->type) ? 'selected' : '' }}>Pilih Tipe</option>
+        <option value="Artikel ilmiah" {{ $luaran->type == 'Artikel ilmiah' ? 'selected' : '' }}>Artikel ilmiah</option>
+        <option value="buku" {{ $luaran->type == 'buku' ? 'selected' : '' }}>Buku</option>
+        <option value="hki" {{ $luaran->type == 'hki' ? 'selected' : '' }}>HKI</option>
+        <option value="lain-lain" {{ $luaran->type == 'lain-lain' ? 'selected' : '' }}>Lain-lain</option>
+        <option value="Prosiding" {{ $luaran->type == 'Prosiding' ? 'selected' : '' }}>Prosiding</option>
+    </select>
+</div>
+
 
                                                         <div class="mb-3">
                                                             <label for="url" class="form-label">URL</label>
